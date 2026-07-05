@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" id="meta-viewport">
+    <meta property="og:image:type" content="image/png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="600">
+    <meta property="og:title" content="BIP39 - Mnemonic Checksum Word Calculator">
+    <script src="bip39_english.js"></script>
+    <script src="./calculator.js"></script>
+    <script src="./dom.js"></script>
+    <link rel="stylesheet" href="./style.css" />
+    <title>BIP39 - Mnemonic Checksum Word Calculator</title>
+</head>
+
+<body>
+    <main>
+        <h1 style="font-size: 24px;">Checksum finder (BIP39 & Polyseed)</h1>
+        <div>
+            <div class="seed-type-selector">
+                <label for="seedType">Select seed phrase type:</label>
+                <select id="seedType" onchange="onSeedTypeChange()">
+                    <option value="bip39_12">BIP39 (12 words)</option>
+                    <option value="bip39_24">BIP39 (24 words)</option>
+                    <option value="polyseed_16">Polyseed Monero (16 words)</option>
+                </select>
+            </div>
+        </div>
+        <div>
+            <textarea placeholder="Write 11 words, separated with blank space." oninput="onInput()">
+        </textarea>
+            <div class="validation display-none"></div>
+        </div>
+        <div class="result display-none">
+            <div class="title"></div>
+            <div class="list"></div>
+        </div>
+        <div>
+            <ul>
+                <li><a href="https://github.com/AdrianNeshad" target="_blank">
+                        Github.com/AdrianNeshad</a>
+                </li>
+            </ul>
+        </div>
+    </main>
+</body>
+
+</html>
