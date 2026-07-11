@@ -5,9 +5,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const qrcodeResultDiv = document.getElementById("qrcode-result");
     const previewImage = document.getElementById("preview-image");
 
-    // Prevent default drag behaviors
     ["dragenter", "dragover", "dragleave", "drop"].forEach((eventName) => {
-        dropArea.addEventListener(eventName, preventDefaults, false);
+        document.body.addEventListener(eventName, preventDefaults, false);
     });
 
     function preventDefaults(e) {
@@ -15,13 +14,12 @@ document.addEventListener("DOMContentLoaded", () => {
         e.stopPropagation();
     }
 
-    // Highlight drop area when item is dragged over it
     ["dragenter", "dragover"].forEach((eventName) => {
-        dropArea.addEventListener(eventName, highlight, false);
+        document.body.addEventListener(eventName, highlight, false);
     });
 
     ["dragleave", "drop"].forEach((eventName) => {
-        dropArea.addEventListener(eventName, unhighlight, false);
+        document.body.addEventListener(eventName, unhighlight, false);
     });
 
     function highlight(e) {
@@ -32,8 +30,8 @@ document.addEventListener("DOMContentLoaded", () => {
         dropArea.classList.remove("highlight");
     }
 
-    // Handle dropped files
-    dropArea.addEventListener("drop", handleDrop, false);
+    // Handle dropped files — now on the whole document
+    document.body.addEventListener("drop", handleDrop, false);
 
     function handleDrop(e) {
         const dt = e.dataTransfer;
@@ -42,7 +40,7 @@ document.addEventListener("DOMContentLoaded", () => {
         handleFiles(files);
     }
 
-    // Click to open file dialog
+    // Click to open file dialog — stays scoped to drop-area only
     dropArea.addEventListener("click", () => {
         fileInput.click();
     });
