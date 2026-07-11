@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>QR Code Decoder</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="./style.css" />
+</head>
+
+<body>
+    <div id="container">
+        <h1>QR Code Decoder</h1>
+        <div id="drop-area">
+            <p>Drag and drop an image (PNG or JPG) here</p>
+            <p>or click to select a file</p>
+            <p>or paste an image (Ctrl+V / Cmd+V)</p>
+            <button id="camera-button">Scan from Camera</button>
+            <video id="camera-stream" playsinline></video>
+            <input type="file" id="file-input" accept="image/png, image/jpeg" style="display: none" />
+        </div>
+        <div id="qrcode-result">
+            <p>QR Code Text will be displayed here</p>
+        </div>
+        <button id="copy-button">Copy decoded text to clipboard</button>
+        <div id="toast" class="toast"></div>
+        <div id="footer">
+            <p>
+                All processing is done locally in your web browser, ensuring your data
+                remains private and is never shared with third parties.
+            </p>
+            <p>
+                <a href="https://github.com/AdrianNeshad/CryptoToolbox">GitHub</a>.
+            </p>
+        </div>
+    </div>
+
+    <script src="./jsQR.js"></script>
+    <script src="./script.js"></script>
+</body>
+
+</html>
