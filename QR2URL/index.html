@@ -10,28 +10,60 @@
 
 <body>
     <div id="container">
-        <h1>QR Code Decoder</h1>
+
+        <a href="../index.html" class="back-link">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M15 6L9 12L15 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                    stroke-linejoin="round" />
+            </svg>
+            Verktygslådan
+        </a>
+
+        <header class="page-header">
+            <h1>QR Code Decoder</h1>
+            <p>Konvertera QR-koder från en bild till URL/Clear Text</p>
+        </header>
+
         <div id="drop-area">
             <div id="drop-area-text">
-                <p>Drag and drop an image (PNG or JPG) here</p>
-                <p>or click to select a file</p>
-                <p>or paste an image (Ctrl+V / Cmd+V)</p>
+                <div class="drop-icon">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="3" y="3" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.6" />
+                        <rect x="14" y="3" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.6" />
+                        <rect x="3" y="14" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.6" />
+                        <path d="M14 14H17V17H14V14ZM18 14H21V17H18V14ZM14 18H17V21H14V18ZM18 18H21V21H18V18Z"
+                            fill="currentColor" />
+                    </svg>
+                </div>
+                <p class="drop-primary">Dra och släpp en bild (PNG eller JPG)</p>
+                <p class="drop-secondary">eller klicka för att välja en fil</p>
+                <p class="drop-secondary">eller klistra in en bild (Ctrl+V / Cmd+V)</p>
             </div>
             <img id="preview-image" style="display: none" />
             <input type="file" id="file-input" accept="image/png, image/jpeg" style="display: none" />
         </div>
+
         <div id="qrcode-result">
-            <p>QR Code Text will be displayed here</p>
+            <p>Avkodad text visas här</p>
         </div>
-        <button id="copy-button">Copy decoded text to clipboard</button>
+
+        <button id="copy-button">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="9" y="9" width="11" height="11" rx="2" stroke="currentColor" stroke-width="1.6" />
+                <path d="M5 15H4C3.44772 15 3 14.5523 3 14V4C3 3.44772 3.44772 3 4 3H14C14.5523 3 15 3.44772 15 4V5"
+                    stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
+            </svg>
+            Kopiera avkodad text
+        </button>
+
         <div id="toast" class="toast"></div>
-        <div>
-            <ul>
-                <li><a href="https://github.com/AdrianNeshad" target="_blank">
-                        Github.com/AdrianNeshad</a>
-                </li>
-            </ul>
-        </div>
+
+        <footer id="footer">
+            <a href="https://github.com/AdrianNeshad" target="_blank" rel="noopener">
+                Github.com/AdrianNeshad
+            </a>
+        </footer>
+
     </div>
 
     <script src="./jsQR.js"></script>
