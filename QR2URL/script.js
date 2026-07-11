@@ -73,11 +73,12 @@ document.addEventListener("DOMContentLoaded", () => {
             const file = files[0];
             if (
                 file.type.startsWith("image/png") ||
-                file.type.startsWith("image/jpeg")
+                file.type.startsWith("image/jpeg") ||
+                file.type.startsWith("image/webp")
             ) {
                 decodeImage(file);
             } else {
-                displayResult("Please upload or paste a PNG or JPG image.", true);
+                displayResult("Please upload or paste a PNG, JPG or WEBP image.", true);
             }
         }
     }
