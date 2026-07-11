@@ -18,7 +18,14 @@ body {
 #drop-area {
     border: 2px dashed #ccc;
     border-radius: 5px;
-    padding: 20px;
+    padding: 40px;
+    min-width: 400px;
+    min-height: 300px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
     text-align: center;
     cursor: pointer;
     background-color: #fff;
@@ -37,28 +44,12 @@ body {
     color: #555;
 }
 
-#drop-area button {
-    padding: 10px 20px;
-    background-color: #007bff;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 1em;
-    margin-bottom: 10px;
-}
-
-#drop-area button:hover {
-    background-color: #0056b3;
-}
-
-#drop-area video {
+#preview-image {
     max-width: 100%;
-    display: none;
-    /* Hidden initially */
+    max-height: 260px;
     border: 1px solid #ddd;
     border-radius: 5px;
-    margin-top: 10px;
+    object-fit: contain;
 }
 
 #qrcode-result {

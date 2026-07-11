@@ -12,11 +12,12 @@
     <div id="container">
         <h1>QR Code Decoder</h1>
         <div id="drop-area">
-            <p>Drag and drop an image (PNG or JPG) here</p>
-            <p>or click to select a file</p>
-            <p>or paste an image (Ctrl+V / Cmd+V)</p>
-            <button id="camera-button">Scan from Camera</button>
-            <video id="camera-stream" playsinline></video>
+            <div id="drop-area-text">
+                <p>Drag and drop an image (PNG or JPG) here</p>
+                <p>or click to select a file</p>
+                <p>or paste an image (Ctrl+V / Cmd+V)</p>
+            </div>
+            <img id="preview-image" style="display: none" />
             <input type="file" id="file-input" accept="image/png, image/jpeg" style="display: none" />
         </div>
         <div id="qrcode-result">

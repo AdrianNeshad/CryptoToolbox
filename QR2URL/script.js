@@ -1,11 +1,9 @@
 document.addEventListener("DOMContentLoaded", () => {
     const dropArea = document.getElementById("drop-area");
+    const dropAreaText = document.getElementById("drop-area-text");
     const fileInput = document.getElementById("file-input");
     const qrcodeResultDiv = document.getElementById("qrcode-result");
-    const cameraButton = document.getElementById("camera-button");
-    const cameraStreamElement = document.getElementById("camera-stream");
-    let cameraActive = false;
-    let videoStream = null;
+    const previewImage = document.getElementById("preview-image");
 
     // Prevent default drag behaviors
     ["dragenter", "dragover", "dragleave", "drop"].forEach((eventName) => {
@@ -45,11 +43,8 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // Click to open file dialog
-    dropArea.addEventListener("click", (e) => {
-        if (e.target !== cameraButton) {
-            // Prevent file dialog opening when clicking camera button
-            fileInput.click();
-        }
+    dropArea.addEventListener("click", () => {
+        fileInput.click();
     });
 
     fileInput.addEventListener("change", () => {
@@ -73,47 +68,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    cameraButton.addEventListener("click", () => {
-        if (!cameraActive) {
-            startCamera();
-        } else {
-            stopCamera();
-        }
-    });
-
-    function startCamera() {
-        navigator.mediaDevices
-            .getUserMedia({ video: { facingMode: "environment" } }) // Use 'environment' for back camera if available
-            .then((stream) => {
-                videoStream = stream;
-                cameraStreamElement.srcObject = stream;
-                cameraStreamElement.style.display = "block"; // Show video element
-                cameraStreamElement.play();
-                cameraActive = true;
-                cameraButton.textContent = "Stop Camera";
-                displayResult("Scanning from camera...", false);
-                requestAnimationFrame(captureAndDecode);
-            })
-            .catch((err) => {
-                console.error("Camera access error:", err);
-                displayResult("Error accessing camera.", true);
-            });
-    }
-
-    function stopCamera() {
-        if (videoStream) {
-            videoStream.getTracks().forEach((track) => track.stop());
-        }
-        cameraStreamElement.pause();
-        cameraStreamElement.srcObject = null;
-        cameraStreamElement.style.display = "none"; // Hide video element
-        cameraActive = false;
-        cameraButton.textContent = "Scan from Camera";
-        displayResult("Camera stopped.", false);
-    }
-
     function handleFiles(files) {
-        stopCamera(); // Stop camera if active when new file is handled
         if (files.length > 0) {
             const file = files[0];
             if (
@@ -147,6 +102,11 @@ document.addEventListener("DOMContentLoaded", () => {
                     canvas.height
                 );
 
+                // Show the image as a preview in the drop area
+                previewImage.src = event.target.result;
+                previewImage.style.display = "block";
+                dropAreaText.style.display = "none";
+
                 decodeQrCodeFromImageData(imageData, canvas.width, canvas.height)
                     .then((decodedText) => {
                         displayResult(decodedText || "No QR code found.", !decodedText);
@@ -167,33 +127,6 @@ document.addEventListener("DOMContentLoaded", () => {
         };
 
         reader.readAsDataURL(imageFile);
-    }
-
-    function captureAndDecode() {
-        if (!cameraActive) return; // Stop if camera is no longer active
-
-        const canvas = document.createElement("canvas");
-        canvas.width = cameraStreamElement.videoWidth;
-        canvas.height = cameraStreamElement.videoHeight;
-        const context = canvas.getContext("2d");
-        context.drawImage(cameraStreamElement, 0, 0, canvas.width, canvas.height);
-        const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
-
-        decodeQrCodeFromImageData(imageData, canvas.width, canvas.height)
-            .then((decodedText) => {
-                if (decodedText) {
-                    displayResult(decodedText, false);
-                    stopCamera(); // Stop camera after successful decode
-                } else {
-                    // Continue scanning if no QR code found in this frame
-                    requestAnimationFrame(captureAndDecode);
-                }
-            })
-            .catch((error) => {
-                displayResult("Error decoding QR code from camera.", true);
-                console.error("QR Code decoding error from camera:", error);
-                stopCamera(); // Stop camera on error
-            });
     }
 
     function decodeQrCodeFromImageData(imageData, width, height) {
