@@ -13,33 +13,109 @@
 
     <div class="container">
 
-        <h1>Verktygslådan</h1>
+        <header class="page-header">
+            <h1>Verktygslådan</h1>
+            <p>Ett samlat gäng interna verktyg — kör direkt i webbläsaren eller ladda ner.</p>
+        </header>
 
-        <br><br>
+        <section class="section">
+            <div class="section-head">
+                <h2>Webbverktyg</h2>
+                <span class="section-hint">Öppnas direkt i webbläsaren</span>
+            </div>
 
-        <div class="cards">
+            <div class="cards">
 
-            <a class="card" href="BIP39-Polyseed-checksum/index.html">
-                <h2>BIP39-Polyseed-checksum</h2>
-                <p>Valid last checksum words for BIP39 (12 & 24 words) and Polyseed (Monero 16 words)</p>
-            </a>
+                <a class="card" href="BIP39-Polyseed-checksum/index.html">
+                    <div class="card-icon">
+                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path
+                                d="M9 12L11 14L15 10M12 3L4 6.5V11.5C4 16.14 7.24 20.47 12 21.5C16.76 20.47 20 16.14 20 11.5V6.5L12 3Z"
+                                stroke="currentColor" stroke-width="1.6" stroke-linecap="round"
+                                stroke-linejoin="round" />
+                        </svg>
+                    </div>
+                    <h3>BIP39-Polyseed-checksum</h3>
+                    <p>Hitta giltiga sista checksum-ord för BIP39 (12 & 24 ord) och Polyseed (Monero 16 ord)</p>
+                    <span class="card-footer">
+                        Öppna verktyget
+                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M9 6L15 12L9 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round" />
+                        </svg>
+                    </span>
+                </a>
 
-            <a class="card" href="QR2URL/index.html">
-                <h2>QR Code Decoder (QR2URL)</h2>
-                <p>Decode QR codes from images or camera</p>
-            </a>
+                <a class="card" href="QR2URL/index.html">
+                    <div class="card-icon">
+                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <rect x="3" y="3" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.6" />
+                            <rect x="14" y="3" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.6" />
+                            <rect x="3" y="14" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.6" />
+                            <path d="M14 14H17V17H14V14ZM18 14H21V17H18V14ZM14 18H17V21H14V18ZM18 18H21V21H18V18Z"
+                                fill="currentColor" />
+                        </svg>
+                    </div>
+                    <h3>QR Code Decoder (QR2URL)</h3>
+                    <p>Avkoda QR-koder från bilder eller kamera</p>
+                    <span class="card-footer">
+                        Öppna verktyget
+                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M9 6L15 12L9 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round" />
+                        </svg>
+                    </span>
+                </a>
 
-            <a class="card" href="downloads/secoUnlock.zip" download>
-                <h2>Exodus secoUnlock</h2>
-                <p>Unlock Exodus seed.seco files (brute force possible)</p>
-            </a>
+            </div>
+        </section>
 
-            <a class="card" href="downloads/electrumUnlock.zip" download>
-                <h2>Electrum Unlock</h2>
-                <p>Unlock Electrum wallet files (brute force possible)</p>
-            </a>
+        <section class="section">
+            <div class="section-head">
+                <h2>Nedladdningar</h2>
+                <span class="section-hint">Laddar ner en fil till din enhet</span>
+            </div>
 
-        </div>
+            <div class="cards">
+
+                <a class="card card--download" href="downloads/secoUnlock.zip" download>
+                    <span class="download-badge">
+                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12 3V15M12 15L7 10M12 15L17 10" stroke="currentColor" stroke-width="1.8"
+                                stroke-linecap="round" stroke-linejoin="round" />
+                            <path d="M4 17V19C4 20.1046 4.89543 21 6 21H18C19.1046 21 20 20.1046 20 19V17"
+                                stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
+                                stroke-linejoin="round" />
+                        </svg>
+                        Nedladdning
+                    </span>
+                    <h3>Exodus secoUnlock</h3>
+                    <p>Lås upp Exodus seed.seco-filer (brute force möjligt)</p>
+                    <span class="card-footer card-footer--download">
+                        .zip-fil
+                    </span>
+                </a>
+
+                <a class="card card--download" href="downloads/electrumUnlock.zip" download>
+                    <span class="download-badge">
+                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12 3V15M12 15L7 10M12 15L17 10" stroke="currentColor" stroke-width="1.8"
+                                stroke-linecap="round" stroke-linejoin="round" />
+                            <path d="M4 17V19C4 20.1046 4.89543 21 6 21H18C19.1046 21 20 20.1046 20 19V17"
+                                stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
+                                stroke-linejoin="round" />
+                        </svg>
+                        Nedladdning
+                    </span>
+                    <h3>Electrum Unlock</h3>
+                    <p>Lås upp Electrum-plånboksfiler (brute force möjligt)</p>
+                    <span class="card-footer card-footer--download">
+                        .zip-fil
+                    </span>
+                </a>
+
+            </div>
+        </section>
 
     </div>
 

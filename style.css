@@ -1,57 +1,204 @@
+:root {
+    --bg: #0a0e17;
+    --surface: #131a29;
+    --surface-hover: #182338;
+    --border: #232d42;
+    --border-hover: #34415c;
+    --text: #e8ebf1;
+    --text-muted: #8892a6;
+    --accent: #5b8cff;
+    --accent-soft: rgba(91, 140, 255, 0.12);
+    --download: #f0a94e;
+    --download-soft: rgba(240, 169, 78, 0.1);
+}
+
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: Arial, Helvetica, sans-serif;
 }
 
 body {
-    background: #111827;
-    color: white;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    background-image:
+        radial-gradient(circle at 15% 0%, rgba(91, 140, 255, 0.08), transparent 40%),
+        radial-gradient(circle at 85% 100%, rgba(240, 169, 78, 0.06), transparent 40%);
+    color: var(--text);
     min-height: 100vh;
+    padding: 64px 24px 80px;
 }
 
 .container {
-    width: 90%;
-    max-width: 1100px;
+    width: 100%;
+    max-width: 1040px;
+    margin: 0 auto;
 }
 
-h1 {
+.page-header {
     text-align: center;
-    font-size: 42px;
-    margin-bottom: 10px;
+    margin-bottom: 56px;
 }
 
-p {
-    text-align: center;
-    color: #9ca3af;
-    margin-bottom: 40px;
+.page-header h1 {
+    font-size: 40px;
+    font-weight: 650;
+    letter-spacing: -0.02em;
+}
+
+.page-header p {
+    margin-top: 12px;
+    color: var(--text-muted);
+    font-size: 16px;
+}
+
+.section {
+    margin-bottom: 48px;
+}
+
+.section-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 14px;
+    margin-bottom: 24px;
+}
+
+.section-head h2 {
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--text);
+}
+
+.section-hint {
+    font-size: 13px;
+    color: var(--text-muted);
 }
 
 .cards {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 25px;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 18px;
 }
 
 .card {
-    background: #1f2937;
-    border: 1px solid #374151;
-    border-radius: 15px;
-    padding: 30px;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 26px;
     text-decoration: none;
-    color: white;
-    transition: .25s;
+    color: var(--text);
+    transition: transform 0.18s ease, background 0.18s ease, border-color 0.18s ease;
 }
 
 .card:hover {
-    transform: translateY(-5px);
-    background: #2563eb;
+    transform: translateY(-3px);
+    background: var(--surface-hover);
+    border-color: var(--border-hover);
 }
 
-.card h2 {
-    margin-bottom: 15px;
+.card-icon {
+    width: 38px;
+    height: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    background: var(--accent-soft);
+    color: var(--accent);
+    margin-bottom: 18px;
+}
+
+.card-icon svg {
+    width: 20px;
+    height: 20px;
+}
+
+.card h3 {
+    font-size: 17px;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+.card p {
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--text-muted);
+    flex-grow: 1;
+}
+
+.card-footer {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 18px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--accent);
+}
+
+.card-footer svg {
+    width: 14px;
+    height: 14px;
+    transition: transform 0.18s ease;
+}
+
+.card:hover .card-footer svg {
+    transform: translateX(3px);
+}
+
+/* --- Download variant: visually distinct so it never reads as navigation --- */
+
+.card--download {
+    border-style: dashed;
+    background: linear-gradient(180deg, var(--download-soft), var(--surface) 60%);
+}
+
+.card--download:hover {
+    background: linear-gradient(180deg, rgba(240, 169, 78, 0.16), var(--surface-hover) 60%);
+    border-color: var(--download);
+}
+
+.download-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    align-self: flex-start;
+    padding: 5px 10px 5px 8px;
+    margin-bottom: 16px;
+    border-radius: 999px;
+    background: var(--download-soft);
+    color: var(--download);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+}
+
+.download-badge svg {
+    width: 13px;
+    height: 13px;
+}
+
+.card-footer--download {
+    color: var(--download);
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 12px;
+}
+
+@media (max-width: 560px) {
+    .page-header h1 {
+        font-size: 30px;
+    }
+
+    .section-head {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+    }
 }
