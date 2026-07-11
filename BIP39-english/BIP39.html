@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <title>BIP39 - Word List</title>
+    <script src="./bip39_english.js"></script>
+    <link rel="stylesheet" href="./style.css" />
+</head>
+
+<body>
+    <main>
+
+        <a href="../Toolbox.html" class="back-link">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M15 6L9 12L15 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                    stroke-linejoin="round" />
+            </svg>
+            Verktygslådan
+        </a>
+
+        <header class="page-header">
+            <h1>BIP39 Word List</h1>
+            <p>Sök och bläddra bland BIP39-ordlistans 2048 ord</p>
+        </header>
+
+        <div class="search-bar">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.8" />
+                <path d="M21 21L16.65 16.65" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+            </svg>
+            <input type="text" id="search-input" placeholder="Sök ord..." oninput="onSearchInput()" autocomplete="off">
+        </div>
+
+        <div class="result-count" id="result-count"></div>
+
+        <div class="word-grid" id="word-grid"></div>
+
+        <div class="empty-state display-none" id="empty-state">
+            <p>Inga ord matchar sökningen</p>
+        </div>
+
+    </main>
+
+    <script src="./script.js"></script>
+</body>
+
+</html>
