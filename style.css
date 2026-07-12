@@ -10,6 +10,8 @@
     --accent-soft: rgba(91, 140, 255, 0.12);
     --download: #f0a94e;
     --download-soft: rgba(240, 169, 78, 0.1);
+    --link: #4ef076;
+    --link-soft: rgba(78, 240, 110, 0.1);
 }
 
 * {
@@ -189,6 +191,36 @@ body {
     color: var(--download);
     font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
     font-size: 12px;
+}
+
+.card--link {
+    border-style: dashed;
+    background: linear-gradient(180deg, var(--link-soft), var(--surface) 60%);
+}
+
+.card--link:hover {
+    background: linear-gradient(180deg, rgba(78, 240, 110, 0.16), var(--surface-hover) 60%);
+    border-color: var(--link);
+}
+
+.open-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    align-self: flex-start;
+    padding: 5px 10px 5px 8px;
+    margin-bottom: 16px;
+    border-radius: 999px;
+    background: var(--link-soft);
+    color: var(--link);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+}
+
+.open-link svg {
+    width: 13px;
+    height: 13px;
 }
 
 @media (max-width: 560px) {
