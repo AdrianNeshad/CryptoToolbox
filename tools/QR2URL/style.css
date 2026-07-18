@@ -159,6 +159,8 @@ body {
     text-align: center;
     word-wrap: break-word;
     box-sizing: border-box;
+    cursor: pointer;
+    user-select: text;
 }
 
 #qrcode-result p {
@@ -169,6 +171,12 @@ body {
 
 #qrcode-result p.error {
     color: var(--error);
+}
+
+#qrcode-result.copied,
+#qrcode-result.copied p {
+    color: #22c55e !important;
+    transition: color 0.2s ease;
 }
 
 #copy-button {
@@ -193,6 +201,62 @@ body {
 }
 
 #copy-button:hover {
+    background: var(--success-hover);
+    transform: translateY(-1px);
+}
+
+#ocr-result {
+    width: 100%;
+    padding: 20px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--surface);
+    text-align: center;
+    word-wrap: break-word;
+    box-sizing: border-box;
+    margin-top: 28px;
+    cursor: pointer;
+    user-select: text;
+}
+
+#ocr-result p {
+    margin: 0;
+    font-size: 15px;
+    color: var(--text);
+}
+
+#ocr-result p.error {
+    color: var(--error);
+}
+
+#ocr-result.copied,
+#ocr-result.copied p {
+    color: #22c55e !important;
+    transition: color 0.2s ease;
+}
+
+#ocr-copy-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 22px;
+    background: var(--success);
+    color: #06120c;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    margin-top: 18px;
+    transition: background 0.18s ease, transform 0.18s ease;
+}
+
+#ocr-copy-button svg {
+    width: 16px;
+    height: 16px;
+}
+
+#ocr-copy-button:hover {
     background: var(--success-hover);
     transform: translateY(-1px);
 }
@@ -234,17 +298,6 @@ body {
 
 #footer a:hover {
     color: var(--accent);
-}
-
-#qrcode-result {
-    cursor: pointer;
-    user-select: text;
-}
-
-#qrcode-result.copied,
-#qrcode-result.copied p {
-    color: #22c55e !important;
-    transition: color 0.2s ease;
 }
 
 @-webkit-keyframes fadein {

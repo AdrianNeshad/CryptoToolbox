@@ -22,6 +22,7 @@
         <header class="page-header">
             <h1>QR Code Decoder</h1>
             <p>Konvertera QR-koder från en bild till URL/Clear Text</p>
+            <p>Med kompletterande OCR-skanning</p>
         </header>
 
         <div id="drop-area">
@@ -56,6 +57,19 @@
             Kopiera avkodad text
         </button>
 
+        <div id="ocr-result">
+            <p>OCR-avläst text visas här</p>
+        </div>
+        
+        <button id="ocr-copy-button">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="9" y="9" width="11" height="11" rx="2" stroke="currentColor" stroke-width="1.6" />
+                <path d="M5 15H4C3.44772 15 3 14.5523 3 14V4C3 3.44772 3.44772 3 4 3H14C14.5523 3 15 3.44772 15 4V5"
+                    stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
+            </svg>
+            Kopiera OCR-text
+        </button>
+
         <div id="toast" class="toast"></div>
 
         <footer id="footer">
@@ -67,6 +81,8 @@
     </div>
 
     <script src="./jsQR.js"></script>
+    <script src="./tesseract/tesseract.min.js"></script>
+    <script src="./ocr.js"></script>
     <script src="./script.js"></script>
 </body>
 
