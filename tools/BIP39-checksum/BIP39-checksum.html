@@ -12,7 +12,7 @@
     <script src="./calculator.js"></script>
     <script src="./dom.js"></script>
     <link rel="stylesheet" href="./style.css" />
-    <title>BIP39 - Mnemonic Checksum Word Calculator</title>
+    <title>BIP39 - Checksum Word Calculator</title>
 </head>
 
 <body>
@@ -30,16 +30,16 @@
 
         <div>
             <div class="seed-type-selector">
-                <label for="seedType">Select seed phrase type:</label>
+                <label for="seedType">Välj typ av Seed Phrase</label>
                 <select id="seedType" onchange="onSeedTypeChange()">
-                    <option value="bip39_12">BIP39 (12 words)</option>
-                    <option value="bip39_24">BIP39 (24 words)</option>
+                    <option value="bip39_12">BIP39 (12 ord)</option>
+                    <option value="bip39_24">BIP39 (24 ord)</option>
                 </select>
             </div>
         </div>
 
         <div>
-            <textarea placeholder="Write 11 words, separated with blank space." oninput="onInput()">
+            <textarea placeholder="Skriv 11 ord, separerade med blanksteg" oninput="onInput()">
         </textarea>
             <div class="validation display-none"></div>
         </div>
