@@ -177,4 +177,27 @@ document.addEventListener("DOMContentLoaded", () => {
             toast.classList.remove("show");
         }, 3000);
     }
+
+    qrcodeResultDiv.addEventListener("dblclick", () => {
+        const qrCodeText = qrcodeResultDiv.innerText.trim();
+        if (!qrCodeText) return;
+
+        navigator.clipboard
+            .writeText(qrCodeText)
+            .then(() => {
+                flashGreen();
+                showToast("Copied to clipboard!");
+            })
+            .catch((err) => {
+                console.error("Failed to copy text: ", err);
+            });
+    });
+
+    function flashGreen() {
+        qrcodeResultDiv.classList.add("copied");
+
+        setTimeout(() => {
+            qrcodeResultDiv.classList.remove("copied");
+        }, 800);
+    }
 });

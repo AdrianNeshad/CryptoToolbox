@@ -236,6 +236,17 @@ body {
     color: var(--accent);
 }
 
+#qrcode-result {
+    cursor: pointer;
+    user-select: text;
+}
+
+#qrcode-result.copied,
+#qrcode-result.copied p {
+    color: #22c55e !important;
+    transition: color 0.2s ease;
+}
+
 @-webkit-keyframes fadein {
     from {
         bottom: 0;
