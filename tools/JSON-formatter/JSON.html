@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="sv">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JSON Formatter</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <div id="container">
+        <a href="../../Toolbox.html" class="back-link">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M15 6L9 12L15 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                    stroke-linejoin="round" />
+            </svg>
+            Verktygslådan
+        </a>
+
+        <header class="page-header">
+            <h1>JSON Formatter</h1>
+            <p>Formatera, minifiera och validera JSON-data</p>
+        </header>
+
+        <div id="json-box">
+            <textarea id="json-input" spellcheck="false" placeholder="Klistra in JSON här..."></textarea>
+        </div>
+
+        <div class="button-row">
+            <button id="format-button">
+                <svg viewBox="0 0 24 24" fill="none">
+                    <path d="M4 6H20M4 12H20M4 18H14" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                </svg>
+                Formattera
+            </button>
+
+            <button id="minify-button">
+                <svg viewBox="0 0 24 24" fill="none">
+                    <path d="M5 12H19" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                </svg>
+                Minifiera
+            </button>
+        </div>
+
+        <div class="button-row">
+            <button id="validate-button" class="secondary">
+                <svg viewBox="0 0 24 24" fill="none">
+                    <path d="M12 3L4 7V12C4 17 7.5 20 12 21C16.5 20 20 17 20 12V7L12 3Z" stroke="currentColor"
+                        stroke-width="1.8" />
+                </svg>
+                Validera
+            </button>
+
+            <button id="clear-button" class="secondary">
+                Rensa
+            </button>
+        </div>
+
+        <div id="status">
+            Ingen JSON laddad
+        </div>
+
+        <div id="json-result">
+            <pre id="output">
+                Resultat visas här
+            </pre>
+        </div>
+
+        <button id="copy-button">
+            <svg viewBox="0 0 24 24" fill="none">
+                <rect x="9" y="9" width="11" height="11" rx="2" stroke="currentColor" stroke-width="1.6" />
+                <path d="M5 15H4C3.4 15 3 14.6 3 14V4C3 3.4 3.4 3 4 3H14C14.6 3 15 3.4 15 4V5" stroke="currentColor"
+                    stroke-width="1.6" />
+            </svg>
+            Kopiera JSON
+        </button>
+
+        <div id="toast" class="toast"></div>
+
+        <footer id="footer">
+            <a href="https://github.com/AdrianNeshad/CryptoToolbox" target="_blank" rel="noopener">
+                Github.com/AdrianNeshad/CryptoToolbox
+            </a>
+        </footer>
+        
+    </div>
+
+    <script src="script.js"></script>
+
+</body>
+</html>
