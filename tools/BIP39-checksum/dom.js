@@ -26,7 +26,7 @@ const getSeedType = () => {
 const updatePlaceholder = () => {
     const seedType = getSeedType()
     const config = seedConfig[seedType]
-    getDOM.textarea().placeholder = `Write ${config.inputWords} words, separated with blank space.`
+    getDOM.textarea().placeholder = `Skriv ${config.inputWords} ord, separerade med blanksteg`
 }
 
 const onClickGenerate = async () => {
