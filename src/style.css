@@ -273,3 +273,19 @@ body {
         padding: 5px 10px;
     }
 }
+
+#footer {
+    margin-top: 32px;
+    font-size: 13px;
+    text-align: center;
+}
+
+#footer a {
+    color: var(--text-muted);
+    text-decoration: none;
+    transition: color 0.18s ease;
+}
+
+#footer a:hover {
+    color: var(--accent);
+}
