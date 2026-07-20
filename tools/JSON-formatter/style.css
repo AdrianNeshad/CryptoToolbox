@@ -118,6 +118,13 @@ body {
     margin-bottom: 14px;
 }
 
+.button-row2 {
+    width: 50%;
+    display: flex;
+    gap: 12px;
+    margin-bottom: 14px;
+}
+
 button {
     flex: 1;
     display: flex;
