@@ -114,11 +114,6 @@ document.addEventListener("DOMContentLoaded", () => {
                         displayResult("Error decoding QR code.", true);
                         console.error("QR Code decoding error:", error);
                     });
-
-                // Kör OCR-avläsning (funktionen är definierad i ocr.js)
-                if (typeof window.runOcr === "function") {
-                    window.runOcr(event.target.result);
-                }
             };
             img.onerror = function () {
                 displayResult("Error loading image.", true);
