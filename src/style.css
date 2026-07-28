@@ -97,9 +97,15 @@ body {
 }
 
 .sidebar-header p {
-    margin-top: 2px;
     font-size: 12px;
     color: var(--text-muted);
+}
+
+.version-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 10px;
 }
 
 .sidebar-toggle {
@@ -307,26 +313,16 @@ body {
 }
 
 .net-status {
-    position: fixed;
-    top: 16px;
-    right: 20px;
-    z-index: 1000;
     display: flex;
     align-items: center;
-    gap: 6px;
-    font-size: 11px;
+    gap: 3px;
+    font-size: 10px;
     font-weight: 600;
-    letter-spacing: 0.03em;
-    padding: 6px 12px;
+    letter-spacing: 0.02em;
+    padding: 2px 6px;
     border-radius: 999px;
     color: #fff;
-    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
     transition: background 0.2s ease;
-}
-
-.net-status svg {
-    width: 14px;
-    height: 14px;
 }
 
 .net-status.offline {
@@ -335,14 +331,6 @@ body {
 
 .net-status.online {
     background: #c05f2b;
-}
-
-@media (max-width: 560px) {
-    .net-status {
-        top: 10px;
-        right: 15px;
-        padding: 5px 10px;
-    }
 }
 
 #footer {
