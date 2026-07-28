@@ -27,8 +27,15 @@
         <aside class="sidebar">
 
             <div class="sidebar-header">
-                <h1>Verktygslådan</h1>
-                <p>v 1.3</p>
+                <div class="sidebar-header-text">
+                    <h1>Verktygslådan</h1>
+                    <p>v 1.3</p>
+                </div>
+                <button id="sidebar-toggle" class="sidebar-toggle" title="Dölj/Visa verktygslista" aria-label="Dölj/Visa verktygslista">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M15 6L9 12L15 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                </button>
             </div>
 
             <nav class="tool-nav">
@@ -250,8 +257,9 @@
         <main class="content">
 
             <div id="content-placeholder" class="content-placeholder">
-                <h2>Välj ett verktyg</h2>
+                <h2>Verktygslådan (v 1.3)</h2>
                 <p>Klicka på ett verktyg i listan till vänster för att öppna det här.</p>
+                <p>Samtliga verktyg finns tillgängliga med öppen källkod och kan köras helt offline</p>
             </div>
 
             <iframe id="tool-frame" class="tool-frame" title="Verktyg" style="display:none;"></iframe>

@@ -39,3 +39,15 @@ function initToolNav() {
 }
 
 initToolNav();
+
+function initSidebarToggle() {
+    const app = document.querySelector('.app');
+    const toggle = document.getElementById('sidebar-toggle');
+    if (!app || !toggle) return;
+
+    toggle.addEventListener('click', () => {
+        app.classList.toggle('sidebar-collapsed');
+    });
+}
+
+initSidebarToggle();
