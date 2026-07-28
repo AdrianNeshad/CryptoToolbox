@@ -13,6 +13,29 @@ KeyDetails = function (parentEl, displayCompressed) {
     DOM.bip38privkey = el.find(".bip38-private-key");
     DOM.bip38password = $(".supplied-password");
 
+    // Native SegWit (bc1q) and Taproot (bc1p) addresses always use the
+    // compressed public key encoding, so only show them next to the
+    // compressed key details.
+    if (displayCompressed) {
+        var segwitGroup = $(
+            '<div class="form-group">' +
+            '<label class="form-label">Address (SegWit, bc1q)</label>' +
+            '<input class="segwit-address form-control" readonly>' +
+            '</div>'
+        );
+        var taprootGroup = $(
+            '<div class="form-group">' +
+            '<label class="form-label">Address (Taproot, bc1p)</label>' +
+            '<input class="taproot-address form-control" readonly>' +
+            '</div>'
+        );
+        var addressGroup = DOM.address.closest(".form-group");
+        addressGroup.after(taprootGroup);
+        addressGroup.after(segwitGroup);
+        DOM.segwitAddress = segwitGroup.find(".segwit-address");
+        DOM.taprootAddress = taprootGroup.find(".taproot-address");
+    }
+
     this.setPrivateKey = function (originalKey) {
         var o = { compressed: displayCompressed };
         var displayKey = new bitcoinjs.bitcoin.ECPair(originalKey.d, null, o);
@@ -30,7 +53,17 @@ KeyDetails = function (parentEl, displayCompressed) {
         // show address
         DOM.address.val(displayKey.getAddress());
         // show public key hex
-        DOM.pubkey.val(displayKey.getPublicKeyBuffer().toString("hex"));
+        var pubkeyBuffer = displayKey.getPublicKeyBuffer();
+        DOM.pubkey.val(pubkeyBuffer.toString("hex"));
+        // show native SegWit / Taproot addresses derived from the compressed pubkey
+        if (displayCompressed) {
+            var hash160 = bitcoinjs.bitcoin.crypto.hash160(pubkeyBuffer);
+            DOM.segwitAddress.val(encodeSegwitAddress("bc", 0, hash160));
+            var taprootOutputKey = getTaprootOutputKey(pubkeyBuffer);
+            if (taprootOutputKey) {
+                DOM.taprootAddress.val(encodeSegwitAddress("bc", 1, taprootOutputKey));
+            }
+        }
         // if it has private key details
         if (displayKey.d) {
             // show private key wif
@@ -49,5 +82,9 @@ KeyDetails = function (parentEl, displayCompressed) {
         DOM.pubkey.val("");
         DOM.privkey.val("");
         DOM.bip38privkey.val("");
+        if (displayCompressed) {
+            DOM.segwitAddress.val("");
+            DOM.taprootAddress.val("");
+        }
     }
 }
