@@ -22,287 +22,242 @@
         <span id="net-status-text"></span>
     </div>
 
-    <div class="container">
+    <div class="app">
 
-        <header class="page-header">
-            <h1>Verktygslådan (v 1.2)</h1>
-            <p>Samtliga verktyg finns tillgängliga med öppen källkod och kan köras helt offline</p>
-        </header>
+        <aside class="sidebar">
 
-        <section class="section">
-            <div class="section-head">
-                <h2>Lokala verktyg</h2>
-                <span class="section-hint">Öppnas direkt i webbläsaren (körs lokalt)</span>
+            <div class="sidebar-header">
+                <h1>Verktygslådan</h1>
+                <p>v 1.3</p>
             </div>
 
-            <div class="cards">
+            <nav class="tool-nav">
 
-                <a class="card" href="tools/BIP38-keycompression/BIP38.html">
-                    <div class="card-icon">
-                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path
-                                d="M14.7 6.3A4 4 0 0 0 9.3 11.7L4 17a2 2 0 1 0 2.8 2.8l5.3-5.3a4 4 0 0 0 5.4-5.4l-2.2 2.2-2.2-2.2 2.4-2.4z"
-                                stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
-                        </svg>
-                    </div>
-                    <h3>BIP38 Key Compression</h3>
-                    <p>Verktyg för att komprimera och dekomprimera Bitcoin-nycklar</p>
-                    <span class="card-footer">
-                        Öppna verktyget
-                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M9 6L15 12L9 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                stroke-linejoin="round" />
-                        </svg>
-                    </span>
+                <div class="nav-group">
+                    <div class="nav-group-title">Lokala verktyg</div>
+
+                    <button class="nav-item" data-type="frame" data-src="tools/BIP38-keycompression/BIP38.html">
+                        <span class="nav-item-icon">
+                            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M14.7 6.3A4 4 0 0 0 9.3 11.7L4 17a2 2 0 1 0 2.8 2.8l5.3-5.3a4 4 0 0 0 5.4-5.4l-2.2 2.2-2.2-2.2 2.4-2.4z"
+                                    stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+                            </svg>
+                        </span>
+                        <span class="nav-item-text">
+                            <span class="nav-item-title">BIP38 Key Compression</span>
+                            <span class="nav-item-desc">Komprimera/dekomprimera Bitcoin-nycklar</span>
+                        </span>
+                    </button>
+
+                    <button class="nav-item" data-type="frame" data-src="tools/QR2URL/QR2URL.html">
+                        <span class="nav-item-icon">
+                            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <rect x="3" y="3" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.6" />
+                                <rect x="14" y="3" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.6" />
+                                <rect x="3" y="14" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.6" />
+                                <path d="M14 14H17V17H14V14ZM18 14H21V17H18V14ZM14 18H17V21H14V18ZM18 18H21V21H18V18Z"
+                                    fill="currentColor" />
+                            </svg>
+                        </span>
+                        <span class="nav-item-text">
+                            <span class="nav-item-title">QR Code Decoder</span>
+                            <span class="nav-item-desc">Avkoda QR-koder från bilder</span>
+                        </span>
+                    </button>
+
+                    <button class="nav-item" data-type="frame" data-src="tools/JSON-formatter/JSON.html">
+                        <span class="nav-item-icon">
+                            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M14.7 6.3A4 4 0 0 0 9.3 11.7L4 17a2 2 0 1 0 2.8 2.8l5.3-5.3a4 4 0 0 0 5.4-5.4l-2.2 2.2-2.2-2.2 2.4-2.4z"
+                                    stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+                            </svg>
+                        </span>
+                        <span class="nav-item-text">
+                            <span class="nav-item-title">JSON Formatter</span>
+                            <span class="nav-item-desc">Compact JSON till Pretty Print</span>
+                        </span>
+                    </button>
+
+                    <button class="nav-item" data-type="frame" data-src="tools/BIP39-english/BIP39.html">
+                        <span class="nav-item-icon">
+                            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M4 6H20M4 12H20M4 18H20" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
+                            </svg>
+                        </span>
+                        <span class="nav-item-text">
+                            <span class="nav-item-title">BIP39 English Word List</span>
+                            <span class="nav-item-desc">Alla BIP39-ord med sökfunktion</span>
+                        </span>
+                    </button>
+
+                    <button class="nav-item" data-type="frame" data-src="tools/BIP39-checksum/BIP39-checksum.html">
+                        <span class="nav-item-icon">
+                            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path
+                                    d="M9 12L11 14L15 10M12 3L4 6.5V11.5C4 16.14 7.24 20.47 12 21.5C16.76 20.47 20 16.14 20 11.5V6.5L12 3Z"
+                                    stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+                            </svg>
+                        </span>
+                        <span class="nav-item-text">
+                            <span class="nav-item-title">BIP39 Checksum Finder</span>
+                            <span class="nav-item-desc">Sista checksum-ord (12 &amp; 24 ord)</span>
+                        </span>
+                    </button>
+
+                    <button class="nav-item" data-type="frame" data-src="tools/CyberChef/index.html">
+                        <span class="nav-item-icon">
+                            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M14.7 6.3A4 4 0 0 0 9.3 11.7L4 17a2 2 0 1 0 2.8 2.8l5.3-5.3a4 4 0 0 0 5.4-5.4l-2.2 2.2-2.2-2.2 2.4-2.4z"
+                                    stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+                            </svg>
+                        </span>
+                        <span class="nav-item-text">
+                            <span class="nav-item-title">CyberChef</span>
+                            <span class="nav-item-desc">Encryption, encoding &amp; compression</span>
+                        </span>
+                    </button>
+
+                    <button class="nav-item" data-type="frame" data-src="tools/BalletCrypto/index.html">
+                        <span class="nav-item-icon">
+                            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M14.7 6.3A4 4 0 0 0 9.3 11.7L4 17a2 2 0 1 0 2.8 2.8l5.3-5.3a4 4 0 0 0 5.4-5.4l-2.2 2.2-2.2-2.2 2.4-2.4z"
+                                    stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+                            </svg>
+                        </span>
+                        <span class="nav-item-text">
+                            <span class="nav-item-title">BalletCrypto Cold Storage Decoder</span>
+                            <span class="nav-item-desc">Dekryptera BalletCrypto-kort</span>
+                        </span>
+                    </button>
+                </div>
+
+                <div class="nav-group">
+                    <div class="nav-group-title">Nedladdningar / Skript</div>
+
+                    <a class="nav-item nav-item--download" href="https://github.com/AdrianNeshad/secoUnlock/archive/refs/heads/main.zip" download>
+                        <span class="nav-item-icon nav-item-icon--download">
+                            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12 3V15M12 15L7 10M12 15L17 10" stroke="currentColor" stroke-width="1.8"
+                                    stroke-linecap="round" stroke-linejoin="round" />
+                                <path d="M4 17V19C4 20.1046 4.89543 21 6 21H18C19.1046 21 20 20.1046 20 19V17"
+                                    stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
+                                    stroke-linejoin="round" />
+                            </svg>
+                        </span>
+                        <span class="nav-item-text">
+                            <span class="nav-item-title">Exodus secoUnlock</span>
+                            <span class="nav-item-desc">Lås upp Exodus seed.seco-filer (.zip)</span>
+                        </span>
+                    </a>
+
+                    <a class="nav-item nav-item--download" href="https://github.com/AdrianNeshad/electrumUnlock/archive/refs/heads/main.zip" download>
+                        <span class="nav-item-icon nav-item-icon--download">
+                            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12 3V15M12 15L7 10M12 15L17 10" stroke="currentColor" stroke-width="1.8"
+                                    stroke-linecap="round" stroke-linejoin="round" />
+                                <path d="M4 17V19C4 20.1046 4.89543 21 6 21H18C19.1046 21 20 20.1046 20 19V17"
+                                    stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
+                                    stroke-linejoin="round" />
+                            </svg>
+                        </span>
+                        <span class="nav-item-text">
+                            <span class="nav-item-title">Electrum Unlock</span>
+                            <span class="nav-item-desc">Lås upp Electrum-plånboksfiler (.zip)</span>
+                        </span>
+                    </a>
+
+                    <a class="nav-item nav-item--download" href="https://github.com/AdrianNeshad/ciphertextUnlock/archive/refs/heads/main.zip" download>
+                        <span class="nav-item-icon nav-item-icon--download">
+                            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12 3V15M12 15L7 10M12 15L17 10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
+                                    stroke-linejoin="round" />
+                                <path d="M4 17V19C4 20.1046 4.89543 21 6 21H18C19.1046 21 20 20.1046 20 19V17" stroke="currentColor"
+                                    stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+                            </svg>
+                        </span>
+                        <span class="nav-item-text">
+                            <span class="nav-item-title">Ciphertext Unlock</span>
+                            <span class="nav-item-desc">Brute force ciphertext (.zip)</span>
+                        </span>
+                    </a>
+                </div>
+
+                <div class="nav-group">
+                    <div class="nav-group-title">Externa länkar</div>
+
+                    <a class="nav-item nav-item--link" href="https://blocksec.com/usdt-freeze-checker" target="_blank" rel="noopener noreferrer">
+                        <span class="nav-item-icon nav-item-icon--link">
+                            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M14 5H19V10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+                                <path d="M10 14L19 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+                                <path d="M19 14V18C19 19.1046 18.1046 20 17 20H6C4.89543 20 4 19.1046 4 18V7C4 5.89543 4.89543 5 6 5H10"
+                                    stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+                            </svg>
+                        </span>
+                        <span class="nav-item-text">
+                            <span class="nav-item-title">USDT Freeze Checker</span>
+                            <span class="nav-item-desc">Blocksec</span>
+                        </span>
+                    </a>
+
+                    <a class="nav-item nav-item--link" href="https://whatismyipaddress.com/ip-lookup" target="_blank"
+                        rel="noopener noreferrer">
+                        <span class="nav-item-icon nav-item-icon--link">
+                            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M14 5H19V10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
+                                    stroke-linejoin="round" />
+                                <path d="M10 14L19 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
+                                    stroke-linejoin="round" />
+                                <path d="M19 14V18C19 19.1046 18.1046 20 17 20H6C4.89543 20 4 19.1046 4 18V7C4 5.89543 4.89543 5 6 5H10"
+                                    stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+                            </svg>
+                        </span>
+                        <span class="nav-item-text">
+                            <span class="nav-item-title">IP Lookup</span>
+                            <span class="nav-item-desc">IP Address Lookup</span>
+                        </span>
+                    </a>
+
+                    <a class="nav-item nav-item--link" href="https://start.me/p/L1rEYQ/osint4all" target="_blank" rel="noopener noreferrer">
+                        <span class="nav-item-icon nav-item-icon--link">
+                            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M14 5H19V10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
+                                    stroke-linejoin="round" />
+                                <path d="M10 14L19 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
+                                    stroke-linejoin="round" />
+                                <path d="M19 14V18C19 19.1046 18.1046 20 17 20H6C4.89543 20 4 19.1046 4 18V7C4 5.89543 4.89543 5 6 5H10"
+                                    stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+                            </svg>
+                        </span>
+                        <span class="nav-item-text">
+                            <span class="nav-item-title">OSINT4ALL</span>
+                            <span class="nav-item-desc">Kollektion av OSINT-verktyg</span>
+                        </span>
+                    </a>
+                    
+                </div>
+
+            </nav>
+
+            <footer id="footer">
+                <a href="https://github.com/AdrianNeshad/CryptoToolbox" target="_blank" rel="noopener">
+                    Github.com/AdrianNeshad/CryptoToolbox
                 </a>
+            </footer>
 
-                <a class="card" href="tools/QR2URL/QR2URL.html">
-                    <div class="card-icon">
-                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <rect x="3" y="3" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.6" />
-                            <rect x="14" y="3" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.6" />
-                            <rect x="3" y="14" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.6" />
-                            <path d="M14 14H17V17H14V14ZM18 14H21V17H18V14ZM14 18H17V21H14V18ZM18 18H21V21H18V18Z"
-                                fill="currentColor" />
-                        </svg>
-                    </div>
-                    <h3>QR Code Decoder</h3>
-                    <p>Avkoda QR-koder från bilder</p>
-                    <span class="card-footer">
-                        Öppna verktyget
-                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M9 6L15 12L9 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                stroke-linejoin="round" />
-                        </svg>
-                    </span>
-                </a>
+        </aside>
 
-                <a class="card" href="tools/JSON-formatter/JSON.html">
-                    <div class="card-icon">
-                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M14.7 6.3A4 4 0 0 0 9.3 11.7L4 17a2 2 0 1 0 2.8 2.8l5.3-5.3a4 4 0 0 0 5.4-5.4l-2.2 2.2-2.2-2.2 2.4-2.4z"
-                                stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
-                        </svg>
-                    </div>
-                    <h3>JSON Formatter</h3>
-                    <p>Konvertera compact JSON till Pretty Print</p>
-                    <span class="card-footer">
-                        Öppna verktyget
-                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M9 6L15 12L9 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                stroke-linejoin="round" />
-                        </svg>
-                    </span>
-                </a>
+        <main class="content">
 
-
-                <a class="card" href="tools/BIP39-english/BIP39.html">
-                    <div class="card-icon">
-                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M4 6H20M4 12H20M4 18H20" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
-                        </svg>
-                    </div>
-                    <h3>BIP39 English Word List</h3>
-                    <p>Alla BIP39-ord på engelska med sökfunktion</p>
-                    <span class="card-footer">
-                        Öppna verktyget
-                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M9 6L15 12L9 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                stroke-linejoin="round" />
-                        </svg>
-                    </span>
-                </a>
-
-                <a class="card" href="tools/BIP39-checksum/BIP39-checksum.html">
-                    <div class="card-icon">
-                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path
-                                d="M9 12L11 14L15 10M12 3L4 6.5V11.5C4 16.14 7.24 20.47 12 21.5C16.76 20.47 20 16.14 20 11.5V6.5L12 3Z"
-                                stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
-                        </svg>
-                    </div>
-                    <h3>BIP39 Checksum Finder</h3>
-                    <p>Hitta giltiga sista checksum-ord för BIP39 (12 & 24 ord)</p>
-                    <span class="card-footer">
-                        Öppna verktyget
-                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M9 6L15 12L9 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                stroke-linejoin="round" />
-                        </svg>
-                    </span>
-                </a>
-
-                <a class="card" href="tools/CyberChef/index.html">
-                    <div class="card-icon">
-                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path
-                                d="M14.7 6.3A4 4 0 0 0 9.3 11.7L4 17a2 2 0 1 0 2.8 2.8l5.3-5.3a4 4 0 0 0 5.4-5.4l-2.2 2.2-2.2-2.2 2.4-2.4z"
-                                stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
-                        </svg>
-                    </div>
-                    <h3>CyberChef</h3>
-                    <p>The Cyber Swiss Army Knife - a web app for encryption, encoding and compression</p>
-                    <span class="card-footer">
-                        Öppna verktyget
-                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M9 6L15 12L9 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                stroke-linejoin="round" />
-                        </svg>
-                    </span>
-                </a>
-
-                <a class="card" href="tools/BalletCrypto/index.html">
-                    <div class="card-icon">
-                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path
-                                d="M14.7 6.3A4 4 0 0 0 9.3 11.7L4 17a2 2 0 1 0 2.8 2.8l5.3-5.3a4 4 0 0 0 5.4-5.4l-2.2 2.2-2.2-2.2 2.4-2.4z"
-                                stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
-                        </svg>
-                    </div>
-                    <h3>BalletCrypto Cold Storage Decoder</h3>
-                    <p>Verktyg för att dekryptera cold storage BalletCrypto-kort</p>
-                    <span class="card-footer">
-                        Öppna verktyget
-                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M9 6L15 12L9 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                stroke-linejoin="round" />
-                        </svg>
-                    </span>
-                </a>
-
+            <div id="content-placeholder" class="content-placeholder">
+                <h2>Välj ett verktyg</h2>
+                <p>Klicka på ett verktyg i listan till vänster för att öppna det här.</p>
             </div>
-        </section>
 
-        <section class="section">
-            <div class="section-head">
-                <h2>Nedladdningar / Skript</h2>
-                <span class="section-hint">Laddar ner en fil till din enhet</span>
-            </div>
+            <iframe id="tool-frame" class="tool-frame" title="Verktyg" style="display:none;"></iframe>
 
-            <div class="cards">
+        </main>
 
-                <a class="card card--download" href="https://github.com/AdrianNeshad/secoUnlock/archive/refs/heads/main.zip" download>
-                    <span class="download-badge">
-                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M12 3V15M12 15L7 10M12 15L17 10" stroke="currentColor" stroke-width="1.8"
-                                stroke-linecap="round" stroke-linejoin="round" />
-                            <path d="M4 17V19C4 20.1046 4.89543 21 6 21H18C19.1046 21 20 20.1046 20 19V17"
-                                stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
-                                stroke-linejoin="round" />
-                        </svg>
-                        Nedladdning
-                    </span>
-                    <h3>Exodus secoUnlock</h3>
-                    <p>Lås upp Exodus seed.seco-filer</p>
-                    <p>Word List Brute Force</p>
-                    <span class="card-footer card-footer--download">
-                        .zip-fil
-                    </span>
-                </a>
-
-                <a class="card card--download" href="https://github.com/AdrianNeshad/electrumUnlock/archive/refs/heads/main.zip" download>
-                    <span class="download-badge">
-                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M12 3V15M12 15L7 10M12 15L17 10" stroke="currentColor" stroke-width="1.8"
-                                stroke-linecap="round" stroke-linejoin="round" />
-                            <path d="M4 17V19C4 20.1046 4.89543 21 6 21H18C19.1046 21 20 20.1046 20 19V17"
-                                stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
-                                stroke-linejoin="round" />
-                        </svg>
-                        Nedladdning
-                    </span>
-                    <h3>Electrum Unlock</h3>
-                    <p>Lås upp Electrum-plånboksfiler</p>
-                    <p>Word List Brute Force</p>
-                    <span class="card-footer card-footer--download">
-                        .zip-fil
-                    </span>
-                </a>
-
-                <a class="card card--download" href="https://github.com/AdrianNeshad/ciphertextUnlock/archive/refs/heads/main.zip" download>
-                    <span class="download-badge">
-                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M12 3V15M12 15L7 10M12 15L17 10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
-                                stroke-linejoin="round" />
-                            <path d="M4 17V19C4 20.1046 4.89543 21 6 21H18C19.1046 21 20 20.1046 20 19V17" stroke="currentColor"
-                                stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
-                        </svg>
-                        Nedladdning
-                    </span>
-                    <h3>Ciphertext Unlock</h3>
-                    <p>Dekryptera ciphertext med brute force</p>
-                    <p style="font-size: 10px;">AES-128-CTR / AES-256-CTR / AES-256-CBC</p>
-                    <span class="card-footer card-footer--download">
-                        .zip-fil
-                    </span>
-                </a>
-
-            </div>
-        </section>
-
-        <section class="section">
-            <div class="section-head">
-                <h2>Externa Länkar</h2>
-                <span class="section-hint">Genväg till externa verktyg i webbläsaren</span>
-            </div>
-        
-            <div class="cards">
-        
-                <a class="card card--link" href="https://blocksec.com/usdt-freeze-checker" target="_blank" rel="noopener noreferrer">
-                    <span class="open-link">
-                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M14 5H19V10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
-                            <path d="M10 14L19 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
-                            <path d="M19 14V18C19 19.1046 18.1046 20 17 20H6C4.89543 20 4 19.1046 4 18V7C4 5.89543 4.89543 5 6 5H10"
-                                stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
-                        </svg>
-                        Besök extern länk
-                    </span>
-                    <h3>USDT Freeze Checker (Blocksec)</h3>
-                    <p>Kontrollera USDT adress för frysta tokens</p>
-                </a>
-                
-                <a class="card card--link" href="https://start.me/p/L1rEYQ/osint4all" target="_blank" rel="noopener noreferrer">
-                    <span class="open-link">
-                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M14 5H19V10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
-                                stroke-linejoin="round" />
-                            <path d="M10 14L19 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
-                                stroke-linejoin="round" />
-                            <path d="M19 14V18C19 19.1046 18.1046 20 17 20H6C4.89543 20 4 19.1046 4 18V7C4 5.89543 4.89543 5 6 5H10"
-                                stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
-                        </svg>
-                        Besök extern länk
-                    </span>
-                    <h3>OSINT4ALL</h3>
-                    <p>Kollektion av OSINT-verktyg</p>
-                </a>
-
-                <a class="card card--link" href="https://whatismyipaddress.com/ip-lookup" target="_blank" rel="noopener noreferrer">
-                    <span class="open-link">
-                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M14 5H19V10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
-                                stroke-linejoin="round" />
-                            <path d="M10 14L19 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
-                                stroke-linejoin="round" />
-                            <path d="M19 14V18C19 19.1046 18.1046 20 17 20H6C4.89543 20 4 19.1046 4 18V7C4 5.89543 4.89543 5 6 5H10"
-                                stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
-                        </svg>
-                        Besök extern länk
-                    </span>
-                    <h3>IP Lookup</h3>
-                    <p>IP Address Lookup</p>
-                </a>
-        
-            </div>
-        </section>
-
-        <footer id="footer">
-            <a href="https://github.com/AdrianNeshad/CryptoToolbox" target="_blank" rel="noopener">
-                Github.com/AdrianNeshad/CryptoToolbox
-            </a>
-        </footer>
-        
     </div>
 
     <script src="src/script.js"></script>
