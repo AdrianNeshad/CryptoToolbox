@@ -1,0 +1,194 @@
+const row = document.getElementById("entropy-row");
+const validation = document.getElementById("validation");
+const output = document.getElementById("output");
+const toast = document.getElementById("toast");
+const checksumStatus = document.getElementById("checksum-status");
+
+const FIELD_COUNT = 16;
+
+let renderToken = 0;
+
+function bytesToBinary(bytes) {
+    return bytes.map(b => b.toString(2).padStart(8, "0")).join("");
+}
+
+async function sha256(bytes) {
+    const hash = await crypto.subtle.digest("SHA-256", new Uint8Array(bytes));
+    return Array.from(new Uint8Array(hash));
+}
+
+async function entropyToMnemonic(entropyBytes, wordlist) {
+    const hash = await sha256(entropyBytes);
+
+    const entropyBits = bytesToBinary(entropyBytes);
+    const checksumBits = bytesToBinary(hash).slice(0, entropyBytes.length / 4);
+
+    const bits = entropyBits + checksumBits;
+
+    const words = [];
+    for (let i = 0; i < bits.length / 11; i++) {
+        const chunk = bits.slice(i * 11, (i + 1) * 11);
+        const index = parseInt(chunk, 2);
+        words.push(wordlist[index]);
+    }
+
+    return words;
+}
+
+function binaryToBytes(bits) {
+    const bytes = [];
+    for (let i = 0; i < bits.length; i += 8) {
+        bytes.push(parseInt(bits.slice(i, i + 8), 2));
+    }
+    return bytes;
+}
+
+// Independently decodes the generated words back into bits and recomputes
+// the SHA-256 checksum from the entropy portion, so the checksum embedded
+// in the last word(s) can be verified rather than just trusted.
+async function verifyChecksum(words, wordlist) {
+    const bits = words
+        .map(word => wordlist.indexOf(word).toString(2).padStart(11, "0"))
+        .join("");
+
+    const totalBits = bits.length;
+    const checksumBitLength = totalBits / 33;
+    const entropyBitLength = totalBits - checksumBitLength;
+
+    const entropyBits = bits.slice(0, entropyBitLength);
+    const embeddedChecksumBits = bits.slice(entropyBitLength);
+
+    const entropyBytes = binaryToBytes(entropyBits);
+    const hash = await sha256(entropyBytes);
+    const recomputedChecksumBits = bytesToBinary(hash).slice(0, checksumBitLength);
+
+    return {
+        valid: recomputedChecksumBits === embeddedChecksumBits,
+        checksumBitLength,
+    };
+}
+
+function createField() {
+    const wrapper = document.createElement("div");
+    wrapper.className = "entropy-field";
+
+    const input = document.createElement("input");
+    input.type = "number";
+    input.min = "0";
+    input.max = "255";
+    input.step = "1";
+    input.autocomplete = "off";
+    input.spellcheck = false;
+    input.addEventListener("input", onFieldsChanged);
+
+    wrapper.appendChild(input);
+    return wrapper;
+}
+
+function addField() {
+    row.appendChild(createField());
+}
+
+function getFieldInputs() {
+    return Array.from(row.querySelectorAll("input"));
+}
+
+function resetValidation() {
+    validation.textContent = "";
+    validation.classList.add("display-none");
+}
+
+function showValidation(text) {
+    validation.textContent = "❌ " + text;
+    validation.classList.remove("display-none");
+}
+
+function hideChecksumStatus() {
+    checksumStatus.textContent = "";
+    checksumStatus.classList.add("display-none");
+    checksumStatus.classList.remove("valid", "invalid");
+}
+
+function showChecksumStatus(valid, checksumBitLength) {
+    checksumStatus.classList.remove("display-none");
+    checksumStatus.classList.toggle("valid", valid);
+    checksumStatus.classList.toggle("invalid", !valid);
+    checksumStatus.textContent = valid
+        ? `✓ Giltig checksum (${checksumBitLength} bitar kontrollerade)`
+        : `✗ Ogiltig checksum (${checksumBitLength} bitar kontrollerade)`;
+}
+
+function onFieldsChanged() {
+    resetValidation();
+    hideChecksumStatus();
+
+    const inputs = getFieldInputs();
+    const bytes = [];
+    let hasInvalidByte = false;
+    let hasEmptyField = false;
+
+    for (const input of inputs) {
+        const raw = input.value.trim();
+
+        if (raw === "") {
+            input.classList.remove("invalid");
+            hasEmptyField = true;
+            continue;
+        }
+
+        const num = Number(raw);
+        const isValidByte = Number.isInteger(num) && num >= 0 && num <= 255;
+
+        input.classList.toggle("invalid", !isValidByte);
+        if (!isValidByte) hasInvalidByte = true;
+        else bytes.push(num);
+    }
+
+    if (hasInvalidByte) {
+        showValidation("Varje fält måste vara ett heltal mellan 0 och 255.");
+        output.textContent = "Mnemonic-frasen visas här";
+        return;
+    }
+
+    if (hasEmptyField) {
+        showValidation("Fyll i ett värde (0–255) i alla fält.");
+        output.textContent = "Mnemonic-frasen visas här";
+        return;
+    }
+
+    generateMnemonic(bytes);
+}
+
+async function generateMnemonic(bytes) {
+    const token = ++renderToken;
+    try {
+        const wordlist = window.entropyWordlists.bip39;
+        const words = await entropyToMnemonic(bytes, wordlist);
+        const checksum = await verifyChecksum(words, wordlist);
+        if (token !== renderToken) return;
+
+        output.textContent = words.join(" ");
+        showChecksumStatus(checksum.valid, checksum.checksumBitLength);
+    } catch (e) {
+        if (token !== renderToken) return;
+        showValidation(e.message);
+        output.textContent = "Mnemonic-frasen visas här";
+        hideChecksumStatus();
+    }
+}
+
+function showToast(text) {
+    toast.textContent = text;
+    toast.classList.add("show");
+    setTimeout(() => {
+        toast.classList.remove("show");
+    }, 2500);
+}
+
+document.getElementById("copy-button").addEventListener("click", () => {
+    navigator.clipboard.writeText(output.textContent);
+    showToast("Mnemonic kopierad");
+});
+
+for (let i = 0; i < FIELD_COUNT; i++) addField();
+onFieldsChanged();

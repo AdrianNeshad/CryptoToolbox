@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="sv">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Entropy to Mnemonic</title>
+    <script src="./wordlists.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <div id="container">
+
+        <header class="page-header">
+            <h1>Entropy to Mnemonic</h1>
+            <p>Konvertera entropi-bytes (0&ndash;255) till en BIP39 mnemonic-fras</p>
+        </header>
+
+        <div class="entropy-box">
+            <div class="entropy-row" id="entropy-row"></div>
+        </div>
+
+        <div class="validation display-none" id="validation"></div>
+
+        <div id="entropy-result">
+            <pre id="output">Mnemonic-frasen visas här</pre>
+        </div>
+
+        <div class="checksum-status display-none" id="checksum-status"></div>
+
+        <div class="button-row2">
+            <button id="copy-button">
+                <svg viewBox="0 0 24 24" fill="none">
+                    <rect x="9" y="9" width="11" height="11" rx="2" stroke="currentColor" stroke-width="1.6" />
+                    <path d="M5 15H4C3.4 15 3 14.6 3 14V4C3 3.4 3.4 3 4 3H14C14.6 3 15 3.4 15 4V5" stroke="currentColor"
+                        stroke-width="1.6" />
+                </svg>
+                Kopiera mnemonic
+            </button>
+        </div>
+
+        <div id="toast" class="toast"></div>
+
+    </div>
+
+    <script src="script.js"></script>
+
+</body>
+</html>
