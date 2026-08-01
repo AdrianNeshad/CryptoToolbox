@@ -73,13 +73,14 @@ function createField() {
     wrapper.className = "entropy-field";
 
     const input = document.createElement("input");
-    input.type = "number";
-    input.min = "0";
-    input.max = "255";
-    input.step = "1";
+    input.type = "text";
+    input.inputMode = "numeric";
+    input.pattern = "[0-9]*";
+    input.maxLength = 3;
     input.autocomplete = "off";
     input.spellcheck = false;
-    input.addEventListener("input", onFieldsChanged);
+    input.addEventListener("input", onFieldInput);
+    input.addEventListener("keydown", onFieldKeydown);
 
     wrapper.appendChild(input);
     return wrapper;
@@ -91,6 +92,45 @@ function addField() {
 
 function getFieldInputs() {
     return Array.from(row.querySelectorAll("input"));
+}
+
+function onFieldInput(event) {
+    const input = event.target;
+    const digitsOnly = input.value.replace(/\D/g, "").slice(0, 3);
+    input.value = digitsOnly;
+
+    if (digitsOnly.length === 3) {
+        const inputs = getFieldInputs();
+        const next = inputs[inputs.indexOf(input) + 1];
+        if (next) next.focus();
+    }
+
+    onFieldsChanged();
+}
+
+function onFieldKeydown(event) {
+    const input = event.target;
+    const inputs = getFieldInputs();
+    const index = inputs.indexOf(input);
+    const atStart = input.selectionStart === 0 && input.selectionEnd === 0;
+    const atEnd = input.selectionStart === input.value.length && input.selectionEnd === input.value.length;
+
+    if (event.key === "ArrowLeft" && atStart) {
+        const prev = inputs[index - 1];
+        if (prev) {
+            event.preventDefault();
+            prev.focus();
+            const pos = prev.value.length;
+            prev.setSelectionRange(pos, pos);
+        }
+    } else if (event.key === "ArrowRight" && atEnd) {
+        const next = inputs[index + 1];
+        if (next) {
+            event.preventDefault();
+            next.focus();
+            next.setSelectionRange(0, 0);
+        }
+    }
 }
 
 function resetValidation() {
