@@ -350,3 +350,79 @@ body {
 #footer a:hover {
     color: var(--accent);
 }
+
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(6, 9, 16, 0.65);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    z-index: 1000;
+}
+
+.modal-box {
+    width: 100%;
+    max-width: 380px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 24px;
+}
+
+.modal-box h3 {
+    font-size: 17px;
+    font-weight: 650;
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+.modal-box p {
+    font-size: 13.5px;
+    color: var(--text-muted);
+    line-height: 1.5;
+    text-align: center;
+}
+
+.modal-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 22px;
+}
+
+.modal-button {
+    flex: 1;
+    padding: 11px;
+    border-radius: 9px;
+    border: 1px solid transparent;
+    font: inherit;
+    font-size: 13.5px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.modal-button.secondary {
+    background: transparent;
+    border-color: var(--border);
+    color: var(--text);
+}
+
+.modal-button.secondary:hover {
+    background: var(--surface-hover);
+    border-color: var(--border-hover);
+}
+
+.modal-button.confirm {
+    background: var(--download);
+    color: #1a1206;
+}
+
+.modal-button.confirm:hover {
+    background: #e2984a;
+}
+
+.display-none {
+    display: none;
+}

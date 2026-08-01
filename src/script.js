@@ -48,3 +48,56 @@ function initSidebarToggle() {
 }
 
 initSidebarToggle();
+
+function initDownloadConfirm() {
+    const modal = document.getElementById('download-modal');
+    const text = document.getElementById('download-modal-text');
+    const cancelButton = document.getElementById('download-modal-cancel');
+    const confirmButton = document.getElementById('download-modal-confirm');
+    if (!modal || !text || !cancelButton || !confirmButton) return;
+
+    let pendingHref = null;
+
+    function openModal(link) {
+        pendingHref = link.href;
+        const title = link.querySelector('.nav-item-title')?.textContent.trim() || 'filen';
+        text.textContent = `Vill du ladda ner "${title}" som .zip-fil från GitHub?`;
+        modal.classList.remove('display-none');
+    }
+
+    function closeModal() {
+        modal.classList.add('display-none');
+        pendingHref = null;
+    }
+
+    document.querySelectorAll('.nav-item--download').forEach((link) => {
+        link.addEventListener('click', (event) => {
+            event.preventDefault();
+            openModal(link);
+        });
+    });
+
+    cancelButton.addEventListener('click', closeModal);
+
+    modal.addEventListener('click', (event) => {
+        if (event.target === modal) closeModal();
+    });
+
+    document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && !modal.classList.contains('display-none')) closeModal();
+    });
+
+    confirmButton.addEventListener('click', () => {
+        if (pendingHref) {
+            const link = document.createElement('a');
+            link.href = pendingHref;
+            link.download = '';
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+        }
+        closeModal();
+    });
+}
+
+initDownloadConfirm();

@@ -19,7 +19,7 @@
                 <div class="sidebar-header-text">
                     <h1>Verktygslådan</h1>
                     <div class="version-row">
-                        <p>Version 1.3</p>
+                        <p>Version 1.4</p>
                         <div id="net-status" class="net-status">
                             <span id="net-status-text"></span>
                         </div>
@@ -277,6 +277,17 @@
 
         </main>
 
+    </div>
+
+    <div id="download-modal" class="modal-overlay display-none">
+        <div class="modal-box">
+            <h3>Bekräfta nedladdning av fil</h3>
+            <p id="download-modal-text">Du är på väg att ladda ner en fil.</p>
+            <div class="modal-actions">
+                <button id="download-modal-cancel" class="modal-button secondary">Avbryt</button>
+                <button id="download-modal-confirm" class="modal-button confirm">Ladda ner</button>
+            </div>
+        </div>
     </div>
 
     <script src="src/script.js"></script>
