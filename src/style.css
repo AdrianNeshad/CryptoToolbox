@@ -12,6 +12,8 @@
     --download-soft: rgba(240, 169, 78, 0.1);
     --link: #4ef076;
     --link-soft: rgba(78, 240, 110, 0.1);
+    --doc: #f0616e;
+    --doc-soft: rgba(240, 97, 110, 0.1);
 }
 
 * {
@@ -217,6 +219,11 @@ body {
 .nav-item-icon--link {
     background: var(--link-soft);
     color: var(--link);
+}
+
+.nav-item-icon--doc {
+    background: var(--doc-soft);
+    color: var(--doc);
 }
 
 .nav-item-text {
