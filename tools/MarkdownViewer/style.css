@@ -1,12 +1,12 @@
 :root {
-    --bg: #0a0e17;
-    --surface: #131a29;
-    --border: #232d42;
-    --text: #e8ebf1;
-    --text-muted: #8892a6;
-    --accent: #5b8cff;
-    --accent-soft: rgba(91, 140, 255, .12);
-    --error: #f0616e;
+    --bg: #0a0a0a;
+    --surface: #161616;
+    --border: #2e2e2e;
+    --text: #f0f0f0;
+    --text-muted: #949494;
+    --accent: #e8e8e8;
+    --accent-soft: rgba(255, 255, 255, .08);
+    --error: #c9c9c9;
 }
 
 * {
@@ -27,10 +27,10 @@ body {
     background: var(--bg);
     background-image:
         radial-gradient(circle at 15% 0%,
-            rgba(91, 140, 255, .08),
+            rgba(255, 255, 255, .05),
             transparent 40%),
         radial-gradient(circle at 85% 100%,
-            rgba(91, 140, 255, .05),
+            rgba(255, 255, 255, .03),
             transparent 40%);
     color: var(--text);
     min-height: 100vh;
@@ -59,6 +59,9 @@ body {
 
 .markdown-body .status.error {
     color: var(--error);
+    font-weight: 600;
+    padding-left: 12px;
+    border-left: 3px solid var(--error);
 }
 
 .markdown-body h1,
