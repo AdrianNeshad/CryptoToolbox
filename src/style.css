@@ -8,12 +8,14 @@
     --text-muted: #8892a6;
     --accent: #5b8cff;
     --accent-soft: rgba(91, 140, 255, 0.12);
+    --local: #4ef076;
+    --local-soft: rgba(78, 240, 110, 0.1);
     --download: #f0a94e;
     --download-soft: rgba(240, 169, 78, 0.1);
-    --link: #4ef076;
-    --link-soft: rgba(78, 240, 110, 0.1);
-    --doc: #f0616e;
-    --doc-soft: rgba(240, 97, 110, 0.1);
+    --link: #f0616e;
+    --link-soft: rgba(240, 97, 110, 0.1);
+    --doc: #5b8cff;
+    --doc-soft: rgba(91, 140, 255, 0.12);
 }
 
 * {
@@ -209,6 +211,11 @@ body {
 .nav-item-icon svg {
     width: 16px;
     height: 16px;
+}
+
+.nav-item-icon--local {
+    background: var(--local-soft);
+    color: var(--local);
 }
 
 .nav-item-icon--download {

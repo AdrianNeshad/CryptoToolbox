@@ -101,3 +101,51 @@ function initDownloadConfirm() {
 }
 
 initDownloadConfirm();
+
+function initExternalLinkConfirm() {
+    const modal = document.getElementById('external-link-modal');
+    const text = document.getElementById('external-link-modal-text');
+    const cancelButton = document.getElementById('external-link-modal-cancel');
+    const confirmButton = document.getElementById('external-link-modal-confirm');
+    if (!modal || !text || !cancelButton || !confirmButton) return;
+
+    let pendingHref = null;
+
+    function openModal(link) {
+        pendingHref = link.href;
+        const title = link.querySelector('.nav-item-title')?.textContent.trim() || 'webbplatsen';
+        text.textContent = `Vill du lämna Verktygslådan och öppna "${title}" i ny flik?`;
+        modal.classList.remove('display-none');
+    }
+
+    function closeModal() {
+        modal.classList.add('display-none');
+        pendingHref = null;
+    }
+
+    document.querySelectorAll('.nav-item--link').forEach((link) => {
+        link.addEventListener('click', (event) => {
+            event.preventDefault();
+            openModal(link);
+        });
+    });
+
+    cancelButton.addEventListener('click', closeModal);
+
+    modal.addEventListener('click', (event) => {
+        if (event.target === modal) closeModal();
+    });
+
+    document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && !modal.classList.contains('display-none')) closeModal();
+    });
+
+    confirmButton.addEventListener('click', () => {
+        if (pendingHref) {
+            window.open(pendingHref, '_blank', 'noopener,noreferrer');
+        }
+        closeModal();
+    });
+}
+
+initExternalLinkConfirm();
