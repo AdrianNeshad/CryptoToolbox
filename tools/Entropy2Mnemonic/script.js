@@ -4,7 +4,7 @@ const output = document.getElementById("output");
 const toast = document.getElementById("toast");
 const checksumStatus = document.getElementById("checksum-status");
 
-const FIELD_COUNT = 16;
+let FIELD_COUNT = 16;
 
 let renderToken = 0;
 
@@ -68,7 +68,7 @@ async function verifyChecksum(words, wordlist) {
     };
 }
 
-function createField() {
+function createField(index) {
     const wrapper = document.createElement("div");
     wrapper.className = "entropy-field";
 
@@ -79,6 +79,7 @@ function createField() {
     input.maxLength = 3;
     input.autocomplete = "off";
     input.spellcheck = false;
+    input.placeholder = String(index + 1);
     input.addEventListener("input", onFieldInput);
     input.addEventListener("keydown", onFieldKeydown);
 
@@ -86,8 +87,23 @@ function createField() {
     return wrapper;
 }
 
-function addField() {
-    row.appendChild(createField());
+function addField(index) {
+    row.appendChild(createField(index));
+}
+
+function setFieldCount(count) {
+    const existingValues = getFieldInputs().map(input => input.value);
+
+    FIELD_COUNT = count;
+    row.innerHTML = "";
+    for (let i = 0; i < FIELD_COUNT; i++) addField(i);
+
+    const inputs = getFieldInputs();
+    inputs.forEach((input, i) => {
+        if (existingValues[i] !== undefined) input.value = existingValues[i];
+    });
+
+    onFieldsChanged();
 }
 
 function getFieldInputs() {
@@ -230,5 +246,15 @@ document.getElementById("copy-button").addEventListener("click", () => {
     showToast("Mnemonic kopierad");
 });
 
-for (let i = 0; i < FIELD_COUNT; i++) addField();
-onFieldsChanged();
+document.getElementById("word-count-toggle").addEventListener("click", (event) => {
+    const btn = event.target.closest(".toggle-btn");
+    if (!btn || btn.classList.contains("active")) return;
+
+    document.querySelectorAll("#word-count-toggle .toggle-btn").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+
+    const wordCount = Number(btn.dataset.words);
+    setFieldCount(wordCount === 24 ? 32 : 16);
+});
+
+setFieldCount(FIELD_COUNT);

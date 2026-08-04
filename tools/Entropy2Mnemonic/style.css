@@ -70,6 +70,40 @@ body {
     font-size: 14px;
 }
 
+.word-count-toggle {
+    display: flex;
+    width: 100%;
+    gap: 6px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 4px;
+    margin-bottom: 16px;
+}
+
+.toggle-btn {
+    flex: 1;
+    padding: 10px;
+    border: none;
+    border-radius: 7px;
+    background: transparent;
+    color: var(--text-muted);
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+.toggle-btn:hover {
+    color: var(--text);
+}
+
+.toggle-btn.active {
+    background: var(--accent-soft);
+    color: var(--accent);
+}
+
 .entropy-box {
     width: 100%;
     background: var(--surface);
@@ -109,6 +143,11 @@ body {
 .entropy-field input::-webkit-inner-spin-button {
     -webkit-appearance: none;
     margin: 0;
+}
+
+.entropy-field input::placeholder {
+    color: var(--text-muted);
+    opacity: .5;
 }
 
 .entropy-field input:focus {
