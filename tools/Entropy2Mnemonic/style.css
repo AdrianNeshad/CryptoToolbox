@@ -136,6 +136,7 @@ body {
     text-align: center;
     outline: none;
     transition: border-color .18s ease, box-shadow .18s ease;
+    appearance: textfield;
     -moz-appearance: textfield;
 }
 
