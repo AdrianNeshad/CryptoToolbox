@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wallet Storage Formats — CryptoToolbox</title>
+<style>
+  :root {
+    --bg: #f3efe4;
+    --bg-elevated: #fbf8f1;
+    --bg-elevated-2: #ffffff;
+    --ink: #26221d;
+    --ink-soft: #4a443c;
+    --muted: #8a8172;
+    --border: #ddd4bf;
+    --border-strong: #c9bea3;
+    --accent: #93611f;
+    --accent-soft: #ecdfc0;
+    --accent2: #2e6a60;
+    --chip-standard-bg: #e1ead7;
+    --chip-standard-fg: #3c6a37;
+    --chip-legacy-bg: #f3e3c4;
+    --chip-legacy-fg: #8a5714;
+    --chip-alt-bg: #e6dff1;
+    --chip-alt-fg: #664e93;
+    --chip-unspec-bg: #e7e2d5;
+    --chip-unspec-fg: #6b6152;
+    --shadow: 0 1px 2px rgba(38,34,29,.06), 0 10px 28px -14px rgba(38,34,29,.22);
+    --rivet: rgba(38,34,29,.14);
+    --serif: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+    --sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --mono: ui-monospace, "SFMono-Regular", "Cascadia Code", "Roboto Mono", Menlo, Consolas, monospace;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #14171b;
+      --bg-elevated: #1b1f24;
+      --bg-elevated-2: #20252b;
+      --ink: #ece6d8;
+      --ink-soft: #c6bfae;
+      --muted: #8b93a1;
+      --border: #2a2f36;
+      --border-strong: #3a4048;
+      --accent: #d9ab5c;
+      --accent-soft: #362c1b;
+      --accent2: #63b0a3;
+      --chip-standard-bg: #223226;
+      --chip-standard-fg: #8fd18a;
+      --chip-legacy-bg: #392e18;
+      --chip-legacy-fg: #e2b768;
+      --chip-alt-bg: #2b2640;
+      --chip-alt-fg: #c1a6ef;
+      --chip-unspec-bg: #262a30;
+      --chip-unspec-fg: #aab0ba;
+      --shadow: 0 1px 2px rgba(0,0,0,.4), 0 10px 28px -14px rgba(0,0,0,.6);
+      --rivet: rgba(255,255,255,.08);
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --bg: #14171b;
+    --bg-elevated: #1b1f24;
+    --bg-elevated-2: #20252b;
+    --ink: #ece6d8;
+    --ink-soft: #c6bfae;
+    --muted: #8b93a1;
+    --border: #2a2f36;
+    --border-strong: #3a4048;
+    --accent: #d9ab5c;
+    --accent-soft: #362c1b;
+    --accent2: #63b0a3;
+    --chip-standard-bg: #223226;
+    --chip-standard-fg: #8fd18a;
+    --chip-legacy-bg: #392e18;
+    --chip-legacy-fg: #e2b768;
+    --chip-alt-bg: #2b2640;
+    --chip-alt-fg: #c1a6ef;
+    --chip-unspec-bg: #262a30;
+    --chip-unspec-fg: #aab0ba;
+    --shadow: 0 1px 2px rgba(0,0,0,.4), 0 10px 28px -14px rgba(0,0,0,.6);
+    --rivet: rgba(255,255,255,.08);
+  }
+
+  :root[data-theme="light"] {
+    --bg: #f3efe4;
+    --bg-elevated: #fbf8f1;
+    --bg-elevated-2: #ffffff;
+    --ink: #26221d;
+    --ink-soft: #4a443c;
+    --muted: #8a8172;
+    --border: #ddd4bf;
+    --border-strong: #c9bea3;
+    --accent: #93611f;
+    --accent-soft: #ecdfc0;
+    --accent2: #2e6a60;
+    --chip-standard-bg: #e1ead7;
+    --chip-standard-fg: #3c6a37;
+    --chip-legacy-bg: #f3e3c4;
+    --chip-legacy-fg: #8a5714;
+    --chip-alt-bg: #e6dff1;
+    --chip-alt-fg: #664e93;
+    --chip-unspec-bg: #e7e2d5;
+    --chip-unspec-fg: #6b6152;
+    --shadow: 0 1px 2px rgba(38,34,29,.06), 0 10px 28px -14px rgba(38,34,29,.22);
+    --rivet: rgba(38,34,29,.14);
+  }
+
+  * { box-sizing: border-box; }
+  @media (prefers-reduced-motion: reduce) {
+    * { animation-duration: .001ms !important; transition-duration: .001ms !important; }
+  }
+
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--sans);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  a { color: var(--accent2); }
+  a:hover { text-decoration-thickness: 2px; }
+
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+    border-radius: 3px;
+  }
+
+  .page {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: clamp(20px, 4vw, 56px) clamp(16px, 4vw, 32px) 64px;
+    display: flex;
+    flex-direction: column;
+    gap: clamp(28px, 4vw, 44px);
+  }
+
+  /* ---------- header plate ---------- */
+  .plate {
+    position: relative;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: clamp(24px, 4vw, 40px) clamp(24px, 5vw, 48px);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+  .plate::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image:
+      radial-gradient(circle, var(--rivet) 1.5px, transparent 1.6px);
+    background-size: 22px 22px;
+    background-position: -6px -6px;
+    opacity: .5;
+    mask-image: radial-gradient(ellipse 140% 100% at 100% 0%, black 0%, transparent 62%);
+    pointer-events: none;
+  }
+  .eyebrow {
+    position: relative;
+    font-family: var(--mono);
+    font-size: .72rem;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 14px;
+  }
+  .eyebrow::before {
+    content: "";
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--accent);
+    display: inline-block;
+  }
+  h1 {
+    position: relative;
+    font-family: var(--serif);
+    font-weight: 600;
+    font-size: clamp(1.9rem, 4vw, 2.7rem);
+    letter-spacing: .01em;
+    margin: 0 0 10px;
+    text-wrap: balance;
+    color: var(--ink);
+  }
+  .lede {
+    position: relative;
+    max-width: 62ch;
+    color: var(--ink-soft);
+    font-size: 1.02rem;
+    margin: 0 0 20px;
+  }
+  .meta-row {
+    position: relative;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 22px;
+    font-family: var(--mono);
+    font-size: .78rem;
+    color: var(--muted);
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+  }
+  .meta-row strong { color: var(--ink-soft); font-weight: 600; }
+
+  /* ---------- toolbar ---------- */
+  .toolbar {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+  }
+  .toolbar label {
+    font-family: var(--mono);
+    font-size: .74rem;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .toolbar input {
+    flex: 1 1 260px;
+    min-width: 0;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-strong);
+    color: var(--ink);
+    font-family: var(--mono);
+    font-size: .9rem;
+    padding: 9px 12px;
+    border-radius: 6px;
+  }
+  .toolbar input::placeholder { color: var(--muted); }
+  .result-count {
+    font-family: var(--mono);
+    font-size: .78rem;
+    color: var(--muted);
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ---------- table ---------- */
+  .table-wrap {
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: auto;
+    box-shadow: var(--shadow);
+    background: var(--bg-elevated);
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 840px;
+  }
+  thead th {
+    position: sticky;
+    top: 0;
+    background: var(--bg-elevated-2);
+    text-align: left;
+    font-family: var(--mono);
+    font-size: .72rem;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 12px 16px;
+    border-bottom: 2px solid var(--accent);
+    white-space: nowrap;
+  }
+  tbody td {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    font-size: .89rem;
+    vertical-align: top;
+  }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr:hover td { background: var(--accent-soft); }
+  .w-name { font-weight: 600; color: var(--ink); white-space: nowrap; }
+  .w-plat { color: var(--ink-soft); white-space: nowrap; }
+  .w-fmt, .w-kdf { font-family: var(--mono); font-size: .82rem; color: var(--ink-soft); white-space: nowrap; }
+  .w-note { color: var(--muted); font-size: .85rem; min-width: 220px; }
+  .w-note a { font-family: var(--mono); font-size: .8rem; }
+
+  .chip {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: .75rem;
+    padding: 3px 8px;
+    border-radius: 5px;
+    white-space: nowrap;
+  }
+  .chip-standard { background: var(--chip-standard-bg); color: var(--chip-standard-fg); }
+  .chip-legacy   { background: var(--chip-legacy-bg);   color: var(--chip-legacy-fg); }
+  .chip-alt      { background: var(--chip-alt-bg);      color: var(--chip-alt-fg); }
+  .chip-unspec   { background: var(--chip-unspec-bg);   color: var(--chip-unspec-fg); }
+
+  tr.is-hidden { display: none; }
+
+  /* ---------- section headings ---------- */
+  h2 {
+    font-family: var(--serif);
+    font-size: 1.35rem;
+    font-weight: 600;
+    margin: 0 0 4px;
+    color: var(--ink);
+  }
+  .section-lede {
+    color: var(--muted);
+    font-size: .92rem;
+    margin: 0 0 18px;
+    max-width: 60ch;
+  }
+
+  /* ---------- reference cards ---------- */
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+    gap: 14px;
+  }
+  .card {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px 18px;
+    box-shadow: var(--shadow);
+  }
+  .card h3 {
+    font-family: var(--sans);
+    font-size: .85rem;
+    font-weight: 600;
+    margin: 0 0 10px;
+    color: var(--ink);
+  }
+  .card ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .card code {
+    font-family: var(--mono);
+    font-size: .82rem;
+    color: var(--accent2);
+    background: transparent;
+  }
+  .card .tagset {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .card .tagset code {
+    background: var(--chip-unspec-bg);
+    color: var(--chip-unspec-fg);
+    padding: 3px 7px;
+    border-radius: 5px;
+    font-size: .78rem;
+  }
+
+  /* ---------- keystore panels ---------- */
+  .panels {
+    display: grid;
+    grid-template-columns: minmax(0, .8fr) minmax(0, 1.2fr);
+    gap: 16px;
+  }
+  @media (max-width: 720px) {
+    .panels { grid-template-columns: 1fr; }
+  }
+  .panel {
+    background: var(--bg-elevated-2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+  }
+  .panel-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 9px 14px;
+    background: var(--bg-elevated);
+    border-bottom: 1px solid var(--border);
+    font-family: var(--mono);
+    font-size: .72rem;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .copy-btn {
+    font-family: var(--mono);
+    font-size: .7rem;
+    letter-spacing: .04em;
+    background: transparent;
+    border: 1px solid var(--border-strong);
+    color: var(--ink-soft);
+    padding: 3px 9px;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  .copy-btn:hover { border-color: var(--accent); color: var(--accent); }
+  pre {
+    margin: 0;
+    padding: 16px 18px;
+    overflow-x: auto;
+    font-family: var(--mono);
+    font-size: .82rem;
+    line-height: 1.6;
+    color: var(--ink-soft);
+  }
+  .jk { color: var(--accent2); }
+  .js { color: var(--ink); }
+  .jn { color: var(--accent); }
+
+  footer {
+    font-family: var(--mono);
+    font-size: .74rem;
+    color: var(--muted);
+    text-align: center;
+    padding-top: 8px;
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header class="plate">
+    <p class="eyebrow">CryptoToolbox · Documentation</p>
+    <h1>Wallet Storage Formats</h1>
+    <p class="lede">Hur tretton wallets krypterar och lagrar sina nycklar — filformat, cipher och KDF, sida vid sida, med fältreferens och ett Ethereum Keystore V3‑exempel längst ned.</p>
+    <div class="meta-row">
+      <span><strong>13</strong> wallets</span>
+      <span><strong>4</strong> cipher‑familjer</span>
+      <span>documentation/wallets.html</span>
+    </div>
+  </header>
+
+  <section class="toolbar">
+    <label for="filter">Filtrera</label>
+    <input id="filter" type="text" placeholder="sök på wallet, plattform eller algoritm…" autocomplete="off">
+    <span class="result-count" id="resultCount">13 av 13</span>
+  </section>
+
+  <div class="table-wrap">
+    <table id="walletTable">
+      <thead>
+        <tr>
+          <th>Wallet</th>
+          <th>Plattform</th>
+          <th>Filformat</th>
+          <th>Kryptering</th>
+          <th>KDF / Lagring</th>
+          <th>Anteckning</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="w-name">MetaMask</td>
+          <td class="w-plat">PC/Web</td>
+          <td class="w-fmt">JSON Vault</td>
+          <td><span class="chip chip-standard">AES-256-GCM</span></td>
+          <td class="w-kdf">PBKDF2 / Browser Storage</td>
+          <td class="w-note"><a href="https://support.metamask.io/configure/wallet/how-to-recover-your-secret-recovery-phrase/" target="_blank" rel="noopener">support.metamask.io ↗</a></td>
+        </tr>
+        <tr>
+          <td class="w-name">MetaMask</td>
+          <td class="w-plat">iOS/Android</td>
+          <td class="w-fmt">JSON Vault</td>
+          <td><span class="chip chip-standard">AES-256-GCM</span></td>
+          <td class="w-kdf">Keychain/Keystore</td>
+          <td class="w-note">iterations: 5000 för mobile</td>
+        </tr>
+        <tr>
+          <td class="w-name">Phantom</td>
+          <td class="w-plat">PC/Web</td>
+          <td class="w-fmt">JSON Vault</td>
+          <td><span class="chip chip-standard">AES-256-GCM</span></td>
+          <td class="w-kdf">PBKDF2/Keychain</td>
+          <td class="w-note">Lagras i keychain med entropy som går att konvertera till mnemonic</td>
+        </tr>
+        <tr>
+          <td class="w-name">Exodus</td>
+          <td class="w-plat">Desktop</td>
+          <td class="w-fmt">seed.seco</td>
+          <td><span class="chip chip-unspec">AES-256</span></td>
+          <td class="w-kdf">PBKDF2</td>
+          <td class="w-note"><a href="https://github.com/AdrianNeshad/secoUnlock" target="_blank" rel="noopener">github.com/AdrianNeshad/secoUnlock ↗</a></td>
+        </tr>
+        <tr>
+          <td class="w-name">Electrum</td>
+          <td class="w-plat">Desktop</td>
+          <td class="w-fmt">wallet</td>
+          <td><span class="chip chip-legacy">AES-256-CBC</span></td>
+          <td class="w-kdf">PBKDF2</td>
+          <td class="w-note"><a href="https://github.com/AdrianNeshad/electrumUnlock" target="_blank" rel="noopener">github.com/AdrianNeshad/electrumUnlock ↗</a></td>
+        </tr>
+        <tr>
+          <td class="w-name">Monero GUI</td>
+          <td class="w-plat">Desktop</td>
+          <td class="w-fmt">.keys</td>
+          <td><span class="chip chip-alt">ChaCha20</span></td>
+          <td class="w-kdf">Wallet password</td>
+          <td class="w-note">Återställ .keys‑fil i moneroGUI eller featherWallet — dekrypterat men encodat lösenord går att använda som password</td>
+        </tr>
+        <tr>
+          <td class="w-name">Trust Wallet</td>
+          <td class="w-plat">Mobile</td>
+          <td class="w-fmt">Encrypted DB</td>
+          <td><span class="chip chip-standard">AES-256-GCM</span></td>
+          <td class="w-kdf">Keychain/Keystore</td>
+          <td class="w-note">—</td>
+        </tr>
+        <tr>
+          <td class="w-name">Coinbase Wallet</td>
+          <td class="w-plat">Web/Mobile</td>
+          <td class="w-fmt">JSON/DB</td>
+          <td><span class="chip chip-standard">AES-256-GCM</span></td>
+          <td class="w-kdf">PBKDF2/Keychain</td>
+          <td class="w-note">—</td>
+        </tr>
+        <tr>
+          <td class="w-name">BlueWallet</td>
+          <td class="w-plat">Mobile</td>
+          <td class="w-fmt">Encrypted JSON</td>
+          <td><span class="chip chip-standard">AES-256-GCM</span></td>
+          <td class="w-kdf">Keychain/Keystore</td>
+          <td class="w-note">—</td>
+        </tr>
+        <tr>
+          <td class="w-name">Atomic</td>
+          <td class="w-plat">Desktop/Mobile</td>
+          <td class="w-fmt">JSON/DB</td>
+          <td><span class="chip chip-unspec">AES-256</span></td>
+          <td class="w-kdf">PBKDF2</td>
+          <td class="w-note">—</td>
+        </tr>
+        <tr>
+          <td class="w-name">Guarda</td>
+          <td class="w-plat">Desktop/Mobile</td>
+          <td class="w-fmt">JSON/DB</td>
+          <td><span class="chip chip-unspec">AES-256</span></td>
+          <td class="w-kdf">PBKDF2</td>
+          <td class="w-note">—</td>
+        </tr>
+        <tr>
+          <td class="w-name">Keplr / Leap / Brave / Rabby / Ronin / XDEFI / Solflare / Backpack</td>
+          <td class="w-plat">Web</td>
+          <td class="w-fmt">JSON Vault</td>
+          <td><span class="chip chip-standard">AES-256-GCM</span></td>
+          <td class="w-kdf">PBKDF2</td>
+          <td class="w-note">—</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <section>
+    <h2>Fältreferens</h2>
+    <p class="section-lede">Filnamn och nycklar att leta efter när en wallet‑mapp ska identifieras.</p>
+    <div class="cards">
+      <div class="card">
+        <h3>Exodus</h3>
+        <ul>
+          <li><code>seed.seco</code></li>
+          <li><code>passphrase.seco</code></li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Monero</h3>
+        <ul>
+          <li><code>wallet.keys</code></li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Electrum</h3>
+        <ul>
+          <li><code>default_wallet</code></li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>MetaMask / Phantom JSON Vault</h3>
+        <div class="tagset">
+          <code>ciphertext</code><code>iv</code><code>salt</code><code>mac</code>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Ethereum Keystore V3</h2>
+    <p class="section-lede">Standardformatet som MetaMask, Geth och de flesta ETH‑wallets baserar sin JSON‑vault på.</p>
+    <div class="panels">
+      <div class="panel">
+        <div class="panel-head">
+          <span>struktur</span>
+          <button class="copy-btn" data-copy="struct">kopiera</button>
+        </div>
+        <pre id="struct">crypto {
+  cipher = aes-128-ctr,
+  kdf = scrypt,
+  ...
+}</pre>
+      </div>
+      <div class="panel">
+        <div class="panel-head">
+          <span>exempel.json</span>
+          <button class="copy-btn" data-copy="example">kopiera</button>
+        </div>
+        <pre id="example">{
+    <span class="jk">"version"</span>: <span class="jn">3</span>,
+    <span class="jk">"id"</span>: <span class="js">"e0fe53d0-7a3d-4f65-88b1-9bb4e245a169"</span>,
+    <span class="jk">"crypto"</span>: {
+        <span class="jk">"ciphertext"</span>: <span class="js">"64b5b416bb2bef882eb7cc63ed92c064e53c818ec46351e07ac140e5ba871596f1595fe6cad8333147fe68c031ba001b79b64dd1edd513043134217b7ffe1903ca23b1fbe823671827e3b2dff69bbd448d9cb79a3321ec8801f2a995"</span>,
+        <span class="jk">"cipherparams"</span>: {
+            <span class="jk">"iv"</span>: <span class="js">"7aaf7eb6f4b0e7d995e8eac67e4d52eb"</span>
+        },
+        <span class="jk">"kdf"</span>: <span class="js">"scrypt"</span>,
+        <span class="jk">"kdfparams"</span>: {
+            <span class="jk">"r"</span>: <span class="jn">8</span>,
+            <span class="jk">"p"</span>: <span class="jn">6</span>,
+            <span class="jk">"n"</span>: <span class="jn">4096</span>,
+            <span class="jk">"dklen"</span>: <span class="jn">32</span>,
+            <span class="jk">"salt"</span>: <span class="js">"80132842c6cde8f9d04582932ef92c3cad3ba6b41e1296ef681692372886db86"</span>
+        },
+        <span class="jk">"mac"</span>: <span class="js">"01816d0a5c31cd03b644f2d756ac8167c2498808040cbace8c35c46dcf06b7a1"</span>,
+        <span class="jk">"cipher"</span>: <span class="js">"aes-128-ctr"</span>
+    },
+    <span class="jk">"type"</span>: <span class="js">"mnemonic"</span>,
+    <span class="jk">"coin"</span>: <span class="jn">60</span>,
+    <span class="jk">"address"</span>: <span class="js">"32dd55E0BCF509a35A3F5eEb8593fbEb244796b1"</span>
+}</pre>
+      </div>
+    </div>
+  </section>
+
+  <footer>CryptoToolbox — documentation/wallets.html</footer>
+
+</div>
+
+<script>
+  (function () {
+    var input = document.getElementById('filter');
+    var rows = Array.prototype.slice.call(document.querySelectorAll('#walletTable tbody tr'));
+    var count = document.getElementById('resultCount');
+
+    input.addEventListener('input', function () {
+      var q = input.value.trim().toLowerCase();
+      var visible = 0;
+      rows.forEach(function (row) {
+        var match = row.textContent.toLowerCase().indexOf(q) !== -1;
+        row.classList.toggle('is-hidden', !match);
+        if (match) visible++;
+      });
+      count.textContent = visible + ' av ' + rows.length;
+    });
+
+    document.querySelectorAll('.copy-btn').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var target = document.getElementById(btn.getAttribute('data-copy'));
+        var text = target ? target.textContent : '';
+        var done = function () {
+          var original = btn.textContent;
+          btn.textContent = 'kopierat';
+          setTimeout(function () { btn.textContent = original; }, 1200);
+        };
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(text).then(done).catch(done);
+        } else {
+          done();
+        }
+      });
+    });
+  })();
+</script>
+</body>
+</html>
