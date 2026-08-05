@@ -1,0 +1,275 @@
+:root {
+    --bg: #0a0e17;
+    --surface: #131a29;
+    --surface-hover: #182338;
+    --border: #232d42;
+    --border-hover: #34415c;
+    --text: #e8ebf1;
+    --text-muted: #8892a6;
+    --accent: #5b8cff;
+    --accent-soft: rgba(91, 140, 255, 0.12);
+    --success: #3ecf8e;
+    --success-soft: rgba(62, 207, 142, 0.12);
+    --error: #f0616e;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    line-height: 1.5;
+    font-size: 16px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    background-image:
+        radial-gradient(circle at 15% 0%, rgba(91, 140, 255, 0.08), transparent 40%),
+        radial-gradient(circle at 85% 100%, rgba(91, 140, 255, 0.05), transparent 40%);
+    color: var(--text);
+    min-height: 100vh;
+}
+
+.display-none {
+    display: none;
+}
+
+main {
+    padding: 56px 20px 80px;
+    max-width: 760px;
+    margin: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.page-header {
+    text-align: center;
+    margin-bottom: 4px;
+}
+
+.page-header h1 {
+    font-size: 26px;
+    font-weight: 650;
+    letter-spacing: -0.02em;
+    margin: 0;
+}
+
+.page-header p {
+    margin-top: 8px;
+    color: var(--text-muted);
+    font-size: 14px;
+}
+
+/* ---------- input ---------- */
+
+#input-box {
+    width: 100%;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    transition: border-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+#input-box:focus-within {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+#input {
+    width: 100%;
+    height: 200px;
+    resize: vertical;
+    padding: 18px;
+    background: none;
+    border: none;
+    outline: none;
+    color: var(--text);
+    font-family: Consolas, Monaco, monospace;
+    font-size: 13.5px;
+}
+
+#input::placeholder {
+    color: var(--text-muted);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Helvetica, Arial, sans-serif;
+}
+
+.input-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+#result-count {
+    font-size: 13px;
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+}
+
+.toolbar-buttons {
+    display: flex;
+    gap: 8px;
+}
+
+#clear-button,
+#testdata-button {
+    font-family: inherit;
+    font-size: 12.5px;
+    font-weight: 650;
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    padding: 6px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: border-color 0.15s ease, color 0.15s ease;
+}
+
+#clear-button:hover {
+    border-color: var(--border-hover);
+    color: var(--text);
+}
+
+#testdata-button {
+    border-color: var(--accent-soft);
+    color: var(--accent);
+}
+
+#testdata-button:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
+/* ---------- empty state ---------- */
+
+.empty-state {
+    text-align: center;
+    padding: 48px 20px;
+    color: var(--text-muted);
+    font-size: 14px;
+    background: var(--surface);
+    border: 1px dashed var(--border);
+    border-radius: 12px;
+}
+
+/* ---------- results ---------- */
+
+#results {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.result-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    transition: border-color 0.15s ease;
+}
+
+.result-card:hover {
+    border-color: var(--border-hover);
+}
+
+.chip-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.chip {
+    display: inline-block;
+    font-size: 11.5px;
+    font-weight: 650;
+    padding: 3px 9px;
+    border-radius: 999px;
+    white-space: nowrap;
+}
+
+.chip-verified {
+    background: var(--success-soft);
+    color: var(--success);
+}
+
+.chip-likely {
+    background: var(--accent-soft);
+    color: var(--accent);
+}
+
+.value-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.value-text {
+    flex: 1;
+    min-width: 0;
+    overflow-wrap: anywhere;
+    font-family: Consolas, Monaco, monospace;
+    font-size: 12.5px;
+    color: var(--text-muted);
+    background: var(--surface-hover);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 6px 10px;
+}
+
+.copy-btn {
+    flex-shrink: 0;
+    font-family: inherit;
+    font-size: 11.5px;
+    font-weight: 650;
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    padding: 6px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: border-color 0.15s ease, color 0.15s ease;
+}
+
+.copy-btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
+/* ---------- toast ---------- */
+
+.toast {
+    visibility: hidden;
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--surface-hover);
+    border: 1px solid var(--border-hover);
+    padding: 14px 18px;
+    border-radius: 8px;
+    font-size: 13.5px;
+}
+
+.toast.show {
+    visibility: visible;
+}
+
+#footer {
+    margin-top: 8px;
+    text-align: center;
+}
+
+#footer a {
+    color: var(--text-muted);
+    text-decoration: none;
+    font-size: 13px;
+    transition: color 0.18s ease;
+}
+
+#footer a:hover {
+    color: var(--accent);
+}

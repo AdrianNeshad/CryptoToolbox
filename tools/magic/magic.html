@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="sv">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Magic Tool</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <main>
+
+        <header class="page-header">
+            <h1>Magic Tool</h1>
+            <p>Klistra in valfri text — nycklar, adresser, entropy och krypteringsmetadata identifieras automatiskt</p>
+        </header>
+
+        <div id="input-box">
+            <textarea id="input" spellcheck="false" placeholder="Klistra in text här: wallet-JSON, minnesdump, loggar, nycklar, adresser..."></textarea>
+        </div>
+
+        <div class="input-toolbar">
+            <span id="result-count"></span>
+            <div class="toolbar-buttons">
+                <button id="testdata-button" type="button">Testdata</button>
+                <button id="clear-button" type="button">Rensa</button>
+            </div>
+        </div>
+
+        <div class="empty-state" id="empty-state">
+            <p>Klistra in text ovan för att identifiera kryptorelaterat innehåll</p>
+        </div>
+
+        <div id="results" class="display-none"></div>
+
+        <div id="toast" class="toast"></div>
+
+    </main>
+
+    <script src="crypto-helpers.js"></script>
+    <script src="script.js"></script>
+</body>
+
+</html>
