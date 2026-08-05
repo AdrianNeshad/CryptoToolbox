@@ -67,66 +67,6 @@
             font-size: 14px;
         }
 
-        .meta-row {
-            display: flex;
-            justify-content: center;
-            flex-wrap: wrap;
-            gap: 6px 16px;
-            margin-top: 14px;
-            font-size: 12.5px;
-            color: var(--text-muted);
-        }
-
-        .meta-row strong {
-            color: var(--text);
-            font-weight: 650;
-        }
-
-        /* ---------- search ---------- */
-        .search-bar {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 10px;
-            padding: 12px 14px;
-            transition: border-color 0.18s ease, box-shadow 0.18s ease;
-        }
-
-        .search-bar:focus-within {
-            border-color: var(--accent);
-            box-shadow: 0 0 0 3px var(--accent-soft);
-        }
-
-        .search-bar svg {
-            width: 18px;
-            height: 18px;
-            color: var(--text-muted);
-            flex-shrink: 0;
-        }
-
-        .search-bar input {
-            flex: 1;
-            border: none;
-            outline: none;
-            background: transparent;
-            color: var(--text);
-            font-size: 15px;
-            font-family: inherit;
-        }
-
-        .search-bar input::placeholder {
-            color: var(--text-muted);
-        }
-
-        .result-count {
-            font-size: 13px;
-            color: var(--text-muted);
-            padding: 0 2px;
-            margin-top: -14px;
-        }
-
         /* ---------- table ---------- */
         .table-wrap {
             background: var(--surface);
@@ -239,10 +179,6 @@
         .chip-plain {
             background: var(--surface-hover);
             color: var(--text-muted);
-        }
-
-        tr.is-hidden {
-            display: none;
         }
 
         /* ---------- section headings ---------- */
@@ -414,21 +350,7 @@
 
         <header class="page-header">
             <h1>Wallet Storage Formats</h1>
-            <p>Filformat, kryptering och KDF-lagring för tretton wallets, sida vid sida</p>
-            <div class="meta-row">
-                <span><strong>13</strong> wallets</span>
-                <span><strong>4</strong> cipher-familjer</span>
-            </div>
         </header>
-
-        <div class="search-bar">
-            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.8" />
-                <path d="M21 21L16.65 16.65" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
-            </svg>
-            <input type="text" id="filter" placeholder="Sök på wallet, plattform eller algoritm..." autocomplete="off">
-        </div>
-        <div class="result-count" id="resultCount">13 av 13</div>
 
         <div class="table-wrap">
             <table id="walletTable">
@@ -614,31 +536,10 @@
             </div>
         </section>
 
-        <footer id="footer">
-            <a href="https://github.com/AdrianNeshad/CryptoToolbox" target="_blank" rel="noopener">
-                Github.com/AdrianNeshad/CryptoToolbox
-            </a>
-        </footer>
-
     </main>
 
     <script>
         (function () {
-            var input = document.getElementById('filter');
-            var rows = Array.prototype.slice.call(document.querySelectorAll('#walletTable tbody tr'));
-            var count = document.getElementById('resultCount');
-
-            input.addEventListener('input', function () {
-                var q = input.value.trim().toLowerCase();
-                var visible = 0;
-                rows.forEach(function (row) {
-                    var match = row.textContent.toLowerCase().indexOf(q) !== -1;
-                    row.classList.toggle('is-hidden', !match);
-                    if (match) visible++;
-                });
-                count.textContent = visible + ' av ' + rows.length;
-            });
-
             document.querySelectorAll('.copy-btn').forEach(function (btn) {
                 btn.addEventListener('click', function () {
                     var target = document.getElementById(btn.getAttribute('data-copy'));
