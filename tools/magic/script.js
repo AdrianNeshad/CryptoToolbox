@@ -76,6 +76,14 @@ var GENERIC_AES_KEYWORDS = [
 
 var WALLET_JSON_FIELDS = ["ciphertext", "iv", "salt", "mac"];
 
+var BIP38_VERSIONS = {
+    "0142": "BIP38-krypterad privat nyckel (icke EC-multiplicerad)",
+    "0143": "BIP38-krypterad privat nyckel (EC-multiplicerad)"
+};
+
+var BIP39_WORDLIST = (window.entropyWordlists && window.entropyWordlists.bip39) || [];
+var BIP39_LENGTHS = { 12: true, 15: true, 18: true, 21: true, 24: true };
+
 // ---------- Hjälpfunktioner ----------
 
 function bytesToHex(bytes) {
@@ -109,6 +117,16 @@ function walkJson(node, addFinding) {
             var bytes = keys.map(function (k) { return node[k]; });
             var hex = bytes.map(function (b) { return b.toString(16).padStart(2, "0"); }).join("");
             addFinding(hex, "Entropy (" + bytes.length + " byte, JSON-objekt)", "verified");
+        }
+
+        // Ethereum Keystore V3: strukturen är specifik nog att känna igen direkt
+        // (version 3 + crypto.cipher/crypto.ciphertext) istället för att bara
+        // rapportera de enskilda cipher/kdf-fälten var för sig. Använder samma
+        // "value" som ciphertext-fältet nedan så de två träffarna slås ihop till
+        // ett kort.
+        if (node.version === 3 && node.crypto && typeof node.crypto === "object" &&
+            typeof node.crypto.cipher === "string" && typeof node.crypto.ciphertext === "string") {
+            addFinding(node.crypto.ciphertext, "Ethereum Keystore V3 (nyckelfil)", "verified");
         }
 
         keys.forEach(function (key) {
@@ -209,6 +227,96 @@ function scanEntropyLists(text, addFinding) {
     }
 }
 
+function scanDerivationPaths(text, addFinding) {
+    // t.ex. m/44'/0'/0'/0/0 eller m/84h/0h/0h/0/0 (h/' markerar hardened index)
+    var re = /\bm(?:\/\d+[h']?)+/g;
+    var m;
+    while ((m = re.exec(text)) !== null) {
+        addFinding(m[0], "BIP32 derivation path", "likely");
+    }
+}
+
+// ---------- BIP39 mnemonic-fraser ----------
+
+function bytesToBinaryLocal(bytes) {
+    var s = "";
+    for (var i = 0; i < bytes.length; i++) s += bytes[i].toString(2).padStart(8, "0");
+    return s;
+}
+
+function binaryToBytesLocal(bits) {
+    var bytes = [];
+    for (var i = 0; i < bits.length; i += 8) {
+        bytes.push(parseInt(bits.slice(i, i + 8), 2));
+    }
+    return bytes;
+}
+
+// Avkodar orden tillbaka till bitar och räknar om SHA-256-checksumman från
+// entropy-delen, samma metod som Entropy2Mnemonic-verktyget använder — så en
+// hittad fras verifieras kryptografiskt istället för att bara matchas mot
+// ordlistan.
+async function verifyBip39Checksum(words) {
+    var bits = words.map(function (w) {
+        return BIP39_WORDLIST.indexOf(w).toString(2).padStart(11, "0");
+    }).join("");
+
+    var totalBits = bits.length;
+    var checksumBitLength = totalBits / 33;
+    var entropyBitLength = totalBits - checksumBitLength;
+
+    var entropyBits = bits.slice(0, entropyBitLength);
+    var embeddedChecksumBits = bits.slice(entropyBitLength);
+
+    var entropyBytes = new Uint8Array(binaryToBytesLocal(entropyBits));
+    var hash = await CH.sha256(entropyBytes);
+    var recomputedChecksumBits = bytesToBinaryLocal(Array.from(hash)).slice(0, checksumBitLength);
+
+    return recomputedChecksumBits === embeddedChecksumBits;
+}
+
+async function scanMnemonicPhrases(text, addFinding) {
+    if (!BIP39_WORDLIST.length) return;
+    var wordSet = new Set(BIP39_WORDLIST);
+
+    var candidates = [];
+    var re = /[A-Za-z]+/g;
+    var m;
+    var run = [];
+    var runStart = -1;
+    var lastEnd = 0;
+
+    function flushRun(endPos) {
+        if (run.length && BIP39_LENGTHS[run.length]) {
+            candidates.push({ words: run.slice(), phrase: text.slice(runStart, endPos).trim() });
+        }
+        run = [];
+        runStart = -1;
+    }
+
+    while ((m = re.exec(text)) !== null) {
+        var word = m[0].toLowerCase();
+        if (wordSet.has(word)) {
+            if (run.length === 0) runStart = m.index;
+            run.push(word);
+            lastEnd = re.lastIndex;
+        } else {
+            flushRun(lastEnd);
+        }
+    }
+    flushRun(lastEnd);
+
+    for (var i = 0; i < candidates.length; i++) {
+        var c = candidates[i];
+        var valid = await verifyBip39Checksum(c.words);
+        if (valid) {
+            addFinding(c.phrase, "BIP39 mnemonic-fras (" + c.words.length + " ord) · checksum verifierad", "verified");
+        } else {
+            addFinding(c.phrase, c.words.length + " ord från BIP39-listan hittade", "likely");
+        }
+    }
+}
+
 // ---------- Token-pass ----------
 
 function classifyBase58Payload(payload) {
@@ -227,6 +335,9 @@ function classifyBase58Payload(payload) {
     } else if (payload.length === 21) {
         var v2 = payload[0];
         if (ADDRESS_VERSIONS[v2]) labels.push(ADDRESS_VERSIONS[v2]);
+    } else if (payload.length === 39) {
+        var v3 = bytesToHex(payload.slice(0, 2));
+        if (BIP38_VERSIONS[v3]) labels.push(BIP38_VERSIONS[v3]);
     }
     return labels;
 }
@@ -269,6 +380,10 @@ function classifyRawHex(token, addFinding) {
     }
     if (len === 130 && /^04/.test(token)) {
         addFinding(token, "Okomprimerad publik nyckel (hex)", "likely");
+        return true;
+    }
+    if (len === 128) {
+        addFinding(token, "Möjlig BIP39-seed (64 byte, hex)", "likely");
         return true;
     }
     return false;
@@ -382,6 +497,8 @@ async function scanText(text) {
 
     scanCipherKeywords(text, addFinding);
     scanEntropyLists(text, addFinding);
+    scanDerivationPaths(text, addFinding);
+    await scanMnemonicPhrases(text, addFinding);
 
     var tokens = text.match(/[A-Za-z0-9+/=_-]{8,}/g) || [];
     var uniqueTokens = Array.from(new Set(tokens)).slice(0, 3000);
@@ -484,6 +601,11 @@ var TEST_DATA = [
     "34,83,38,148,136,254,124,59,160,186,149,60,155,68,241,6",
     '{"version":1,"identifier":"7aec91735f7e125dde475e982aae316c88f336e361593f70a4e51c2e1c7c1dd7","name":"Account 1","entropy":{"0":34,"1":83,"2":38,"3":148,"4":136,"5":254,"6":124,"7":59,"8":160,"9":186,"10":149,"11":60,"12":155,"13":68,"14":241,"15":6}}',
     'Wallet-dump: {"crypto":{"cipher":"aes-128-ctr","kdf":"scrypt","kdfparams":{"n":4096},"ciphertext":"9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a0"}} slutet av dumpen',
+    "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about",
+    "fd01247b947310a65f45a88a350a2be833570fea82bbcb6d4d32d6e3c89d6ebc0f1922b4815fefd1d4f5ea309de4be48b1ee2c7dae63b69eeca0c7d4d5214ef2",
+    "6PYQU2sX9f9JJEJwZo8S6bZcZHyVtecXPR7v6t9Zph4tCBUbwkAQ5Y1dqz",
+    'Keystore: {"version":3,"id":"e0fe53d0-7a3d-4f65-88b1-9bb4e245a169","crypto":{"ciphertext":"64b5b416bb2bef882eb7cc63ed92c064e53c818ec46351e07ac140e5ba871596f1595fe6cad8333147fe68c031ba001b79b64dd1edd513043134217b7ffe1903ca23b1fbe823671827e3b2dff69bbd448d9cb79a3321ec8801f2a995","cipherparams":{"iv":"7aaf7eb6f4b0e7d995e8eac67e4d52eb"},"kdf":"scrypt","kdfparams":{"r":8,"p":6,"n":4096,"dklen":32,"salt":"80132842c6cde8f9d04582932ef92c3cad3ba6b41e1296ef681692372886db86"},"mac":"01816d0a5c31cd03b644f2d756ac8167c2498808040cbace8c35c46dcf06b7a1","cipher":"aes-128-ctr"},"address":"32dd55E0BCF509a35A3F5eEb8593fbEb244796b1"}',
+    "Derivation path: m/44'/0'/0'/0/0",
     "333f226d7631860d3020432d497b4333a74edbb4709e3fdf75be0e0bea34475a",
     "23d74c7c36b814a23ea337739da22de5",
     "fb67a6394c139ae6a87ff257804157c7f5414ce9",
