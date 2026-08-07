@@ -11,6 +11,25 @@
     --success: #3ecf8e;
     --success-hover: #32b87c;
     --error: #f0616e;
+    --glow-1: rgba(91, 140, 255, .08);
+    --glow-2: rgba(91, 140, 255, .05);
+}
+
+[data-theme="light"] {
+    --bg: #e7ebf3;
+    --surface: #ffffff;
+    --surface-hover: #dde4f0;
+    --border: #c9d1e2;
+    --border-hover: #a8b3cc;
+    --text: #12151d;
+    --text-muted: #555f74;
+    --accent: #2f5fed;
+    --accent-soft: rgba(47, 95, 237, .14);
+    --success: #0f7d3e;
+    --success-hover: #0b652f;
+    --error: #dc2626;
+    --glow-1: rgba(47, 95, 237, .07);
+    --glow-2: rgba(47, 95, 237, .04);
 }
 
 * {
@@ -31,16 +50,17 @@ body {
     background: var(--bg);
     background-image:
         radial-gradient(circle at 15% 0%,
-            rgba(91, 140, 255, .08),
+            var(--glow-1),
             transparent 40%),
         radial-gradient(circle at 85% 100%,
-            rgba(91, 140, 255, .05),
+            var(--glow-2),
             transparent 40%);
     color: var(--text);
     min-height: 100vh;
     display: flex;
     justify-content: center;
     padding: 56px 20px 80px;
+    transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 #container {
@@ -157,6 +177,12 @@ button.secondary {
 
 button.secondary:hover {
     border-color: var(--border-hover);
+}
+
+/* Ljust läge: --success är mörkare/mättare där, så vit knapptext ger bäst kontrast
+   (gäller inte de sekundära knapparna, de behåller var(--text)) */
+[data-theme="light"] button:not(.secondary) {
+    color: #ffffff;
 }
 
 #status {

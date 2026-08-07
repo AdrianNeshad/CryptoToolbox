@@ -201,3 +201,14 @@ document.addEventListener("DOMContentLoaded", () => {
         }, 800);
     }
 });
+
+// --- Temasynkronisering med Verktygslådan (postMessage från förälder-iframe) ---
+window.addEventListener('message', function (event) {
+    if (event.source !== window.parent) return;
+    const data = event.data;
+    if (data && data.source === 'verktygslada' && data.type === 'theme' &&
+        (data.theme === 'light' || data.theme === 'dark')) {
+        document.documentElement.setAttribute('data-theme', data.theme);
+        try { localStorage.setItem('theme', data.theme); } catch (e) { /* ignoreras */ }
+    }
+});

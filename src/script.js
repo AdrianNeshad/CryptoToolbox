@@ -28,7 +28,10 @@ function initToolNav() {
             document.querySelectorAll('.nav-item.active').forEach((el) => el.classList.remove('active'));
             item.classList.add('active');
 
-            frame.src = item.dataset.src;
+            const theme = document.documentElement.getAttribute('data-theme') || 'dark';
+            const src = item.dataset.src;
+            const separator = src.indexOf('?') === -1 ? '?' : '&';
+            frame.src = src + separator + 'theme=' + theme;
             frame.style.display = 'block';
             placeholder.style.display = 'none';
         });
@@ -48,6 +51,63 @@ function initSidebarToggle() {
 }
 
 initSidebarToggle();
+
+function initThemeToggle() {
+    const THEME_KEY = 'theme';
+    const toggle = document.getElementById('theme-toggle');
+    const frame = document.getElementById('tool-frame');
+    if (!toggle) return;
+
+    function getStoredTheme() {
+        try {
+            const saved = localStorage.getItem(THEME_KEY);
+            return (saved === 'light' || saved === 'dark') ? saved : 'dark';
+        } catch (e) {
+            return 'dark';
+        }
+    }
+
+    function setStoredTheme(value) {
+        try {
+            localStorage.setItem(THEME_KEY, value);
+        } catch (e) {
+            /* localStorage otillgängligt (t.ex. privat läge) — temat gäller ändå för sessionen */
+        }
+    }
+
+    function broadcastTheme(value) {
+        if (frame && frame.contentWindow) {
+            try {
+                frame.contentWindow.postMessage({ source: 'verktygslada', type: 'theme', theme: value }, '*');
+            } catch (e) {
+                /* verktyget kunde inte nås (t.ex. fortfarande under laddning) — ignorera */
+            }
+        }
+    }
+
+    function applyTheme(value) {
+        document.documentElement.setAttribute('data-theme', value);
+        toggle.setAttribute('aria-checked', value === 'light' ? 'true' : 'false');
+    }
+
+    let theme = getStoredTheme();
+    applyTheme(theme);
+
+    toggle.addEventListener('click', () => {
+        theme = theme === 'dark' ? 'light' : 'dark';
+        applyTheme(theme);
+        setStoredTheme(theme);
+        broadcastTheme(theme);
+    });
+
+    // Om ett verktyg laddas om (t.ex. via klick i sidofältet) — se till att det får
+    // rätt tema direkt, som ett komplement till ?theme= i src-URL:en.
+    if (frame) {
+        frame.addEventListener('load', () => broadcastTheme(theme));
+    }
+}
+
+initThemeToggle();
 
 function initDownloadConfirm() {
     const modal = document.getElementById('download-modal');

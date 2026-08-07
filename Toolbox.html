@@ -6,6 +6,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Verktygslådan</title>
 
+    <script>
+        (function () {
+            try {
+                var saved = localStorage.getItem('theme');
+                var theme = (saved === 'light' || saved === 'dark') ? saved : 'dark';
+                document.documentElement.setAttribute('data-theme', theme);
+            } catch (e) {
+                document.documentElement.setAttribute('data-theme', 'dark');
+            }
+        })();
+    </script>
+
     <link rel="stylesheet" href="src/style.css">
 </head>
 
@@ -25,11 +37,31 @@
                         </div>
                     </div>
                 </div>
-                <button id="sidebar-toggle" class="sidebar-toggle" title="Dölj/Visa verktygslista" aria-label="Dölj/Visa verktygslista">
-                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M15 6L9 12L15 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                    </svg>
-                </button>
+                <div class="sidebar-header-actions">
+                    <button id="theme-toggle" class="theme-toggle" type="button" role="switch" aria-checked="false"
+                        aria-label="Ljust läge" title="Växla mellan mörkt och ljust läge">
+                        <span class="theme-toggle-track">
+                            <svg class="theme-toggle-icon theme-toggle-icon--sun" viewBox="0 0 24 24" fill="none"
+                                xmlns="http://www.w3.org/2000/svg">
+                                <circle cx="12" cy="12" r="4.2" stroke="currentColor" stroke-width="1.8" />
+                                <path
+                                    d="M12 2.5V4.5M12 19.5V21.5M4.5 12H2.5M21.5 12H19.5M5.6 5.6L4.2 4.2M19.8 19.8L18.4 18.4M18.4 5.6L19.8 4.2M4.2 19.8L5.6 18.4"
+                                    stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+                            </svg>
+                            <svg class="theme-toggle-icon theme-toggle-icon--moon" viewBox="0 0 24 24" fill="none"
+                                xmlns="http://www.w3.org/2000/svg">
+                                <path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a6.8 6.8 0 0 0 10.5 10.5Z" stroke="currentColor"
+                                    stroke-width="1.8" stroke-linejoin="round" />
+                            </svg>
+                            <span class="theme-toggle-thumb"></span>
+                        </span>
+                    </button>
+                    <button id="sidebar-toggle" class="sidebar-toggle" title="Dölj/Visa verktygslista" aria-label="Dölj/Visa verktygslista">
+                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M15 6L9 12L15 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                    </button>
+                </div>
             </div>
 
             <nav class="tool-nav">
