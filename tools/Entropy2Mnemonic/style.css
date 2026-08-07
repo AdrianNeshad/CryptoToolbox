@@ -255,8 +255,9 @@ button:hover {
     background: var(--success-hover);
 }
 
-/* Ljust läge: --success är mörkare/mättare där, så vit knapptext ger bäst kontrast */
-[data-theme="light"] button {
+/* Ljust läge: --success är mörkare/mättare där, så vit knapptext ger bäst kontrast.
+   Gäller bara den gröna kopiera-knappen — inte 12/24-ord-togglen, som har egen färgsättning. */
+[data-theme="light"] button:not(.toggle-btn) {
     color: #ffffff;
 }
 
