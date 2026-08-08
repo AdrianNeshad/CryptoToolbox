@@ -1,0 +1,12 @@
+# Electron-byggartefakter
+node_modules/
+release/
+dist/
+*.log
+npm-debug.log*
+
+# OS
+Thumbs.db
+.DS_Store
+
+BUILD.md

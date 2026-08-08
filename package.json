@@ -1,0 +1,73 @@
+{
+  "name": "verktygslada",
+  "productName": "Verktygslådan",
+  "version": "1.6.0",
+  "description": "Lokal verktygslåda för kryptografi, BIP38/BIP39, QR-avkodning, CyberChef m.m. Körs helt offline.",
+  "author": "Adrian Neshad",
+  "license": "UNLICENSED",
+  "private": true,
+  "main": "electron/main.js",
+  "scripts": {
+    "start": "electron .",
+    "sync-version": "node scripts/sync-version.js",
+    "dist": "npm run sync-version && electron-builder --win && node scripts/finalize-artifacts.js",
+    "dist:installer": "npm run sync-version && electron-builder --win nsis && node scripts/finalize-artifacts.js",
+    "dist:portable": "npm run sync-version && electron-builder --win portable && node scripts/finalize-artifacts.js",
+    "pack": "electron-builder --dir"
+  },
+  "devDependencies": {
+    "electron": "^33.4.11",
+    "electron-builder": "^25.1.8",
+    "png-to-ico": "^3.0.2",
+    "sharp": "^0.35.3"
+  },
+  "build": {
+    "appId": "se.adrianneshad.verktygslada",
+    "productName": "Verktygslådan",
+    "directories": {
+      "output": "release"
+    },
+    "asar": false,
+    "files": [
+      "electron/**/*",
+      "Toolbox.html",
+      "src/**/*",
+      "tools/**/*",
+      "documentation/**/*",
+      "package.json",
+      "!**/*.md"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "build/icon.ico",
+      "signAndEditExecutable": false
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Verktygslådan"
+    },
+    "portable": {
+      "artifactName": "Verktygslådan-Portable-${version}.exe"
+    }
+  },
+  "allowScripts": {
+    "electron@33.4.11": true
+  }
+}

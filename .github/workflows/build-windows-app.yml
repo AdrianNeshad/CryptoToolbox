@@ -1,0 +1,87 @@
+name: Bygg och publicera Windows-appen
+
+# Körs vid varje push till main (dvs varje gång du pushar till repot), samt manuellt
+# via "Run workflow" i GitHub-fliken Actions. Ändringar som bara rör .md-filer
+# triggar ingen ny build, eftersom de inte påverkar den byggda appen.
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - '**.md'
+  workflow_dispatch:
+
+permissions:
+  contents: write # krävs för att skapa/uppdatera en GitHub Release med den byggda .exe-filen
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - name: Checka ut repot
+        uses: actions/checkout@v4
+
+      - name: Installera Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      # Cachar de nedladdade Electron/electron-builder-binärerna mellan körningar så
+      # att inte varje push behöver ladda ner Chromium/Electron på nytt.
+      - name: Cacha electron-builder
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~\AppData\Local\electron\Cache
+            ~\AppData\Local\electron-builder\Cache
+          key: ${{ runner.os }}-electron-cache-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-electron-cache-
+
+      - name: Installera beroenden
+        run: npm ci
+
+      - name: Läs version från Toolbox.html
+        id: version
+        run: npm run sync-version
+
+      - name: Bygg Electron-appen (installer + portabel .exe)
+        run: |
+          npx electron-builder --win
+          node scripts/finalize-artifacts.js
+
+      # Om releasen för den här versionen redan finns (t.ex. flera pushar utan
+      # versionshöjning, eller ett filnamn som ändrats sen sist) — töm den på gamla
+      # bifogade filer innan vi laddar upp de nya. Annars lämnas gamla/omdöpta
+      # filer kvar vid sidan av de nya istället för att ersättas.
+      - name: Rensa gamla filer i releasen (om den redan finns)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          TAG="v${{ steps.version.outputs.version }}"
+          if gh release view "$TAG" --repo "${{ github.repository }}" >/dev/null 2>&1; then
+            gh release view "$TAG" --repo "${{ github.repository }}" --json assets --jq '.assets[].name' |
+              while IFS= read -r name; do
+                echo "Tar bort tidigare asset: $name"
+                gh release delete-asset "$TAG" "$name" --repo "${{ github.repository }}" --yes
+              done
+          else
+            echo "Ingen befintlig release för $TAG ännu — inget att rensa."
+          fi
+
+      - name: Skapa/uppdatera GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.version.outputs.version }}
+          name: Verktygslådan ${{ steps.version.outputs.version }}
+          body: |
+            Automatiskt byggd från commit ${{ github.sha }}.
+
+            - **Verktygslådan${{ steps.version.outputs.version }}.exe** — portabel version, behöver inte installeras. Ladda ner och dubbelklicka.
+            - **Verktygslådan${{ steps.version.outputs.version }}-Installer.exe** — installerar appen med genväg i Start-menyn.
+
+            > OBS: GitHub sanerar automatiskt filnamn vid uppladdning (å/ä/ö blir a/a/o). Den nedladdade filen kan därför heta t.ex. `Verktygsladan${{ steps.version.outputs.version }}.exe`. Det påverkar bara filnamnet — appens namn i fönstret, Start-menyn och "Om"-dialogen är alltid korrekt "Verktygslådan".
+          files: |
+            release/Verktygslådan${{ steps.version.outputs.version }}.exe
+            release/Verktygslådan${{ steps.version.outputs.version }}-Installer.exe
