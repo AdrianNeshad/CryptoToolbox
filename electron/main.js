@@ -26,7 +26,7 @@ function createWindow() {
         height: 920,
         minWidth: 960,
         minHeight: 640,
-        backgroundColor: '#0f1115',
+        backgroundColor: '#1e1e23',
         autoHideMenuBar: true, // menyraden döljs men nås via Alt-tangenten
         show: false,
         webPreferences: {

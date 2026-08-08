@@ -1,35 +1,37 @@
 :root {
-    --bg: #0a0e17;
-    --surface: #131a29;
-    --surface-hover: #182338;
-    --border: #232d42;
-    --border-hover: #34415c;
-    --text: #e8ebf1;
-    --text-muted: #8892a6;
-    --accent: #5b8cff;
-    --accent-soft: rgba(91, 140, 255, 0.12);
-    --success: #3ecf8e;
-    --success-hover: #32b87c;
-    --error: #f0616e;
-    --glow-1: rgba(91, 140, 255, 0.08);
-    --glow-2: rgba(91, 140, 255, 0.05);
+    --bg: #1e1e23;
+    --surface: #28282d;
+    --surface-hover: #323238;
+    --border: #3a3a40;
+    --border-hover: #4a4a52;
+    --text: #e8e8ed;
+    --text-muted: #98989f;
+    --accent: #0a84ff;
+    --accent-soft: rgba(10, 132, 255, 0.16);
+    --success: #30d158;
+    --success-hover: #2bbd4f;
+    --accent-hover: #3395ff;
+    --error: #ff453a;
+    --glow-1: rgba(0, 0, 0, 0);
+    --glow-2: rgba(0, 0, 0, 0);
 }
 
 [data-theme="light"] {
-    --bg: #e7ebf3;
+    --bg: #f2f2f7;
     --surface: #ffffff;
-    --surface-hover: #dde4f0;
-    --border: #c9d1e2;
-    --border-hover: #a8b3cc;
-    --text: #12151d;
-    --text-muted: #555f74;
-    --accent: #2f5fed;
-    --accent-soft: rgba(47, 95, 237, 0.14);
-    --success: #0f7d3e;
-    --success-hover: #0b652f;
-    --error: #dc2626;
-    --glow-1: rgba(47, 95, 237, 0.07);
-    --glow-2: rgba(47, 95, 237, 0.04);
+    --surface-hover: #e8e8ed;
+    --border: #d2d2d7;
+    --border-hover: #b6b6bd;
+    --text: #1d1d1f;
+    --text-muted: #6e6e73;
+    --accent: #007aff;
+    --accent-soft: rgba(0, 122, 255, 0.13);
+    --success: #248a3d;
+    --success-hover: #1d7431;
+    --accent-hover: #0066d6;
+    --error: #ff3b30;
+    --glow-1: rgba(0, 0, 0, 0);
+    --glow-2: rgba(0, 0, 0, 0);
 }
 
 * {
@@ -204,8 +206,8 @@ body {
     align-items: center;
     gap: 8px;
     padding: 12px 22px;
-    background: var(--success);
-    color: #06120c;
+    background: var(--accent);
+    color: #ffffff;
     border: none;
     border-radius: 10px;
     cursor: pointer;
@@ -221,8 +223,7 @@ body {
 }
 
 #copy-button:hover {
-    background: var(--success-hover);
-    transform: translateY(-1px);
+    background: var(--accent-hover);
 }
 
 /* Ljust läge: --success är mörkare/mättare där, så vit knapptext ger bäst kontrast */
@@ -266,8 +267,8 @@ body {
     align-items: center;
     gap: 8px;
     padding: 12px 22px;
-    background: var(--success);
-    color: #06120c;
+    background: var(--accent);
+    color: #ffffff;
     border: none;
     border-radius: 10px;
     cursor: pointer;
@@ -283,8 +284,7 @@ body {
 }
 
 #ocr-copy-button:hover {
-    background: var(--success-hover);
-    transform: translateY(-1px);
+    background: var(--accent-hover);
 }
 
 .toast {
