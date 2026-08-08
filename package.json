@@ -17,7 +17,9 @@
   },
   "devDependencies": {
     "electron": "^33.4.11",
-    "electron-builder": "^25.1.8"
+    "electron-builder": "^25.1.8",
+    "png-to-ico": "^3.0.2",
+    "sharp": "^0.35.3"
   },
   "build": {
     "appId": "se.adrianneshad.verktygslada",
@@ -50,6 +52,7 @@
           ]
         }
       ],
+      "icon": "build/icon.ico",
       "signAndEditExecutable": false
     },
     "nsis": {
