@@ -383,7 +383,22 @@
             <div id="content-placeholder" class="content-placeholder">
                 <h2>Verktygslådan</h2>
                 <p>Klicka på ett verktyg i listan till vänster för att öppna det här</p>
-                <p>Samtliga verktyg finns tillgängliga med öppen källkod och körs helt lokalt</p>
+
+                <div class="good-to-know">
+                    <div class="good-to-know-header">
+                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6" />
+                            <path d="M12 11V16.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+                            <circle cx="12" cy="7.75" r="1" fill="currentColor" />
+                        </svg>
+                        <span>Bra att veta</span>
+                    </div>
+                    <ul class="good-to-know-list">
+                        <li>Allt innehåll körs lokalt i din webbläsare, inga nätverksanrop görs.</li>
+                        <li>Samtliga verktyg finns tillgängliga med öppen källkod på Github.</li>
+                        <li>Glöm inte att rensa clipboard-historiken efter att du kopierat känslig data, t.ex. mnemonics/seed phrases eller privata nycklar. (⊞ Win + V för att öppna clipboard-historiken)</li>
+                    </ul>
+                </div>
             </div>
 
             <iframe id="tool-frame" class="tool-frame" title="Verktyg" style="display:none;"></iframe>

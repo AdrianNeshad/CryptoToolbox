@@ -392,12 +392,67 @@ body {
     text-align: center;
     color: var(--text-muted);
     padding: 24px;
+    transform: translateY(-9vh);
 }
 
 .content-placeholder h2 {
     color: var(--text);
     font-size: 22px;
     margin-bottom: 8px;
+}
+
+.good-to-know {
+    margin-top: 50px;
+    width: 100%;
+    max-width: 420px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px 18px;
+    text-align: left;
+}
+
+.good-to-know-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 650;
+    color: var(--text);
+    margin-bottom: 10px;
+}
+
+.good-to-know-header svg {
+    width: 16px;
+    height: 16px;
+    color: var(--accent);
+    flex-shrink: 0;
+}
+
+.good-to-know-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.good-to-know-list li {
+    position: relative;
+    padding-left: 16px;
+    font-size: 12.5px;
+    line-height: 1.5;
+    color: var(--text-muted);
+}
+
+.good-to-know-list li::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 7px;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--accent);
 }
 
 @media (max-width: 800px) {
