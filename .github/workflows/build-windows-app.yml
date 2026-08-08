@@ -50,6 +50,26 @@ jobs:
           npx electron-builder --win
           node scripts/finalize-artifacts.js
 
+      # Om releasen för den här versionen redan finns (t.ex. flera pushar utan
+      # versionshöjning, eller ett filnamn som ändrats sen sist) — töm den på gamla
+      # bifogade filer innan vi laddar upp de nya. Annars lämnas gamla/omdöpta
+      # filer kvar vid sidan av de nya istället för att ersättas.
+      - name: Rensa gamla filer i releasen (om den redan finns)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          TAG="v${{ steps.version.outputs.version }}"
+          if gh release view "$TAG" --repo "${{ github.repository }}" >/dev/null 2>&1; then
+            gh release view "$TAG" --repo "${{ github.repository }}" --json assets --jq '.assets[].name' |
+              while IFS= read -r name; do
+                echo "Tar bort tidigare asset: $name"
+                gh release delete-asset "$TAG" "$name" --repo "${{ github.repository }}" --yes
+              done
+          else
+            echo "Ingen befintlig release för $TAG ännu — inget att rensa."
+          fi
+
       - name: Skapa/uppdatera GitHub Release
         uses: softprops/action-gh-release@v2
         with:
