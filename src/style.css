@@ -22,8 +22,8 @@
 
 /* --- Light theme overrides (default is dark, see body below) --- */
 [data-theme="light"] {
-    --bg: #f2f2f7;
-    --surface: #ffffff;
+    --bg: #dedee4;
+    --surface: #ebebef;
     --surface-hover: rgba(0, 0, 0, 0.045);
     --surface-active: rgba(0, 0, 0, 0.08);
     --border: rgba(0, 0, 0, 0.1);
