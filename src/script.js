@@ -130,7 +130,9 @@ function initDownloadConfirm() {
         pendingHref = null;
     }
 
-    document.querySelectorAll('.nav-item--download').forEach((link) => {
+    // Endast riktiga länk-nedladdningar (<a href>) ska visa bekräftelsemodalen.
+    // Nedladdnings-poster som numera öppnar en infosida hanteras av initToolNav (data-type="frame").
+    document.querySelectorAll('a.nav-item--download[href]').forEach((link) => {
         link.addEventListener('click', (event) => {
             event.preventDefault();
             openModal(link);
