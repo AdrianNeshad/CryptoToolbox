@@ -233,7 +233,7 @@ main {
     overflow-wrap: anywhere;
     font-family: Consolas, Monaco, monospace;
     font-size: 12.5px;
-    color: var(--text-muted);
+    color: var(--text);
     background: var(--surface-hover);
     border: 1px solid var(--border);
     border-radius: 6px;
