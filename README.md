@@ -1,4 +1,4 @@
-# Verktygslådan (CryptoToolbox)
+# <img src="build/icon-preview.png" width="32" alt="Verktygslådans logga" align="top"> Verktygslådan (CryptoToolbox)
 
 Lokal verktygslåda för **kryptografi och krypto-forensik**. Körs helt offline via Electron (eller ladda ner källkoden och öppna `Toolbox.html` i webbläsaren).
 
