@@ -30,6 +30,7 @@
     "asar": false,
     "files": [
       "electron/**/*",
+      "build/icon.ico",
       "Toolbox.html",
       "src/**/*",
       "tools/**/*",

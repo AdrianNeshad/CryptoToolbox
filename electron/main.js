@@ -129,6 +129,11 @@ function buildMenu() {
     Menu.setApplicationMenu(Menu.buildFromTemplate(template));
 }
 
+// Samma AppUserModelID som "appId" i electron-builder-konfigurationen. Gör att
+// Windows kopplar fönstret till startmeny-genvägen så att rätt ikon används
+// i aktivitetsfältet, även när appen är fäst där.
+app.setAppUserModelId('se.adrianneshad.verktygslada');
+
 app.whenReady().then(() => {
     // Visa en "Spara som"-dialog för nedladdningar (t.ex. GitHub-zip-filerna i sidopanelen)
     // istället för att tyst spara dem i standardmappen för nedladdningar.
