@@ -61,7 +61,7 @@ body {
     min-height: 100vh;
     display: flex;
     justify-content: center;
-    padding: 56px 20px 80px;
+    padding: clamp(56px, 14vh, 150px) 20px 80px;
     transition: background-color 0.2s ease, color 0.2s ease;
 }
 
