@@ -45,9 +45,9 @@ jobs:
         id: version
         run: npm run sync-version
 
-      - name: Bygg Electron-appen (installer + portabel .exe)
+      - name: Bygg Electron-appen (portabel .exe)
         run: |
-          npx electron-builder --win
+          npx electron-builder --win portable
           node scripts/finalize-artifacts.js
 
       # Om releasen för den här versionen redan finns (t.ex. flera pushar utan
@@ -79,9 +79,6 @@ jobs:
             Automatiskt byggd från commit ${{ github.sha }}.
 
             - **Verktygslådan${{ steps.version.outputs.version }}.exe** — portabel version, behöver inte installeras. Ladda ner och dubbelklicka.
-            - **Verktygslådan${{ steps.version.outputs.version }}-Installer.exe** — installerar appen med genväg i Start-menyn.
 
-            > OBS: GitHub sanerar automatiskt filnamn vid uppladdning (å/ä/ö blir a/a/o). Den nedladdade filen kan därför heta t.ex. `Verktygsladan${{ steps.version.outputs.version }}.exe`. Det påverkar bara filnamnet — appens namn i fönstret, Start-menyn och "Om"-dialogen är alltid korrekt "Verktygslådan".
           files: |
             release/Verktygslådan${{ steps.version.outputs.version }}.exe
-            release/Verktygslådan${{ steps.version.outputs.version }}-Installer.exe
