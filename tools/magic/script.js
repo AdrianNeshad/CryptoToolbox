@@ -92,6 +92,12 @@ function bytesToHex(bytes) {
     return s;
 }
 
+function hexToDecimalList(hex) {
+    var parts = [];
+    for (var i = 0; i < hex.length; i += 2) parts.push(parseInt(hex.slice(i, i + 2), 16));
+    return parts.join(",");
+}
+
 function isEntropyObjectShape(node, keys) {
     if (keys.length !== 16 && keys.length !== 32) return false;
     for (var i = 0; i < keys.length; i++) {
@@ -114,9 +120,11 @@ function walkJson(node, addFinding) {
         var keys = Object.keys(node);
 
         if (isEntropyObjectShape(node, keys)) {
-            var bytes = keys.map(function (k) { return node[k]; });
-            var hex = bytes.map(function (b) { return b.toString(16).padStart(2, "0"); }).join("");
-            addFinding(hex, "Entropy (" + bytes.length + " byte, JSON-objekt)", "verified");
+            var bytes = [];
+            for (var bi = 0; bi < keys.length; bi++) bytes.push(node[String(bi)]);
+            var hex = bytesToHex(bytes);
+            addFinding(hex, "Entropy (" + bytes.length + " byte, JSON-objekt)", "verified",
+                { label: "Decimal", value: bytes.join(",") });
         }
 
         // Ethereum Keystore V3: strukturen är specifik nog att känna igen direkt
@@ -222,7 +230,8 @@ function scanEntropyLists(text, addFinding) {
         var validCount = nums.length === 16 || nums.length === 32;
         var validBytes = nums.every(function (n) { return Number.isInteger(n) && n >= 0 && n <= 255; });
         if (validCount && validBytes) {
-            addFinding(raw.trim(), "Entropy (" + nums.length + " byte, talista)", "likely");
+            addFinding(raw.trim(), "Entropy (" + nums.length + " byte, talista)", "likely",
+                { label: "Hex", value: bytesToHex(nums) });
         }
     }
 }
@@ -360,7 +369,8 @@ function describeBech32(decoded) {
 function classifyRawHex(token, addFinding) {
     var len = token.length;
     if (len === 32) {
-        addFinding(token, "Entropy (16 byte, hex)", "likely");
+        addFinding(token, "Entropy (16 byte, hex)", "likely",
+            { label: "Decimal", value: hexToDecimalList(token.toLowerCase()) });
         addFinding(token, "Möjlig MD5-hash", "likely");
         return true;
     }
@@ -371,7 +381,8 @@ function classifyRawHex(token, addFinding) {
     if (len === 64) {
         addFinding(token, "Möjlig privat nyckel (hex)", "likely");
         addFinding(token, "Möjlig SHA-256-hash", "likely");
-        addFinding(token, "Entropy (32 byte, hex)", "likely");
+        addFinding(token, "Entropy (32 byte, hex)", "likely",
+            { label: "Decimal", value: hexToDecimalList(token.toLowerCase()) });
         return true;
     }
     if (len === 66 && /^0[23]/.test(token)) {
@@ -476,12 +487,15 @@ async function classifyToken(token, addFinding) {
 async function scanText(text) {
     var findings = new Map();
 
-    function addFinding(value, label, confidence) {
+    function addFinding(value, label, confidence, alt) {
         if (!findings.has(value)) findings.set(value, { value: value, types: [] });
         var f = findings.get(value);
         if (!f.types.some(function (t) { return t.label === label; })) {
             f.types.push({ label: label, confidence: confidence });
         }
+        // Alternativ representation av samma värde (t.ex. entropy i både hex
+        // och decimal) — visas som en extra rad i kortet.
+        if (alt && !f.alt) f.alt = alt;
     }
 
     if (!text || !text.trim()) return [];
@@ -525,12 +539,27 @@ function renderCard(finding) {
     });
     card.appendChild(chipRow);
 
+    card.appendChild(buildValueRow(finding.value));
+    if (finding.alt) {
+        card.appendChild(buildValueRow(finding.alt.value, finding.alt.label));
+    }
+    return card;
+}
+
+function buildValueRow(value, formatLabel) {
     var valueRow = document.createElement("div");
     valueRow.className = "value-row";
 
+    if (formatLabel) {
+        var tag = document.createElement("span");
+        tag.className = "format-tag";
+        tag.textContent = formatLabel;
+        valueRow.appendChild(tag);
+    }
+
     var valueEl = document.createElement("code");
     valueEl.className = "value-text";
-    valueEl.textContent = finding.value;
+    valueEl.textContent = value;
     valueRow.appendChild(valueEl);
 
     var copyBtn = document.createElement("button");
@@ -538,14 +567,13 @@ function renderCard(finding) {
     copyBtn.type = "button";
     copyBtn.textContent = "Kopiera";
     copyBtn.addEventListener("click", function () {
-        navigator.clipboard.writeText(finding.value).then(function () {
+        navigator.clipboard.writeText(value).then(function () {
             showToast("Kopierat till urklipp");
         });
     });
     valueRow.appendChild(copyBtn);
 
-    card.appendChild(valueRow);
-    return card;
+    return valueRow;
 }
 
 function render(findings, text) {
