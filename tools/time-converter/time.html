@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="sv">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Time Converter</title>
+    <script>
+        (function () {
+            try {
+                var params = new URLSearchParams(location.search);
+                var fromParent = params.get('theme');
+                var saved = localStorage.getItem('theme');
+                var theme = (fromParent === 'light' || fromParent === 'dark') ? fromParent
+                    : (saved === 'light' || saved === 'dark') ? saved : 'dark';
+                document.documentElement.setAttribute('data-theme', theme);
+                if (fromParent === 'light' || fromParent === 'dark') {
+                    localStorage.setItem('theme', fromParent);
+                }
+            } catch (e) {
+                document.documentElement.setAttribute('data-theme', 'dark');
+            }
+        })();
+    </script>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div id="container">
+        <header class="page-header">
+            <h1>Time Converter</h1>
+            <p>Ett värde → alla vanliga forensiska tidsformat. Matcha mot vad databasen visar.</p>
+        </header>
+
+        <label class="field-label" for="raw-input">Indata</label>
+        <input id="raw-input" type="text" spellcheck="false" autocomplete="off"
+            placeholder="t.ex. 726427200 · 1710000000 · 13300000000000000 · 2024-03-09T12:00:00Z">
+
+        <label class="field-label" for="format-select">Tolka indata som</label>
+        <select id="format-select">
+            <option value="auto">Auto-detektera</option>
+            <option value="unix-s">Unix (sekunder)</option>
+            <option value="unix-ms">Unix (millisekunder)</option>
+            <option value="unix-us">Unix (mikrosekunder)</option>
+            <option value="unix-ns">Unix (nanosekunder)</option>
+            <option value="apple">Apple Cocoa / NSDate (s sedan 2001-01-01)</option>
+            <option value="webkit">WebKit / Chrome (µs sedan 1601-01-01)</option>
+            <option value="filetime">Windows FILETIME (100 ns sedan 1601-01-01)</option>
+            <option value="iso">ISO 8601 / datumsträng</option>
+        </select>
+
+        <div class="button-row">
+            <button id="convert-button" type="button">Konvertera</button>
+            <button id="now-button" class="secondary" type="button">Nu</button>
+            <button id="clear-button" class="secondary" type="button">Rensa</button>
+        </div>
+
+        <div id="status">Klistra in ett timestamp eller datum</div>
+        <div id="guess" class="guess display-none"></div>
+
+        <section id="matrix" class="panel display-none">
+            <h2>Alla format <span class="panel-sub">(för samma tidpunkt)</span></h2>
+            <div id="matrix-rows"></div>
+        </section>
+
+        <section id="interpretations" class="panel display-none">
+            <h2>Om råvärdet tolkas som… <span class="panel-sub">(jämför med DB)</span></h2>
+            <p class="hint">När du inte vet formatet: se vilket som ger en rimlig tid och matchar övriga artefakter.</p>
+            <div id="interpretation-rows"></div>
+        </section>
+
+        <section class="panel ref-panel">
+            <h2>Epoch-referens</h2>
+            <ul class="ref-list">
+                <li><strong>Unix</strong> — sekunder (eller underenheter) sedan 1970-01-01 UTC</li>
+                <li><strong>Apple Cocoa / NSDate</strong> — sekunder sedan 2001-01-01 UTC (vanligt i iOS SQLite)</li>
+                <li><strong>WebKit / Chrome</strong> — mikrosekunder sedan 1601-01-01 UTC</li>
+                <li><strong>Windows FILETIME</strong> — 100-nanosekundersenheter sedan 1601-01-01 UTC</li>
+            </ul>
+        </section>
+    </div>
+
+    <div id="toast" class="toast">Kopierat</div>
+    <script src="script.js"></script>
+</body>
+
+</html>
