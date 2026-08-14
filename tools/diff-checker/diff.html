@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="sv">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diff Checker</title>
+    <script>
+        (function () {
+            try {
+                var params = new URLSearchParams(location.search);
+                var fromParent = params.get('theme');
+                var saved = localStorage.getItem('theme');
+                var theme = (fromParent === 'light' || fromParent === 'dark') ? fromParent
+                    : (saved === 'light' || saved === 'dark') ? saved : 'dark';
+                document.documentElement.setAttribute('data-theme', theme);
+                if (fromParent === 'light' || fromParent === 'dark') {
+                    localStorage.setItem('theme', fromParent);
+                }
+            } catch (e) {
+                document.documentElement.setAttribute('data-theme', 'dark');
+            }
+        })();
+    </script>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div id="container">
+        <header class="page-header">
+            <h1>Diff Checker</h1>
+            <p>Jämför två texter rad för rad och se skillnaderna markerade.</p>
+        </header>
+
+        <div class="input-grid">
+            <div class="input-col">
+                <label class="field-label" for="input-a">Original (A)</label>
+                <textarea id="input-a" spellcheck="false" autocomplete="off"
+                    placeholder="Klistra in den första texten här"></textarea>
+            </div>
+            <div class="input-col">
+                <label class="field-label" for="input-b">Ändrad (B)</label>
+                <textarea id="input-b" spellcheck="false" autocomplete="off"
+                    placeholder="Klistra in den andra texten här"></textarea>
+            </div>
+        </div>
+
+        <div class="options-row">
+            <label class="switch-label">
+                <input type="checkbox" id="opt-ignore-case" class="switch-input">
+                <span class="switch-track"><span class="switch-thumb"></span></span>
+                Ignorera versaler/gemener
+            </label>
+            <label class="switch-label">
+                <input type="checkbox" id="opt-ignore-whitespace" class="switch-input">
+                <span class="switch-track"><span class="switch-thumb"></span></span>
+                Ignorera whitespace i början/slutet av rader
+            </label>
+            <button id="clear-button" class="secondary" type="button">Rensa</button>
+        </div>
+
+        <section id="result" class="panel display-none">
+            <h2>Resultat <span id="stats" class="panel-sub"></span></h2>
+            <div class="legend">
+                <span class="legend-item"><span class="legend-swatch legend-swatch--del"></span>Borttagen (finns bara i A)</span>
+                <span class="legend-item"><span class="legend-swatch legend-swatch--ins"></span>Tillagd (finns bara i B)</span>
+            </div>
+            <div id="diff-output" class="diff-output"></div>
+        </section>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
