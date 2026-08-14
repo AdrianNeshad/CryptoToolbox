@@ -182,6 +182,59 @@ body {
     border-color: var(--error);
 }
 
+.paste-box {
+    width: 100%;
+    margin-bottom: 12px;
+}
+
+.paste-label {
+    display: block;
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+}
+
+#paste-input {
+    width: 100%;
+    height: 40px;
+    padding: 0 12px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: Consolas, Monaco, monospace;
+    font-size: 13px;
+    outline: none;
+    transition: border-color .18s ease, box-shadow .18s ease;
+}
+
+#paste-input::placeholder {
+    color: var(--text-muted);
+    opacity: .5;
+}
+
+#paste-input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+#paste-input.invalid {
+    border-color: var(--error);
+}
+
+.paste-hint {
+    font-size: 12px;
+    margin-top: 6px;
+}
+
+.paste-hint.error {
+    color: var(--error);
+}
+
+.paste-hint.ok {
+    color: var(--success);
+}
+
 .validation {
     width: 100%;
     color: var(--error);

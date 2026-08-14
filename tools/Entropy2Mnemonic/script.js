@@ -257,6 +257,63 @@ document.getElementById("word-count-toggle").addEventListener("click", (event) =
     setFieldCount(wordCount === 24 ? 32 : 16);
 });
 
+// --- Klistra in alla bytes på en gång (kommaseparerat) ---
+const pasteInput = document.getElementById("paste-input");
+const pasteHint = document.getElementById("paste-hint");
+
+function hidePasteHint() {
+    pasteHint.textContent = "";
+    pasteHint.classList.add("display-none");
+    pasteHint.classList.remove("error", "ok");
+    pasteInput.classList.remove("invalid");
+}
+
+function showPasteHint(text, isError) {
+    pasteHint.textContent = text;
+    pasteHint.classList.remove("display-none");
+    pasteHint.classList.toggle("error", isError);
+    pasteHint.classList.toggle("ok", !isError);
+    pasteInput.classList.toggle("invalid", isError);
+}
+
+function setWordCountMode(fieldCount) {
+    const wordCount = fieldCount === 32 ? 24 : 12;
+    document.querySelectorAll("#word-count-toggle .toggle-btn").forEach(b =>
+        b.classList.toggle("active", Number(b.dataset.words) === wordCount));
+    if (FIELD_COUNT !== fieldCount) setFieldCount(fieldCount);
+}
+
+function applyPastedEntropy() {
+    const raw = pasteInput.value.trim();
+
+    if (raw === "") {
+        hidePasteHint();
+        return;
+    }
+
+    const parts = raw.split(/[\s,;]+/).filter(p => p !== "");
+    const invalid = parts.filter(p => !/^\d+$/.test(p) || Number(p) > 255);
+
+    if (invalid.length > 0) {
+        showPasteHint(`Ogiltigt värde: "${invalid[0]}" — varje värde måste vara ett heltal 0–255.`, true);
+        return;
+    }
+
+    if (parts.length !== 16 && parts.length !== 32) {
+        showPasteHint(`Hittade ${parts.length} värden — förväntade 16 (12 ord) eller 32 (24 ord).`, true);
+        return;
+    }
+
+    setWordCountMode(parts.length);
+    getFieldInputs().forEach((input, i) => {
+        input.value = parts[i];
+    });
+    onFieldsChanged();
+    showPasteHint(`✓ ${parts.length} värden ifyllda`, false);
+}
+
+pasteInput.addEventListener("input", applyPastedEntropy);
+
 setFieldCount(FIELD_COUNT);
 
 // --- Temasynkronisering med Verktygslådan (postMessage från förälder-iframe) ---
