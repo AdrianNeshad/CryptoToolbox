@@ -32,7 +32,7 @@
                 <div class="sidebar-header-text">
                     <h1>Verktygslådan</h1>
                     <div class="version-row">
-                        <p>Version 2.2</p>
+                        <p>Version 2.3</p>
                         <div id="net-status" class="net-status">
                             <span id="net-status-text"></span>
                         </div>
@@ -69,6 +69,9 @@
 
                 <div class="nav-group">
                     <div class="nav-group-title">Lokala verktyg</div>
+
+                    <div class="nav-subgroup">
+                        <div class="nav-subgroup-title">Konvertering &amp; Format</div>
 
                     <button class="nav-item" data-type="frame" data-src="tools/Magic/magic.html">
                         <span class="nav-item-icon nav-item-icon--local">
@@ -129,6 +132,25 @@
                         </span>
                     </button>
 
+                    <button class="nav-item" data-type="frame" data-src="tools/time-converter/time.html">
+                        <span class="nav-item-icon nav-item-icon--local">
+                            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6" />
+                                <path d="M12 7V12L15.5 14.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"
+                                    stroke-linejoin="round" />
+                            </svg>
+                        </span>
+                        <span class="nav-item-text">
+                            <span class="nav-item-title">Time Converter</span>
+                            <span class="nav-item-desc">Unix, Apple NSDate, WebKit, FILETIME, etc.</span>
+                        </span>
+                    </button>
+
+                    </div>
+
+                    <div class="nav-subgroup">
+                        <div class="nav-subgroup-title">BIP39 &amp; Seed</div>
+
                     <button class="nav-item" data-type="frame" data-src="tools/Entropy2Mnemonic/Entropy2Mnemonic.html">
                         <span class="nav-item-icon nav-item-icon--local">
                             <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -183,62 +205,59 @@
                         </span>
                     </button>
 
-                    <button class="nav-item" data-type="frame" data-src="tools/diff-checker/diff.html">
-                        <span class="nav-item-icon nav-item-icon--local">
-                            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M9 3H5.5A1.5 1.5 0 0 0 4 4.5V19.5A1.5 1.5 0 0 0 5.5 21H9" stroke="currentColor" stroke-width="1.6"
-                                    stroke-linecap="round" stroke-linejoin="round" />
-                                <path d="M15 3H18.5A1.5 1.5 0 0 1 20 4.5V19.5A1.5 1.5 0 0 1 18.5 21H15" stroke="currentColor"
-                                    stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
-                                <path d="M12 2V4.5M12 7.5V10M12 13V15.5M12 18.5V21" stroke="currentColor" stroke-width="1.6"
-                                    stroke-linecap="round" />
-                            </svg>
-                        </span>
-                        <span class="nav-item-text">
-                            <span class="nav-item-title">Diff Checker</span>
-                            <span class="nav-item-desc">Jämför två texter rad för rad</span>
-                        </span>
-                    </button>
+                    </div>
 
-                    <button class="nav-item" data-type="frame" data-src="tools/time-converter/time.html">
-                        <span class="nav-item-icon nav-item-icon--local">
-                            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6" />
-                                <path d="M12 7V12L15.5 14.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"
-                                    stroke-linejoin="round" />
-                            </svg>
-                        </span>
-                        <span class="nav-item-text">
-                            <span class="nav-item-title">Time Converter</span>
-                            <span class="nav-item-desc">Unix, Apple NSDate, WebKit, FILETIME — alla format</span>
-                        </span>
-                    </button>
+                    <div class="nav-subgroup">
+                        <div class="nav-subgroup-title">Övrigt</div>
+                    
+                        <button class="nav-item" data-type="frame" data-src="tools/diff-checker/diff.html">
+                            <span class="nav-item-icon nav-item-icon--local">
+                                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M9 3H5.5A1.5 1.5 0 0 0 4 4.5V19.5A1.5 1.5 0 0 0 5.5 21H9" stroke="currentColor"
+                                        stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+                                    <path d="M15 3H18.5A1.5 1.5 0 0 1 20 4.5V19.5A1.5 1.5 0 0 1 18.5 21H15" stroke="currentColor"
+                                        stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+                                    <path d="M12 2V4.5M12 7.5V10M12 13V15.5M12 18.5V21" stroke="currentColor" stroke-width="1.6"
+                                        stroke-linecap="round" />
+                                </svg>
+                            </span>
+                            <span class="nav-item-text">
+                                <span class="nav-item-title">Diff Checker</span>
+                                <span class="nav-item-desc">Jämför två texter rad för rad</span>
+                            </span>
+                        </button>
+                    
+                        <button class="nav-item" data-type="frame" data-src="tools/CyberChef/index.html">
+                            <span class="nav-item-icon nav-item-icon--local">
+                                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M9 8L4 12.5L9 17M15 8L20 12.5L15 17" stroke="currentColor" stroke-width="1.8"
+                                        stroke-linecap="round" stroke-linejoin="round" />
+                                </svg>
+                            </span>
+                            <span class="nav-item-text">
+                                <span class="nav-item-title">CyberChef</span>
+                                <span class="nav-item-desc">v11.3.0</span>
+                            </span>
+                        </button>
+                    
+                        <button class="nav-item" data-type="frame" data-src="tools/BalletCrypto/index.html">
+                            <span class="nav-item-icon nav-item-icon--local">
+                                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path
+                                        d="M14.7 6.3A4 4 0 0 0 9.3 11.7L4 17a2 2 0 1 0 2.8 2.8l5.3-5.3a4 4 0 0 0 5.4-5.4l-2.2 2.2-2.2-2.2 2.4-2.4z"
+                                        stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+                                </svg>
+                            </span>
+                            <span class="nav-item-text">
+                                <span class="nav-item-title">BalletCrypto Cold Storage Decoder</span>
+                                <span class="nav-item-desc">Dekryptera BalletCrypto-kort</span>
+                            </span>
+                        </button>
+                    
+                    </div>
 
-                    <button class="nav-item" data-type="frame" data-src="tools/CyberChef/index.html">
-                        <span class="nav-item-icon nav-item-icon--local">
-                            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M9 8L4 12.5L9 17M15 8L20 12.5L15 17"
-                                    stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
-                            </svg>
-                        </span>
-                        <span class="nav-item-text">
-                            <span class="nav-item-title">CyberChef</span>
-                            <span class="nav-item-desc">v11.3.0</span>
-                        </span>
-                    </button>
-
-                    <button class="nav-item" data-type="frame" data-src="tools/BalletCrypto/index.html">
-                        <span class="nav-item-icon nav-item-icon--local">
-                            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M14.7 6.3A4 4 0 0 0 9.3 11.7L4 17a2 2 0 1 0 2.8 2.8l5.3-5.3a4 4 0 0 0 5.4-5.4l-2.2 2.2-2.2-2.2 2.4-2.4z"
-                                    stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
-                            </svg>
-                        </span>
-                        <span class="nav-item-text">
-                            <span class="nav-item-title">BalletCrypto Cold Storage Decoder</span>
-                            <span class="nav-item-desc">Dekryptera BalletCrypto-kort</span>
-                        </span>
-                    </button>
+                    <div class="nav-subgroup">
+                        <div class="nav-subgroup-title">Brute Force</div>
 
                     <button class="nav-item" data-type="frame" data-src="tools/secoUnlock/secoUnlock.html">
                         <span class="nav-item-icon nav-item-icon--local">
@@ -275,17 +294,20 @@
                     <button class="nav-item" data-type="frame" data-src="tools/ciphertextUnlock/ciphertextUnlock.html">
                         <span class="nav-item-icon nav-item-icon--local">
                             <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M5 4.5C5 3.7 5.7 3 6.5 3H14l5 5v11.5c0 .8-.7 1.5-1.5 1.5h-11C5.7 21 5 20.3 5 19.5V4.5Z"
-                                    stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" />
-                                <path d="M13.5 3.2V8H18.8" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" />
-                                <path d="M8.5 13.5h7M8.5 16.5h4.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" />
+                                <rect x="5" y="11" width="14" height="9" rx="2" stroke="currentColor" stroke-width="1.8"
+                                    stroke-linejoin="round" />
+                                <path d="M8 11V8a4 4 0 0 1 7.5-2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
+                                    stroke-linejoin="round" />
+                                <path d="M12 14.5V17" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
                             </svg>
                         </span>
                         <span class="nav-item-text">
                             <span class="nav-item-title">Ethereum Keystore Unlock</span>
-                            <span class="nav-item-desc">Dekryptera Ethereum keystore / krypterad JSON</span>
+                            <span class="nav-item-desc">Brute force Ethereum keystore</span>
                         </span>
                     </button>
+
+                    </div>
 
                 </div>
 

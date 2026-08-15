@@ -19,7 +19,7 @@
 }
 
 [data-theme="light"] {
-    --bg: #f2f2f7;
+    --bg: #dedee4;
     --surface: #ffffff;
     --surface-hover: #e8e8ed;
     --border: #d2d2d7;
@@ -52,7 +52,7 @@ body {
 
 #container {
     width: 100%;
-    max-width: 720px;
+    max-width: 960px;
     display: flex;
     flex-direction: column;
 }
