@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="sv">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ethereum Keystore Unlock</title>
+    <script>
+        (function () {
+            try {
+                var params = new URLSearchParams(location.search);
+                var fromParent = params.get('theme');
+                var saved = localStorage.getItem('theme');
+                var theme = (fromParent === 'light' || fromParent === 'dark') ? fromParent
+                    : (saved === 'light' || saved === 'dark') ? saved : 'dark';
+                document.documentElement.setAttribute('data-theme', theme);
+                if (fromParent === 'light' || fromParent === 'dark') {
+                    localStorage.setItem('theme', fromParent);
+                }
+            } catch (e) {
+                document.documentElement.setAttribute('data-theme', 'dark');
+            }
+        })();
+    </script>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <div id="container">
+
+        <header class="page-header">
+            <h1>Ethereum Keystore Unlock</h1>
+            <p>Dictionary-attack som dekrypterar en krypterad plånboks-JSON (Ethereum/TrustWallet V3-keystore,
+                CryptoJS, PBKDF2-vault m.fl.) och extraherar innehållet &mdash; allt körs lokalt i webbläsaren,
+                inget lämnar din dator.</p>
+        </header>
+
+        <!-- Steg 1 & 2 sida vid sida -->
+        <div class="panel-row">
+
+            <!-- Steg 1: krypterad JSON -->
+            <div class="panel">
+                <div class="panel-head">
+                    <span class="step-num">1</span>
+                    <span class="panel-title">Klistra in krypterad JSON</span>
+                </div>
+                <p class="hint">Hela keystore-/vault-JSON:en. Eller ladda in en <code>.json</code>-fil.</p>
+                <div class="file-row">
+                    <button type="button" class="secondary" id="json-btn">Läs in .json-fil…</button>
+                    <span class="file-name" id="json-file-name"></span>
+                </div>
+                <input type="file" id="json-file-input" accept=".json,application/json,text/plain" hidden>
+                <textarea id="json-input" spellcheck="false" autocomplete="off"
+                    placeholder='{&#10;  "version": 3,&#10;  "crypto": { … }&#10;}'></textarea>
+                <div class="detect-status display-none" id="detect-status"></div>
+            </div>
+
+            <!-- Steg 2: lösenordslista -->
+            <div class="panel">
+                <div class="panel-head">
+                    <span class="step-num">2</span>
+                    <span class="panel-title">Lösenordslista</span>
+                </div>
+                <p class="hint">Klistra in ett lösenord per rad, eller ladda in en <code>.txt</code>-fil.</p>
+                <div class="file-row">
+                    <button type="button" class="secondary" id="pw-btn">Läs in .txt-fil…</button>
+                    <span class="file-name" id="pw-name"></span>
+                    <span class="pw-count" id="pw-count"></span>
+                </div>
+                <input type="file" id="pw-input" accept=".txt,text/plain" hidden>
+                <textarea id="pw-list" spellcheck="false" autocomplete="off"
+                    placeholder="lösenord1&#10;lösenord2&#10;lösenord3&#10;…"></textarea>
+            </div>
+
+        </div><!-- /panel-row -->
+
+        <!-- Steg 3: kör -->
+        <div class="button-row">
+            <button id="run-btn">Kör</button>
+            <button id="stop-btn" class="danger display-none">Stoppa</button>
+        </div>
+
+        <!-- Progress -->
+        <div class="progress-wrap display-none" id="progress-wrap">
+            <div class="progress-track">
+                <div class="progress-bar" id="progress-bar"></div>
+            </div>
+            <div class="progress-status" id="progress-status"></div>
+        </div>
+
+        <!-- Logg / output (resultatbannern visas överst i samma ruta) -->
+        <div class="output-wrap">
+            <div class="output-head">
+                <span>Output</span>
+                <button type="button" class="clear-btn" id="clear-btn">Rensa</button>
+            </div>
+            <div class="result-panel display-none" id="result-panel">
+                <div class="result-title" id="result-title"></div>
+                <div class="result-body" id="result-body"></div>
+            </div>
+            <pre id="output">Väntar på körning…</pre>
+        </div>
+
+        <div id="toast" class="toast"></div>
+
+    </div>
+
+    <script src="script.js"></script>
+
+</body>
+
+</html>
