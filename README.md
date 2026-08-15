@@ -2,7 +2,9 @@
 
 Lokal verktygslåda för **kryptografi och krypto-forensik**. Körs helt offline via Electron (eller ladda ner källkoden och öppna `Toolbox.html` i webbläsaren).
 
-## Verktyg (v1.6)
+## Verktyg (v2.3)
+
+### Konvertering & Format
 
 | Verktyg | Beskrivning |
 |---------|-------------|
@@ -10,12 +12,32 @@ Lokal verktygslåda för **kryptografi och krypto-forensik**. Körs helt offline
 | BIP38 Key Compression | Komprimera/dekomprimera Bitcoin-nycklar |
 | QR Code Decoder | Avkoda QR-koder från bilder |
 | JSON Formatter | Compact JSON → pretty print / validera |
+| Time Converter | Konvertera tidsstämplar (Unix, Apple NSDate, WebKit, FILETIME, m.m.) |
+
+### BIP39 & Seed
+
+| Verktyg | Beskrivning |
+|---------|-------------|
 | Entropy to Mnemonic | Konvertera entropi-bytes till BIP39-fras |
 | BIP39 Tool | Komplett BIP39-verktyg (mnemonic ↔ seed, derivation paths, adresser) |
 | BIP39 English Word List | Alla BIP39-ord med sökfunktion |
 | BIP39 Checksum Finder | Sista checksum-ordet (12 & 24 ord) |
+
+### Övrigt
+
+| Verktyg | Beskrivning |
+|---------|-------------|
+| Diff Checker | Jämför två texter rad för rad |
 | CyberChef | Offline encoding / decoding / crypto |
 | BalletCrypto Cold Storage Decoder | Dekryptera BalletCrypto-kort |
+
+### Brute Force
+
+| Verktyg | Beskrivning |
+|---------|-------------|
+| Exodus seed.seco Unlock | Brute force av Exodus `seed.seco`-filer |
+| Electrum Wallet Unlock | Brute force av Electrum-plånboksfiler |
+| Ethereum Keystore Unlock | Brute force av Ethereum keystore |
 
 ## Dokumentation & extramaterial
 
