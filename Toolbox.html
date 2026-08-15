@@ -32,7 +32,7 @@
                 <div class="sidebar-header-text">
                     <h1>Verktygslådan</h1>
                     <div class="version-row">
-                        <p>Version 2.3</p>
+                        <p>Version 2.4</p>
                         <div id="net-status" class="net-status">
                             <span id="net-status-text"></span>
                         </div>
@@ -256,7 +256,7 @@
                     
                     </div>
 
-                    <div class="nav-subgroup">
+                    <div class="nav-subgroup nav-subgroup--brute">
                         <div class="nav-subgroup-title">Brute Force</div>
 
                     <button class="nav-item" data-type="frame" data-src="tools/secoUnlock/secoUnlock.html">
@@ -288,6 +288,22 @@
                         <span class="nav-item-text">
                             <span class="nav-item-title">Electrum Wallet Unlock</span>
                             <span class="nav-item-desc">Brute force Electrum-wallet</span>
+                        </span>
+                    </button>
+
+                    <button class="nav-item" data-type="frame" data-src="tools/vault-decryptor/index.html">
+                        <span class="nav-item-icon nav-item-icon--local">
+                            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <rect x="5" y="11" width="14" height="9" rx="2" stroke="currentColor" stroke-width="1.8"
+                                    stroke-linejoin="round" />
+                                <path d="M8 11V8a4 4 0 0 1 7.5-2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
+                                    stroke-linejoin="round" />
+                                <path d="M12 14.5V17" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+                            </svg>
+                        </span>
+                        <span class="nav-item-text">
+                            <span class="nav-item-title">MetaMask Vault Decryptor</span>
+                            <span class="nav-item-desc">Brute force MetaMask vault</span>
                         </span>
                     </button>
 
@@ -342,58 +358,21 @@
                             <span class="nav-item-desc">Entropy & JSON decryption</span>
                         </span>
                     </button>
+
+                    <button class="nav-item" data-type="frame" data-src="documentation/bitcoin.pdf">
+                        <span class="nav-item-icon nav-item-icon--doc">
+                            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M5 4.5C5 3.67 5.67 3 6.5 3H18a1 1 0 0 1 1 1v15.5a1 1 0 0 1-1 1H6.5A1.5 1.5 0 0 0 5 22V4.5ZM5 22h13"
+                                    stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+                                <path d="M8 7h7M8 10h7M8 13h5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+                            </svg>
+                        </span>
+                        <span class="nav-item-text">
+                            <span class="nav-item-title">Bitcoin (Satoshi Nakamoto)</span>
+                            <span class="nav-item-desc">A Peer-to-Peer Electronic Cash System</span>
+                        </span>
+                    </button>
                 
-                </div>
-
-                <div class="nav-group">
-                    <div class="nav-group-title">Nedladdningar / Skript</div>
-
-                    <button class="nav-item nav-item--download" data-type="frame" data-src="documentation/secoUnlock.html">
-                        <span class="nav-item-icon nav-item-icon--download">
-                            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M12 3V15M12 15L7 10M12 15L17 10" stroke="currentColor" stroke-width="1.8"
-                                    stroke-linecap="round" stroke-linejoin="round" />
-                                <path d="M4 17V19C4 20.1046 4.89543 21 6 21H18C19.1046 21 20 20.1046 20 19V17"
-                                    stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
-                                    stroke-linejoin="round" />
-                            </svg>
-                        </span>
-                        <span class="nav-item-text">
-                            <span class="nav-item-title">Exodus secoUnlock</span>
-                            <span class="nav-item-desc">Lås upp Exodus seed.seco-filer (.zip)</span>
-                        </span>
-                    </button>
-
-                    <button class="nav-item nav-item--download" data-type="frame" data-src="documentation/electrumUnlock.html">
-                        <span class="nav-item-icon nav-item-icon--download">
-                            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M12 3V15M12 15L7 10M12 15L17 10" stroke="currentColor" stroke-width="1.8"
-                                    stroke-linecap="round" stroke-linejoin="round" />
-                                <path d="M4 17V19C4 20.1046 4.89543 21 6 21H18C19.1046 21 20 20.1046 20 19V17"
-                                    stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
-                                    stroke-linejoin="round" />
-                            </svg>
-                        </span>
-                        <span class="nav-item-text">
-                            <span class="nav-item-title">Electrum Unlock</span>
-                            <span class="nav-item-desc">Lås upp Electrum-plånboksfiler (.zip)</span>
-                        </span>
-                    </button>
-
-                    <button class="nav-item nav-item--download" data-type="frame" data-src="documentation/ciphertextUnlock.html">
-                        <span class="nav-item-icon nav-item-icon--download">
-                            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M12 3V15M12 15L7 10M12 15L17 10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
-                                    stroke-linejoin="round" />
-                                <path d="M4 17V19C4 20.1046 4.89543 21 6 21H18C19.1046 21 20 20.1046 20 19V17" stroke="currentColor"
-                                    stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
-                            </svg>
-                        </span>
-                        <span class="nav-item-text">
-                            <span class="nav-item-title">Ciphertext Unlock</span>
-                            <span class="nav-item-desc">Brute force ciphertext (.zip)</span>
-                        </span>
-                    </button>
                 </div>
 
                 <div class="nav-group">
@@ -484,7 +463,7 @@
                             privata nycklar.
                             (Öppna clipboard-historik:
                             <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"
-                                style="width: 16px; height: 16px; vertical-align: -3px; margin: 0 2px;" aria-label="Windows">
+                                style="width: 20px; height: 20px; vertical-align: -4px; margin: 0 2px;" aria-label="Windows">
                                 <path d="M3 4.5L11.2 3.35V11.35H3V4.5Z" fill="currentColor" />
                                 <path d="M12.3 3.2L21 2V11.35H12.3V3.2Z" fill="currentColor" />
                                 <path d="M3 12.55H11.2V20.65L3 19.5V12.55Z" fill="currentColor" />
@@ -499,17 +478,6 @@
 
         </main>
 
-    </div>
-
-    <div id="download-modal" class="modal-overlay display-none">
-        <div class="modal-box">
-            <h3>Bekräfta nedladdning av fil</h3>
-            <p id="download-modal-text">Du är på väg att ladda ner en fil.</p>
-            <div class="modal-actions">
-                <button id="download-modal-cancel" class="modal-button secondary">Avbryt</button>
-                <button id="download-modal-confirm" class="modal-button confirm">Ladda ner</button>
-            </div>
-        </div>
     </div>
 
     <div id="external-link-modal" class="modal-overlay display-none">
