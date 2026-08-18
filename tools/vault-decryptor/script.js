@@ -197,7 +197,6 @@ const pwInput = $('pw-input');
 const pwName = $('pw-name');
 const pwCount = $('pw-count');
 const pwList = $('pw-list');
-const testdataBtn = $('testdata-btn');
 const runBtn = $('run-btn');
 const stopBtn = $('stop-btn');
 const progressWrap = $('progress-wrap');
@@ -277,30 +276,20 @@ function refreshVaultState() {
 
 vaultText.addEventListener('input', refreshVaultState);
 
-function applyVaultText(text) {
-    const vault = extractVaultFromFile(text);
-    if (vault && (isVaultValid(vault) || (vault.data && vault.data.mnemonic))) {
-        vaultText.value = JSON.stringify(vault);
-    } else {
-        vaultText.value = text;
-    }
-    refreshVaultState();
-}
-
-function applyPasswordText(text, label) {
-    pwList.value = text;
-    pwName.textContent = label;
-    pwName.classList.add('set');
-    updatePwCount();
-}
-
 vaultBtn.addEventListener('click', () => vaultInput.click());
 
 vaultInput.addEventListener('change', async () => {
     const file = vaultInput.files[0];
     if (!file) return;
     try {
-        applyVaultText(await file.text());
+        const text = await file.text();
+        const vault = extractVaultFromFile(text);
+        if (vault && (isVaultValid(vault) || (vault.data && vault.data.mnemonic))) {
+            vaultText.value = JSON.stringify(vault);
+        } else {
+            vaultText.value = text;
+        }
+        refreshVaultState();
     } catch (e) {
         setVaultName('Kunde inte läsa filen', 'invalid');
     }
@@ -312,23 +301,13 @@ pwInput.addEventListener('change', async () => {
     const file = pwInput.files[0];
     if (!file) return;
     try {
-        applyPasswordText(await file.text(), file.name);
+        pwList.value = await file.text();
+        pwName.textContent = file.name;
+        pwName.classList.add('set');
+        updatePwCount();
     } catch (e) {
         pwName.textContent = 'Kunde inte läsa filen';
         pwName.classList.remove('set');
-    }
-});
-
-testdataBtn.addEventListener('click', () => {
-    if (running) return;
-    const td = window.__TESTDATA;
-    if (!td) { showToast('Testdata saknas (test/testdata.js kunde inte läsas in)'); return; }
-    try {
-        applyVaultText(td.vaultText);
-        applyPasswordText(td.passwordsText, 'passwords.txt (testdata)');
-        showToast('Testdata inläst');
-    } catch (e) {
-        showToast('Kunde inte läsa testdata: ' + e.message);
     }
 });
 
@@ -342,7 +321,6 @@ function setRunning(state) {
     pwBtn.disabled = state;
     pwList.disabled = state;
     vaultText.disabled = state;
-    testdataBtn.disabled = state;
 }
 
 function showResult(success, titleText, fields) {

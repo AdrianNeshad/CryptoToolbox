@@ -202,7 +202,6 @@ const pwInput = $('pw-input');
 const pwName = $('pw-name');
 const pwCount = $('pw-count');
 const pwList = $('pw-list');
-const testdataBtn = $('testdata-btn');
 const runBtn = $('run-btn');
 const stopBtn = $('stop-btn');
 const progressWrap = $('progress-wrap');
@@ -265,45 +264,33 @@ function setWalletName(text, state, title) {
     if (title) walletName.title = title; else walletName.removeAttribute('title');
 }
 
-function applyWalletText(text, label) {
-    text = text.trim();
-    walletContent = null;
-    walletRaw = null;
-    let info;
-    try {
-        info = checkMagic(text);
-    } catch (e) {
-        setWalletName(label, 'invalid', 'Kunde inte base64-avkoda — verkar inte vara en Electrum-wallet.');
-        return;
-    }
-    if (info.magic === 'BIE1') {
-        walletContent = text;
-        walletRaw = info.raw;
-        setWalletName(label, 'valid', 'Giltig lösenordskrypterad Electrum-wallet (BIE1)');
-    } else if (info.magic === 'BIE2') {
-        setWalletName(label, 'invalid', 'BIE2-krypterad (hårdvaruplånbok/xpub-lösenord) — stöds inte.');
-    } else {
-        setWalletName(label, 'invalid', 'Ingen BIE1-magic — filen verkar inte vara lösenordskrypterad.');
-    }
-}
-
-function applyPasswordText(text, label) {
-    pwList.value = text;
-    pwName.textContent = label;
-    pwName.classList.add('set');
-    updatePwCount();
-}
-
 walletBtn.addEventListener('click', () => walletInput.click());
 
 walletInput.addEventListener('change', async () => {
     const file = walletInput.files[0];
     if (!file) return;
+    walletContent = null;
+    walletRaw = null;
     try {
-        applyWalletText(await file.text(), `${file.name} (${file.size} byte)`);
+        const text = (await file.text()).trim();
+        const label = `${file.name} (${file.size} byte)`;
+        let info;
+        try {
+            info = checkMagic(text);
+        } catch (e) {
+            setWalletName(label, 'invalid', 'Kunde inte base64-avkoda — verkar inte vara en Electrum-wallet.');
+            return;
+        }
+        if (info.magic === 'BIE1') {
+            walletContent = text;
+            walletRaw = info.raw;
+            setWalletName(label, 'valid', 'Giltig lösenordskrypterad Electrum-wallet (BIE1)');
+        } else if (info.magic === 'BIE2') {
+            setWalletName(label, 'invalid', 'BIE2-krypterad (hårdvaruplånbok/xpub-lösenord) — stöds inte.');
+        } else {
+            setWalletName(label, 'invalid', 'Ingen BIE1-magic — filen verkar inte vara lösenordskrypterad.');
+        }
     } catch (e) {
-        walletContent = null;
-        walletRaw = null;
         setWalletName('Kunde inte läsa filen', null);
     }
 });
@@ -314,23 +301,13 @@ pwInput.addEventListener('change', async () => {
     const file = pwInput.files[0];
     if (!file) return;
     try {
-        applyPasswordText(await file.text(), file.name);
+        pwList.value = await file.text();
+        pwName.textContent = file.name;
+        pwName.classList.add('set');
+        updatePwCount();
     } catch (e) {
         pwName.textContent = 'Kunde inte läsa filen';
         pwName.classList.remove('set');
-    }
-});
-
-testdataBtn.addEventListener('click', () => {
-    if (running) return;
-    const td = window.__TESTDATA;
-    if (!td) { showToast('Testdata saknas (test/testdata.js kunde inte läsas in)'); return; }
-    try {
-        applyWalletText(td.walletText, `wallet (${td.walletText.trim().length} byte, testdata)`);
-        applyPasswordText(td.passwordsText, 'passwords.txt (testdata)');
-        showToast('Testdata inläst');
-    } catch (e) {
-        showToast('Kunde inte läsa testdata: ' + e.message);
     }
 });
 
@@ -342,7 +319,6 @@ function setRunning(state) {
     walletBtn.disabled = state;
     pwBtn.disabled = state;
     pwList.disabled = state;
-    testdataBtn.disabled = state;
 }
 
 function showResult(success, titleText, fields) {
