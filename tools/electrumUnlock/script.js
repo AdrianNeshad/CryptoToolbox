@@ -321,23 +321,16 @@ pwInput.addEventListener('change', async () => {
     }
 });
 
-testdataBtn.addEventListener('click', async () => {
+testdataBtn.addEventListener('click', () => {
     if (running) return;
-    testdataBtn.disabled = true;
+    const td = window.__TESTDATA;
+    if (!td) { showToast('Testdata saknas (test/testdata.js kunde inte läsas in)'); return; }
     try {
-        const [walletRes, pwRes] = await Promise.all([
-            fetch('test/wallet'),
-            fetch('test/passwords.txt'),
-        ]);
-        if (!walletRes.ok || !pwRes.ok) throw new Error('Testfilerna kunde inte hämtas.');
-        const text = await walletRes.text();
-        applyWalletText(text, `wallet (${text.trim().length} byte, testdata)`);
-        applyPasswordText(await pwRes.text(), 'passwords.txt (testdata)');
+        applyWalletText(td.walletText, `wallet (${td.walletText.trim().length} byte, testdata)`);
+        applyPasswordText(td.passwordsText, 'passwords.txt (testdata)');
         showToast('Testdata inläst');
     } catch (e) {
         showToast('Kunde inte läsa testdata: ' + e.message);
-    } finally {
-        testdataBtn.disabled = false;
     }
 });
 

@@ -382,22 +382,16 @@ pwInput.addEventListener('change', async () => {
     }
 });
 
-testdataBtn.addEventListener('click', async () => {
+testdataBtn.addEventListener('click', () => {
     if (running) return;
-    testdataBtn.disabled = true;
+    const td = window.__TESTDATA;
+    if (!td) { showToast('Testdata saknas (test/testdata.js kunde inte läsas in)'); return; }
     try {
-        const [jsonRes, pwRes] = await Promise.all([
-            fetch('test/encrypted.json'),
-            fetch('test/passwords.txt'),
-        ]);
-        if (!jsonRes.ok || !pwRes.ok) throw new Error('Testfilerna kunde inte hämtas.');
-        applyJsonText(await jsonRes.text(), 'encrypted.json (testdata)');
-        applyPasswordText(await pwRes.text(), 'passwords.txt (testdata)');
+        applyJsonText(td.jsonText, 'encrypted.json (testdata)');
+        applyPasswordText(td.passwordsText, 'passwords.txt (testdata)');
         showToast('Testdata inläst');
     } catch (e) {
         showToast('Kunde inte läsa testdata: ' + e.message);
-    } finally {
-        testdataBtn.disabled = false;
     }
 });
 

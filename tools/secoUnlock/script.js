@@ -334,23 +334,19 @@ pwInput.addEventListener('change', async () => {
     }
 });
 
-testdataBtn.addEventListener('click', async () => {
+testdataBtn.addEventListener('click', () => {
     if (running) return;
-    testdataBtn.disabled = true;
+    const td = window.__TESTDATA;
+    if (!td) { showToast('Testdata saknas (test/testdata.js kunde inte läsas in)'); return; }
     try {
-        const [secoRes, pwRes] = await Promise.all([
-            fetch('test/seed.seco'),
-            fetch('test/passwords.txt'),
-        ]);
-        if (!secoRes.ok || !pwRes.ok) throw new Error('Testfilerna kunde inte hämtas.');
-        const buf = await secoRes.arrayBuffer();
-        applySecoBytes(buf, `seed.seco (${buf.byteLength} byte, testdata)`);
-        applyPasswordText(await pwRes.text(), 'passwords.txt (testdata)');
+        const bin = atob(td.secoBase64);
+        const buf = new Uint8Array(bin.length);
+        for (let i = 0; i < bin.length; i++) buf[i] = bin.charCodeAt(i);
+        applySecoBytes(buf.buffer, `seed.seco (${buf.length} byte, testdata)`);
+        applyPasswordText(td.passwordsText, 'passwords.txt (testdata)');
         showToast('Testdata inläst');
     } catch (e) {
         showToast('Kunde inte läsa testdata: ' + e.message);
-    } finally {
-        testdataBtn.disabled = false;
     }
 });
 
