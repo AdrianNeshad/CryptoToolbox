@@ -221,6 +221,7 @@ const pwInput = $('pw-input');
 const pwName = $('pw-name');
 const pwCount = $('pw-count');
 const pwList = $('pw-list');
+const testdataBtn = $('testdata-btn');
 const runBtn = $('run-btn');
 const stopBtn = $('stop-btn');
 const progressWrap = $('progress-wrap');
@@ -288,6 +289,24 @@ function setSecoName(text, state, title) {
     if (title) secoName.title = title; else secoName.removeAttribute('title');
 }
 
+function applySecoBytes(buf, label) {
+    secoBytes = new Uint8Array(buf);
+    // Validera signatur/storlek → grön text om giltig, röd om inte
+    try {
+        parseSeco(secoBytes);
+        setSecoName(label, 'valid', 'Giltig .seco-fil');
+    } catch (e) {
+        setSecoName(label, 'invalid', 'Ogiltig .seco-fil: ' + e.message);
+    }
+}
+
+function applyPasswordText(text, label) {
+    pwList.value = text;
+    pwName.textContent = label;
+    pwName.classList.add('set');
+    updatePwCount();
+}
+
 secoBtn.addEventListener('click', () => secoInput.click());
 
 secoInput.addEventListener('change', async () => {
@@ -295,15 +314,7 @@ secoInput.addEventListener('change', async () => {
     if (!file) return;
     try {
         const buf = await file.arrayBuffer();
-        secoBytes = new Uint8Array(buf);
-        const label = `${file.name} (${secoBytes.length} byte)`;
-        // Validera signatur/storlek → grön text om giltig, röd om inte
-        try {
-            parseSeco(secoBytes);
-            setSecoName(label, 'valid', 'Giltig .seco-fil');
-        } catch (e) {
-            setSecoName(label, 'invalid', 'Ogiltig .seco-fil: ' + e.message);
-        }
+        applySecoBytes(buf, `${file.name} (${buf.byteLength} byte)`);
     } catch (e) {
         secoBytes = null;
         setSecoName('Kunde inte läsa filen', null);
@@ -316,14 +327,30 @@ pwInput.addEventListener('change', async () => {
     const file = pwInput.files[0];
     if (!file) return;
     try {
-        const text = await file.text();
-        pwList.value = text;
-        pwName.textContent = file.name;
-        pwName.classList.add('set');
-        updatePwCount();
+        applyPasswordText(await file.text(), file.name);
     } catch (e) {
         pwName.textContent = 'Kunde inte läsa filen';
         pwName.classList.remove('set');
+    }
+});
+
+testdataBtn.addEventListener('click', async () => {
+    if (running) return;
+    testdataBtn.disabled = true;
+    try {
+        const [secoRes, pwRes] = await Promise.all([
+            fetch('test/seed.seco'),
+            fetch('test/passwords.txt'),
+        ]);
+        if (!secoRes.ok || !pwRes.ok) throw new Error('Testfilerna kunde inte hämtas.');
+        const buf = await secoRes.arrayBuffer();
+        applySecoBytes(buf, `seed.seco (${buf.byteLength} byte, testdata)`);
+        applyPasswordText(await pwRes.text(), 'passwords.txt (testdata)');
+        showToast('Testdata inläst');
+    } catch (e) {
+        showToast('Kunde inte läsa testdata: ' + e.message);
+    } finally {
+        testdataBtn.disabled = false;
     }
 });
 
@@ -336,6 +363,7 @@ function setRunning(state) {
     secoBtn.disabled = state;
     pwBtn.disabled = state;
     pwList.disabled = state;
+    testdataBtn.disabled = state;
 }
 
 function showResult(success, titleText, fields) {

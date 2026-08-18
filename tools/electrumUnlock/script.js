@@ -202,6 +202,7 @@ const pwInput = $('pw-input');
 const pwName = $('pw-name');
 const pwCount = $('pw-count');
 const pwList = $('pw-list');
+const testdataBtn = $('testdata-btn');
 const runBtn = $('run-btn');
 const stopBtn = $('stop-btn');
 const progressWrap = $('progress-wrap');
@@ -264,33 +265,45 @@ function setWalletName(text, state, title) {
     if (title) walletName.title = title; else walletName.removeAttribute('title');
 }
 
+function applyWalletText(text, label) {
+    text = text.trim();
+    walletContent = null;
+    walletRaw = null;
+    let info;
+    try {
+        info = checkMagic(text);
+    } catch (e) {
+        setWalletName(label, 'invalid', 'Kunde inte base64-avkoda — verkar inte vara en Electrum-wallet.');
+        return;
+    }
+    if (info.magic === 'BIE1') {
+        walletContent = text;
+        walletRaw = info.raw;
+        setWalletName(label, 'valid', 'Giltig lösenordskrypterad Electrum-wallet (BIE1)');
+    } else if (info.magic === 'BIE2') {
+        setWalletName(label, 'invalid', 'BIE2-krypterad (hårdvaruplånbok/xpub-lösenord) — stöds inte.');
+    } else {
+        setWalletName(label, 'invalid', 'Ingen BIE1-magic — filen verkar inte vara lösenordskrypterad.');
+    }
+}
+
+function applyPasswordText(text, label) {
+    pwList.value = text;
+    pwName.textContent = label;
+    pwName.classList.add('set');
+    updatePwCount();
+}
+
 walletBtn.addEventListener('click', () => walletInput.click());
 
 walletInput.addEventListener('change', async () => {
     const file = walletInput.files[0];
     if (!file) return;
-    walletContent = null;
-    walletRaw = null;
     try {
-        const text = (await file.text()).trim();
-        const label = `${file.name} (${file.size} byte)`;
-        let info;
-        try {
-            info = checkMagic(text);
-        } catch (e) {
-            setWalletName(label, 'invalid', 'Kunde inte base64-avkoda — verkar inte vara en Electrum-wallet.');
-            return;
-        }
-        if (info.magic === 'BIE1') {
-            walletContent = text;
-            walletRaw = info.raw;
-            setWalletName(label, 'valid', 'Giltig lösenordskrypterad Electrum-wallet (BIE1)');
-        } else if (info.magic === 'BIE2') {
-            setWalletName(label, 'invalid', 'BIE2-krypterad (hårdvaruplånbok/xpub-lösenord) — stöds inte.');
-        } else {
-            setWalletName(label, 'invalid', 'Ingen BIE1-magic — filen verkar inte vara lösenordskrypterad.');
-        }
+        applyWalletText(await file.text(), `${file.name} (${file.size} byte)`);
     } catch (e) {
+        walletContent = null;
+        walletRaw = null;
         setWalletName('Kunde inte läsa filen', null);
     }
 });
@@ -301,13 +314,30 @@ pwInput.addEventListener('change', async () => {
     const file = pwInput.files[0];
     if (!file) return;
     try {
-        pwList.value = await file.text();
-        pwName.textContent = file.name;
-        pwName.classList.add('set');
-        updatePwCount();
+        applyPasswordText(await file.text(), file.name);
     } catch (e) {
         pwName.textContent = 'Kunde inte läsa filen';
         pwName.classList.remove('set');
+    }
+});
+
+testdataBtn.addEventListener('click', async () => {
+    if (running) return;
+    testdataBtn.disabled = true;
+    try {
+        const [walletRes, pwRes] = await Promise.all([
+            fetch('test/wallet'),
+            fetch('test/passwords.txt'),
+        ]);
+        if (!walletRes.ok || !pwRes.ok) throw new Error('Testfilerna kunde inte hämtas.');
+        const text = await walletRes.text();
+        applyWalletText(text, `wallet (${text.trim().length} byte, testdata)`);
+        applyPasswordText(await pwRes.text(), 'passwords.txt (testdata)');
+        showToast('Testdata inläst');
+    } catch (e) {
+        showToast('Kunde inte läsa testdata: ' + e.message);
+    } finally {
+        testdataBtn.disabled = false;
     }
 });
 
@@ -319,6 +349,7 @@ function setRunning(state) {
     walletBtn.disabled = state;
     pwBtn.disabled = state;
     pwList.disabled = state;
+    testdataBtn.disabled = state;
 }
 
 function showResult(success, titleText, fields) {

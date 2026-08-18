@@ -264,6 +264,7 @@ const pwInput = $('pw-input');
 const pwName = $('pw-name');
 const pwCount = $('pw-count');
 const pwList = $('pw-list');
+const testdataBtn = $('testdata-btn');
 const runBtn = $('run-btn');
 const stopBtn = $('stop-btn');
 const progressWrap = $('progress-wrap');
@@ -343,15 +344,26 @@ function validateJson() {
 }
 jsonInput.addEventListener('input', validateJson);
 
+function applyJsonText(text, label) {
+    jsonInput.value = text.trim();
+    jsonFileName.textContent = label;
+    jsonFileName.classList.add('set');
+    validateJson();
+}
+
+function applyPasswordText(text, label) {
+    pwList.value = text;
+    pwName.textContent = label;
+    pwName.classList.add('set');
+    updatePwCount();
+}
+
 jsonBtn.addEventListener('click', () => jsonFileInput.click());
 jsonFileInput.addEventListener('change', async () => {
     const file = jsonFileInput.files[0];
     if (!file) return;
     try {
-        jsonInput.value = (await file.text()).trim();
-        jsonFileName.textContent = file.name;
-        jsonFileName.classList.add('set');
-        validateJson();
+        applyJsonText(await file.text(), file.name);
     } catch (e) {
         jsonFileName.textContent = 'Kunde inte läsa filen';
         jsonFileName.classList.remove('set');
@@ -363,13 +375,29 @@ pwInput.addEventListener('change', async () => {
     const file = pwInput.files[0];
     if (!file) return;
     try {
-        pwList.value = await file.text();
-        pwName.textContent = file.name;
-        pwName.classList.add('set');
-        updatePwCount();
+        applyPasswordText(await file.text(), file.name);
     } catch (e) {
         pwName.textContent = 'Kunde inte läsa filen';
         pwName.classList.remove('set');
+    }
+});
+
+testdataBtn.addEventListener('click', async () => {
+    if (running) return;
+    testdataBtn.disabled = true;
+    try {
+        const [jsonRes, pwRes] = await Promise.all([
+            fetch('test/encrypted.json'),
+            fetch('test/passwords.txt'),
+        ]);
+        if (!jsonRes.ok || !pwRes.ok) throw new Error('Testfilerna kunde inte hämtas.');
+        applyJsonText(await jsonRes.text(), 'encrypted.json (testdata)');
+        applyPasswordText(await pwRes.text(), 'passwords.txt (testdata)');
+        showToast('Testdata inläst');
+    } catch (e) {
+        showToast('Kunde inte läsa testdata: ' + e.message);
+    } finally {
+        testdataBtn.disabled = false;
     }
 });
 
@@ -382,6 +410,7 @@ function setRunning(state) {
     pwBtn.disabled = state;
     pwList.disabled = state;
     jsonInput.disabled = state;
+    testdataBtn.disabled = state;
 }
 
 function showResult(success, titleText, fields) {
