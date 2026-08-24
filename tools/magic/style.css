@@ -10,7 +10,11 @@
     --accent-soft: rgba(10, 132, 255, 0.16);
     --success: #30d158;
     --success-soft: rgba(48, 209, 88, 0.15);
+    --warning: #ffd60a;
+    --warning-soft: rgba(255, 214, 10, 0.14);
+    --warning-dot: #ffd60a;
     --error: #ff453a;
+    --error-soft: rgba(255, 69, 58, 0.15);
     --glow-1: rgba(0, 0, 0, 0);
     --glow-2: rgba(0, 0, 0, 0);
 }
@@ -27,7 +31,11 @@
     --accent-soft: rgba(0, 122, 255, 0.13);
     --success: #248a3d;
     --success-soft: rgba(36, 138, 61, 0.14);
+    --warning: #9a6a00;
+    --warning-soft: rgba(154, 106, 0, 0.13);
+    --warning-dot: #f5c518;
     --error: #ff3b30;
+    --error-soft: rgba(255, 59, 48, 0.12);
     --glow-1: rgba(0, 0, 0, 0);
     --glow-2: rgba(0, 0, 0, 0);
 }
@@ -55,12 +63,101 @@ body {
 }
 
 main {
-    padding: clamp(56px, 14vh, 150px) 20px 80px;
-    max-width: 760px;
+    padding: clamp(44px, 8vh, 88px) 20px 80px;
+    max-width: 1120px;
     margin: auto;
     display: flex;
     flex-direction: column;
     gap: 20px;
+}
+
+/* Verktyg + kapabilitetspanel som ett centrerat block med lika marginaler på
+   båda sidor (inget tomrum till vänster). align-items: start gör att panelen
+   bara blir så hög som sitt eget innehåll, inte lika hög som resultaten. */
+.content {
+    display: grid;
+    grid-template-columns: minmax(0, 760px) 300px;
+    justify-content: center;
+    column-gap: 28px;
+    align-items: start;
+}
+
+.tool-column {
+    grid-column: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* Högerkolumn: färgkodslegend ovanför kapabilitetspanelen. align-self: start
+   gör att kolumnen bara blir så hög som sitt innehåll, inte lika hög som
+   resultaten till vänster. */
+.side-column {
+    grid-column: 2;
+    align-self: start;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* ---------- kapabilitetspanel ---------- */
+
+.capabilities {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 18px 20px;
+}
+
+.capabilities h2 {
+    margin: 0 0 14px;
+    font-size: 15px;
+    font-weight: 650;
+    letter-spacing: -0.01em;
+}
+
+.capabilities section {
+    margin-bottom: 14px;
+}
+
+.capabilities section:last-child {
+    margin-bottom: 0;
+}
+
+.capabilities h3 {
+    margin: 0 0 6px;
+    font-size: 11px;
+    font-weight: 650;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--accent);
+}
+
+.capabilities ul {
+    margin: 0;
+    padding-left: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.capabilities li {
+    font-size: 12.5px;
+    line-height: 1.4;
+    color: var(--text-muted);
+}
+
+@media (max-width: 900px) {
+    .content {
+        grid-template-columns: minmax(0, 760px);
+        justify-content: center;
+    }
+
+    .tool-column,
+    .side-column {
+        grid-column: 1;
+    }
 }
 
 .page-header {
@@ -116,8 +213,17 @@ main {
 
 .input-toolbar {
     display: flex;
+    justify-content: flex-end;
     align-items: center;
-    justify-content: space-between;
+    gap: 16px;
+}
+
+.toolbar-right {
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-end;
     gap: 12px;
 }
 
@@ -125,6 +231,7 @@ main {
     font-size: 13px;
     color: var(--text-muted);
     font-variant-numeric: tabular-nums;
+    text-align: right;
 }
 
 .toolbar-buttons {
@@ -219,6 +326,76 @@ main {
 .chip-likely {
     background: var(--accent-soft);
     color: var(--accent);
+}
+
+.chip-unknown {
+    background: var(--warning-soft);
+    color: var(--warning);
+}
+
+.chip-invalid {
+    background: var(--error-soft);
+    color: var(--error);
+}
+
+/* ---------- färgkodslegend ---------- */
+
+.legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 20px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+.legend.display-none {
+    display: none;
+}
+
+.legend-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+}
+
+.legend-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+@media (max-width: 560px) {
+    .input-toolbar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .toolbar-right {
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+    }
+}
+
+.dot-verified {
+    background: var(--success);
+}
+
+.dot-likely {
+    background: var(--accent);
+}
+
+.dot-unknown {
+    background: var(--warning-dot);
+}
+
+.dot-invalid {
+    background: var(--error);
 }
 
 .value-row {

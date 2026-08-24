@@ -75,12 +75,6 @@
 
         </div><!-- /panel-row -->
 
-        <!-- Steg 3: kör -->
-        <div class="button-row">
-            <button id="run-btn">Kör</button>
-            <button id="stop-btn" class="danger display-none">Stoppa</button>
-        </div>
-
         <!-- Progress -->
         <div class="progress-wrap display-none" id="progress-wrap">
             <div class="progress-track">
@@ -93,7 +87,11 @@
         <div class="output-wrap">
             <div class="output-head">
                 <span>Output</span>
-                <button type="button" class="clear-btn" id="clear-btn">Rensa</button>
+                <div class="output-head-actions">
+                    <button id="run-btn">Kör</button>
+                    <button id="stop-btn" class="danger display-none">Stoppa</button>
+                    <button type="button" class="clear-btn" id="clear-btn">Rensa</button>
+                </div>
             </div>
             <div class="result-panel display-none" id="result-panel">
                 <div class="result-title" id="result-title"></div>

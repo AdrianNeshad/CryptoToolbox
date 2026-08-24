@@ -30,26 +30,96 @@
 
         <header class="page-header">
             <h1>Magic Tool</h1>
-            <p>Klistra in valfri text — nycklar, adresser, entropy och krypteringsmetadata identifieras automatiskt</p>
+            <p>Klistra in valfri text - nycklar, adresser, entropy och krypteringsmetadata identifieras automatiskt</p>
         </header>
 
-        <div id="input-box">
-            <textarea id="input" spellcheck="false" placeholder="Klistra in text här: wallet-JSON, minnesdump, loggar, nycklar, adresser..."></textarea>
-        </div>
+        <div class="content">
 
-        <div class="input-toolbar">
-            <span id="result-count"></span>
-            <div class="toolbar-buttons">
-                <button id="testdata-button" type="button">Testdata</button>
-                <button id="clear-button" type="button">Rensa</button>
+            <div class="tool-column">
+
+                <div id="input-box">
+                    <textarea id="input" spellcheck="false" placeholder="Klistra in text här: wallet-JSON, minnesdump, loggar, nycklar, adresser..."></textarea>
+                </div>
+
+                <div class="input-toolbar">
+                    <div class="toolbar-right">
+                        <span id="result-count"></span>
+                        <div class="toolbar-buttons">
+                            <button id="testdata-button" type="button">Testdata</button>
+                            <button id="clear-button" type="button">Rensa</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="empty-state" id="empty-state">
+                    <p>Klistra in text ovan för att identifiera kryptorelaterat innehåll</p>
+                </div>
+
+                <div id="results" class="display-none"></div>
+
             </div>
-        </div>
 
-        <div class="empty-state" id="empty-state">
-            <p>Klistra in text ovan för att identifiera kryptorelaterat innehåll</p>
-        </div>
+            <aside class="side-column">
+            <div id="legend" class="legend"></div>
+            <div class="capabilities">
+            <h2>Kan identifiera &amp; verifiera</h2>
 
-        <div id="results" class="display-none"></div>
+            <section>
+                <h3>Adresser</h3>
+                <ul>
+                    <li>Bitcoin - Legacy, P2SH, SegWit, Taproot</li>
+                    <li>Litecoin, Dogecoin, Dash, Zcash</li>
+                    <li>Ethereum / EVM (EIP-55-checksumma)</li>
+                    <li>Tron, XRP (Ripple), Bitcoin Cash</li>
+                    <li>Monero (keccak), TON (CRC16)</li>
+                    <li>Solana, Cosmos-kedjor (bech32)</li>
+                </ul>
+            </section>
+
+            <section>
+                <h3>Nycklar</h3>
+                <ul>
+                    <li>WIF privata nycklar</li>
+                    <li>Utökade nycklar (xpub / xprv / zpub…)</li>
+                    <li>BIP38-krypterade nycklar</li>
+                    <li>Publika nycklar (secp256k1, på kurvan)</li>
+                    <li>PEM-nyckelblock (EC / RSA, DER)</li>
+                </ul>
+            </section>
+
+            <section>
+                <h3>Seed &amp; entropy</h3>
+                <ul>
+                    <li>BIP39-mnemonic (checksumma)</li>
+                    <li>Electrum-seedfraser (versionsprefix)</li>
+                    <li>BIP32 derivation paths</li>
+                    <li>Entropy (hex, decimal, JSON-objekt)</li>
+                </ul>
+            </section>
+
+            <section>
+                <h3>Kryptometadata</h3>
+                <ul>
+                    <li>Ethereum Keystore V3</li>
+                    <li>JSON-Keystore (cipher, kdf, iv, salt, mac)</li>
+                    <li>Algoritmer - AES, ChaCha20, Argon2, scrypt,
+                        PBKDF2, SHA, HMAC, Ed25519 m.fl.</li>
+                </ul>
+            </section>
+
+            <section>
+                <h3>Format &amp; kodning</h3>
+                <ul>
+                    <li>JSON (syntaxverifierad)</li>
+                    <li>JWT (header avkodad)</li>
+                    <li>Base64 / Base64url, Base58, Hex</li>
+                    <li>Hashar - MD5, SHA-1/256/512, RIPEMD-160</li>
+                </ul>
+            </section>
+            </div>
+            </aside>
+
+        </div>
 
         <div id="toast" class="toast"></div>
 

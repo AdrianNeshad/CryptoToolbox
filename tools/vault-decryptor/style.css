@@ -327,6 +327,26 @@ button.danger:hover { background: var(--error); opacity: 0.85; }
 
 .clear-btn:hover { background: var(--border); }
 
+.output-head-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.output-head-actions button {
+    flex: none;
+    min-width: 0;
+    padding: 5px 12px;
+    font-size: 12px;
+}
+
+/* Kör/Stoppa flyttade in i output-headern: samma storlek som Rensa. Rensa har
+   en 1px-ram, så ge Kör/Stoppa en genomskinlig ram så totalhöjden matchar. */
+.output-head-actions #run-btn,
+.output-head-actions #stop-btn {
+    border: 1px solid transparent;
+}
+
 #output {
     margin: 0;
     padding: 14px;
