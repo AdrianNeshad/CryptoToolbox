@@ -2,7 +2,7 @@
 
 Lokal verktygslåda för **kryptografi och krypto-forensik**. Körs helt offline via Electron (eller ladda ner källkoden och öppna `Toolbox.html` i webbläsaren).
 
-## Verktyg (v2.3)
+## Verktyg (v2.6)
 
 ### Konvertering & Format
 
@@ -35,26 +35,10 @@ Lokal verktygslåda för **kryptografi och krypto-forensik**. Körs helt offline
 
 | Verktyg | Beskrivning |
 |---------|-------------|
-| Exodus seed.seco Unlock | Brute force av Exodus `seed.seco`-filer |
-| Electrum Wallet Unlock | Brute force av Electrum-plånboksfiler |
-| Ethereum Keystore Unlock | Brute force av Ethereum keystore |
-
-## Dokumentation & extramaterial
-
-- **Krypto wallets lagring** – wallet-lagringsformat och kryptering (`documentation/wallets.html`)
-- **Phantom Wallet Decryption** – entropy & JSON decryption (`documentation/phantom.pdf`)
-
-### Nedladdningar / skript
-
-- **Exodus secoUnlock** – lås upp Exodus `seed.seco`-filer med dictionary attack (.zip)
-- **Electrum Unlock** – lås upp Electrum-plånboksfiler med dictionary attack (.zip)
-- **Ciphertext Unlock** – brute force ciphertext med dictionary attack (.zip)
-
-### Externa länkar
-
-- **Learn Me A Bitcoin** – teknisk information om Bitcoin
-- **USDT Freeze Checker** – Blocksec
-- **OSINT4ALL** – kollektion av OSINT-verktyg
+| Exodus seed.seco Unlock | Brute force av Exodus `seed.seco`-filer (dictionary attack) |
+| Electrum Wallet Unlock | Brute force av Electrum-plånboksfiler (dictionary attack) |
+| MetaMask Vault Decryptor | Brute force av MetaMask-vault (dictionary attack) |
+| Ethereum Keystore Unlock | Brute force av Ethereum keystore (dictionary attack) |
 
 ## Kom igång
 
@@ -93,9 +77,6 @@ npm run dist:installer  # bara NSIS-installer
 npm run dist:portable   # bara portable .exe
 ```
 
-Alla `dist`-kommandon kör först `sync-version` (matchar `package.json`-versionen) och
-`finalize-artifacts` (namnger/flyttar färdiga filer i `release/`) automatiskt.
-
 **CI (rekommenderas):** GitHub Actions bygger Windows-appen och publicerar en Release
 (`.github/workflows/build-windows-app.yml`) vid push till `main`. Ändringar som bara
 rör `.md`-filer triggar ingen ny build.
@@ -108,7 +89,7 @@ rör `.md`-filer triggar ingen ny build.
 | Windows portable | `npm run dist:portable` | `release/Verktygslådan-Portable-*.exe` |
 | Windows (båda) | `npm run dist` | `release/*.exe` |
 
-## Lägga till ett verktyg
+## Lägga till ett eget verktyg
 
 1. Skapa `tools/<namn>/` med HTML/JS/CSS
 2. Lägg till en knapp i `Toolbox.html` med `data-type="frame"` och `data-src="tools/<namn>/..."`
@@ -118,3 +99,8 @@ rör `.md`-filer triggar ingen ny build.
 
 - CyberChef: [GCHQ/CyberChef](https://github.com/gchq/CyberChef)
 - BIP39 Mnemonic Code Converter & Bitcoin Key Compression Tool: [GitHub/iancoleman](https://github.com/iancoleman)
+- QR-avkodning: [cozmo/jsQR](https://github.com/cozmo/jsQR)
+
+## Licens
+
+Släppt under [MIT-licensen](LICENSE). © 2026 Adrian Neshad.
