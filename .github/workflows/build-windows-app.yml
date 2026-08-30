@@ -79,6 +79,8 @@ jobs:
             Automatiskt byggd från commit ${{ github.sha }}.
 
             - **Verktygslådan${{ steps.version.outputs.version }}.exe** — portabel version, behöver inte installeras. Ladda ner och dubbelklicka.
+            - **magic.html** — fristående Magic Tool i en enda fil. Ladda ner och öppna direkt i webbläsaren, inget annat krävs.
 
           files: |
             release/Verktygslådan${{ steps.version.outputs.version }}.exe
+            tools/Magic/magic.html
