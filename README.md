@@ -4,6 +4,9 @@ Lokal verktygslåda för **kryptografi och krypto-forensik**. Körs helt offline
 
 ## Verktyg (v2.6)
 
+<img width="1511" height="822" alt="Screenshot 2026-09-05 at 13 54 32" src="https://github.com/user-attachments/assets/58f8262b-782b-4752-b2bf-ac77677ee86b" />
+<img width="1512" height="826" alt="Screenshot 2026-09-05 at 13 59 09" src="https://github.com/user-attachments/assets/d7945323-7cec-4900-8bf6-61f68b34ee03" />
+
 ### Konvertering & Format
 
 | Verktyg | Beskrivning |
