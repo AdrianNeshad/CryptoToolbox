@@ -112,7 +112,7 @@ rör `.md`-filer triggar ingen ny build.
 - Time Converter: [Overwatched/Forensics-Toolbox](https://github.com/Overwatched/Forensics-Toolbox)
 - CyberChef: [GCHQ/CyberChef](https://github.com/gchq/CyberChef)
 - QR-avkodning: [cozmo/jsQR](https://github.com/cozmo/jsQR)
-- BIP39 Mnemonic Code Converter & Bitcoin Key Compression Tool: [GitHub/iancoleman](https://github.com/iancoleman)
+- BIP39: [iancoleman/bip39](https://github.com/iancoleman/bip39)
 
 ## Licens
 
