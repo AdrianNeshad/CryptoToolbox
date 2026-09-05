@@ -31,11 +31,11 @@
 
         <header class="page-header">
             <h1>JSON Formatter</h1>
-            <p>Formatera, minifiera och validera JSON-data</p>
+            <p>Formatera och minifiera JSON-data eller avkoda JSON Web Token</p>
         </header>
 
         <div id="json-box">
-            <textarea id="json-input" spellcheck="false" placeholder="Klistra in JSON här..."></textarea>
+            <textarea id="json-input" spellcheck="false" placeholder="Klistra in JSON eller JSON Web Token här..."></textarea>
         </div>
 
         <div class="button-row">
@@ -55,12 +55,13 @@
         </div>
 
         <div class="button-row">
-            <button id="validate-button" class="secondary">
+            <button id="jwt-button">
                 <svg viewBox="0 0 24 24" fill="none">
-                    <path d="M12 3L4 7V12C4 17 7.5 20 12 21C16.5 20 20 17 20 12V7L12 3Z" stroke="currentColor"
-                        stroke-width="1.8" />
+                    <circle cx="8" cy="12" r="3.2" stroke="currentColor" stroke-width="1.8" />
+                    <path d="M11.2 12H20M17 12V15M20 12V16" stroke="currentColor" stroke-width="1.8"
+                        stroke-linecap="round" />
                 </svg>
-                Validera
+                Decode JWT
             </button>
 
             <button id="clear-button" class="secondary">

@@ -17,7 +17,7 @@ Lokal verktygslåda för **kryptografi och krypto-forensik**. Körs helt offline
 | Magic Tool | Klistra in valfri text — nycklar, adresser, entropi och krypteringsmetadata identifieras automatiskt |
 | BIP38 Key Compression | Komprimera/dekomprimera Bitcoin-nycklar |
 | QR Code Decoder | Avkoda QR-koder från bilder |
-| JSON Formatter | Compact JSON → pretty print / validera |
+| JSON Formatter | Compact JSON → pretty print / minifiera, avkodar även JWT |
 | Time Converter | Konvertera tidsstämplar (Unix, Apple NSDate, WebKit, FILETIME, m.m.) |
 
 ### BIP39 & Seed

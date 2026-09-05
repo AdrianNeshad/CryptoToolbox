@@ -238,9 +238,28 @@ main {
 
 .input-toolbar {
     display: flex;
-    justify-content: flex-end;
+    justify-content: space-between;
     align-items: center;
     gap: 16px;
+}
+
+.toolbar-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+}
+
+#file-name {
+    font-size: 12.5px;
+    color: var(--text-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+#file-name.error {
+    color: var(--error);
 }
 
 .toolbar-right {
@@ -265,7 +284,8 @@ main {
 }
 
 #clear-button,
-#testdata-button {
+#testdata-button,
+#file-button {
     font-family: inherit;
     font-size: 12.5px;
     font-weight: 650;
@@ -278,9 +298,16 @@ main {
     transition: border-color 0.15s ease, color 0.15s ease;
 }
 
-#clear-button:hover {
+#clear-button:hover,
+#file-button:hover {
     border-color: var(--border-hover);
     color: var(--text);
+}
+
+/* Dragover: samma visuella tillstånd som fokus på inmatningsrutan */
+#input-box.dragover {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-soft);
 }
 
 #testdata-button {
@@ -400,6 +427,10 @@ main {
         align-items: stretch;
     }
 
+    .toolbar-left {
+        justify-content: flex-start;
+    }
+
     .toolbar-right {
         flex-direction: row;
         align-items: center;
@@ -514,7 +545,7 @@ main {
 
         <header class="page-header">
             <h1>Magic Tool</h1>
-            <p>Klistra in valfri text - nycklar, adresser, entropy och krypteringsmetadata identifieras automatiskt</p>
+            <p>Klistra in text eller läs in en fil - nycklar, adresser, entropy och krypteringsmetadata identifieras automatiskt</p>
         </header>
 
         <div class="content">
@@ -522,10 +553,15 @@ main {
             <div class="tool-column">
 
                 <div id="input-box">
-                    <textarea id="input" spellcheck="false" placeholder="Klistra in text här: wallet-JSON, minnesdump, loggar, nycklar, adresser..."></textarea>
+                    <textarea id="input" spellcheck="false" placeholder="Klistra in text eller släpp en fil här: wallet-JSON, minnesdump, loggar, nycklar, adresser..."></textarea>
                 </div>
 
                 <div class="input-toolbar">
+                    <div class="toolbar-left">
+                        <button id="file-button" type="button">Läs in fil…</button>
+                        <span id="file-name"></span>
+                        <input type="file" id="file-input" hidden>
+                    </div>
                     <div class="toolbar-right">
                         <span id="result-count"></span>
                         <div class="toolbar-buttons">
@@ -536,7 +572,7 @@ main {
                 </div>
 
                 <div class="empty-state" id="empty-state">
-                    <p>Klistra in text ovan för att identifiera kryptorelaterat innehåll</p>
+                    <p>Klistra in text eller läs in en fil ovan för att identifiera kryptorelaterat innehåll</p>
                 </div>
 
                 <div id="results" class="display-none"></div>
@@ -3231,6 +3267,10 @@ var emptyStateText = emptyState.querySelector("p");
 var emptyStateDefaultText = emptyStateText.textContent;
 var resultCount = document.getElementById("result-count");
 var toast = document.getElementById("toast");
+var inputBox = document.getElementById("input-box");
+var fileButton = document.getElementById("file-button");
+var fileInput = document.getElementById("file-input");
+var fileNameEl = document.getElementById("file-name");
 
 var CH = window.CryptoHelpers;
 
@@ -4332,6 +4372,126 @@ var TEST_DATA = [
     "Gt0LbTeSg9EFVayQ/H1YC/GwV+4pq95JnPA0s/D8QkI=",
 ].join("\n");
 
+// ---------- Filinläsning ----------
+// Filer läses lokalt med File API - inget innehåll lämnar datorn. Texten hamnar
+// i inmatningsrutan så att den går att redigera och skannas som vanlig inmatning.
+// Filändelsen avgör ingenting: innehållet sniffas, så filer utan ändelse
+// (t.ex. Geth-keystores, "UTC--2024-...") fungerar också.
+
+var MAX_FILE_BYTES = 5 * 1024 * 1024;
+var SNIFF_BYTES = 4096;
+
+function formatFileSize(bytes) {
+    if (bytes < 1024) return bytes + " B";
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1).replace(".", ",") + " KB";
+    return (bytes / (1024 * 1024)).toFixed(1).replace(".", ",") + " MB";
+}
+
+function setFileName(text, isError) {
+    fileNameEl.textContent = text;
+    fileNameEl.classList.toggle("error", !!isError);
+    fileNameEl.title = text;
+}
+
+function hasNulByte(sample) {
+    for (var i = 0; i < sample.length; i++) {
+        if (sample[i] === 0) return true;
+    }
+    return false;
+}
+
+// BOM-lös UTF-16 känns igen på att varannan byte är NUL i vanlig text.
+// offset 1 = little endian ("a\0b\0"), offset 0 = big endian ("\0a\0b").
+function looksLikeUtf16(sample, offset) {
+    var nuls = 0;
+    var total = 0;
+
+    for (var i = offset; i < sample.length; i += 2) {
+        total++;
+        if (sample[i] === 0) nuls++;
+    }
+
+    return total > 8 && nuls / total > 0.6;
+}
+
+// Många ersättningstecken efter UTF-8-avkodning betyder oftast Latin-1/Windows-1252
+function decodeUtf8(bytes) {
+    var text = new TextDecoder("utf-8").decode(bytes);
+    var broken = (text.match(/\ufffd/g) || []).length;
+
+    if (broken > 0 && broken / Math.max(text.length, 1) > 0.002) {
+        return { text: new TextDecoder("windows-1252").decode(bytes), encoding: "Windows-1252" };
+    }
+
+    return { text: text, encoding: "UTF-8" };
+}
+
+// Returnerar {text, encoding} för textfiler, null för binära filer
+function decodeFileBytes(buffer) {
+    var bytes = new Uint8Array(buffer);
+
+    if (bytes.length >= 2 && bytes[0] === 0xff && bytes[1] === 0xfe) {
+        return { text: new TextDecoder("utf-16le").decode(bytes.subarray(2)), encoding: "UTF-16LE" };
+    }
+
+    if (bytes.length >= 2 && bytes[0] === 0xfe && bytes[1] === 0xff) {
+        return { text: new TextDecoder("utf-16be").decode(bytes.subarray(2)), encoding: "UTF-16BE" };
+    }
+
+    if (bytes.length >= 3 && bytes[0] === 0xef && bytes[1] === 0xbb && bytes[2] === 0xbf) {
+        return { text: new TextDecoder("utf-8").decode(bytes.subarray(3)), encoding: "UTF-8" };
+    }
+
+    var sample = bytes.subarray(0, SNIFF_BYTES);
+
+    if (hasNulByte(sample)) {
+        if (looksLikeUtf16(sample, 1)) {
+            return { text: new TextDecoder("utf-16le").decode(bytes), encoding: "UTF-16LE" };
+        }
+
+        if (looksLikeUtf16(sample, 0)) {
+            return { text: new TextDecoder("utf-16be").decode(bytes), encoding: "UTF-16BE" };
+        }
+
+        return null;
+    }
+
+    return decodeUtf8(bytes);
+}
+
+async function loadFile(file) {
+    if (!file) return;
+
+    if (file.size > MAX_FILE_BYTES) {
+        setFileName(file.name + " - för stor (max " + formatFileSize(MAX_FILE_BYTES) + ")", true);
+        return;
+    }
+
+    var decoded;
+
+    try {
+        decoded = decodeFileBytes(await file.arrayBuffer());
+    }
+
+    catch (e) {
+        setFileName(file.name + " - kunde inte läsas", true);
+        return;
+    }
+
+    if (!decoded) {
+        setFileName(file.name + " - binär fil, stöds inte än", true);
+        return;
+    }
+
+    input.value = decoded.text;
+
+    var label = file.name + " (" + formatFileSize(file.size) + ")";
+    if (decoded.encoding !== "UTF-8") label += " · " + decoded.encoding;
+
+    setFileName(label, false);
+    scheduleScan();
+}
+
 // ---------- Init & event-koppling ----------
 
 var scanTimer = null;
@@ -4350,19 +4510,54 @@ async function runScan() {
     render(findings, text);
 }
 
-input.addEventListener("input", scheduleScan);
+// Egen inmatning ersätter filens innehåll - då är filnamnet inte längre sant
+input.addEventListener("input", function () {
+    setFileName("", false);
+    scheduleScan();
+});
 
 clearButton.addEventListener("click", function () {
     input.value = "";
+    setFileName("", false);
     render([], "");
     input.focus();
 });
 
 testdataButton.addEventListener("click", function () {
     input.value = TEST_DATA;
+    setFileName("", false);
     scheduleScan();
     input.focus();
 });
+
+fileButton.addEventListener("click", function () {
+    fileInput.click();
+});
+
+fileInput.addEventListener("change", function () {
+    loadFile(fileInput.files[0]);
+    fileInput.value = ""; // gör att samma fil kan läsas in igen
+});
+
+// Drag & drop på inmatningsrutan
+inputBox.addEventListener("dragover", function (e) {
+    e.preventDefault();
+    inputBox.classList.add("dragover");
+});
+
+inputBox.addEventListener("dragleave", function (e) {
+    if (!inputBox.contains(e.relatedTarget)) inputBox.classList.remove("dragover");
+});
+
+inputBox.addEventListener("drop", function (e) {
+    e.preventDefault();
+    inputBox.classList.remove("dragover");
+    loadFile(e.dataTransfer.files[0]);
+});
+
+// Hindrar webbläsaren från att öppna filen om den släpps utanför rutan
+document.addEventListener("dragover", function (e) { e.preventDefault(); });
+document.addEventListener("drop", function (e) { e.preventDefault(); });
 
 renderLegend();
 render([], "");
