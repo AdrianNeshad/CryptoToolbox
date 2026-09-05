@@ -2,7 +2,7 @@
 
 Lokal verktygslåda för **kryptografi och krypto-forensik**. Körs helt offline via Electron (eller ladda ner källkoden och öppna `Toolbox.html` i webbläsaren).
 
-## Verktyg (v2.6)
+## Verktyg (v2.8)
 
 ### Magic Tool - Klistra in valfri text och detektera kryptorelaterade strängar med checksum-verifiering
 <img width="1511" height="822" alt="Screenshot 2026-09-05 at 13 54 32" src="https://github.com/user-attachments/assets/58f8262b-782b-4752-b2bf-ac77677ee86b" />
