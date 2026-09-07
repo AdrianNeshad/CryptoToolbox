@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="sv">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monero .keys Unlock</title>
+    <script>
+        (function () {
+            try {
+                var params = new URLSearchParams(location.search);
+                var fromParent = params.get('theme');
+                var saved = localStorage.getItem('theme');
+                var theme = (fromParent === 'light' || fromParent === 'dark') ? fromParent
+                    : (saved === 'light' || saved === 'dark') ? saved : 'dark';
+                document.documentElement.setAttribute('data-theme', theme);
+                if (fromParent === 'light' || fromParent === 'dark') {
+                    localStorage.setItem('theme', fromParent);
+                }
+            } catch (e) {
+                document.documentElement.setAttribute('data-theme', 'dark');
+            }
+        })();
+    </script>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <div id="container">
+
+        <header class="page-header">
+            <h1>Monero .keys Unlock</h1>
+            <p>Dictionary-attack som låser upp en Monero <code>.keys</code>-fil och extraherar seed-phrase samt nycklar &mdash;
+                allt körs lokalt i webbläsaren, inget lämnar din dator.</p>
+        </header>
+
+        <div class="panel-row">
+
+            <!-- Steg 1: .keys-fil -->
+            <div class="panel">
+                <div class="panel-head">
+                    <span class="step-num">1</span>
+                    <span class="panel-title">Välj <code>.keys</code>-fil</span>
+                </div>
+                <p class="hint">Hittas där du sparade plånboken (Monero GUI/CLI), eller i <code>Monero/wallets/</code>.</p>
+                <div class="file-row">
+                    <button type="button" class="secondary" id="keys-btn">Välj .keys-fil…</button>
+                    <span class="file-name" id="keys-name">Ingen fil vald</span>
+                </div>
+                <input type="file" id="keys-input" accept=".keys,application/octet-stream" hidden>
+            </div>
+
+            <!-- Steg 2: lösenordslista -->
+            <div class="panel">
+                <div class="panel-head">
+                    <span class="step-num">2</span>
+                    <span class="panel-title">Lösenord</span>
+                </div>
+                <p class="hint">Klistra in ett lösenord per rad, eller ladda in en <code>.txt</code>-fil.</p>
+                <div class="file-row">
+                    <button type="button" class="secondary" id="pw-btn">Läs in .txt-fil…</button>
+                    <span class="file-name" id="pw-name"></span>
+                    <span class="pw-count" id="pw-count"></span>
+                </div>
+                <input type="file" id="pw-input" accept=".txt,text/plain" hidden>
+                <textarea id="pw-list" spellcheck="false" autocomplete="off"
+                    placeholder="lösenord1&#10;lösenord2&#10;lösenord3&#10;…"></textarea>
+            </div>
+
+        </div><!-- /panel-row -->
+
+        <details class="advanced">
+            <summary>Avancerat</summary>
+            <div class="advanced-grid">
+                <div class="advanced-field">
+                    <label for="kdf-rounds">KDF-rundor</label>
+                    <input type="number" id="kdf-rounds" value="1" min="1" max="100" step="1" autocomplete="off">
+                    <p class="hint" style="margin-top:6px">Nästan alltid <code>1</code>. Ändra bara om plånboken skapades
+                        med<code>--kdf-rounds N</code>.</p>
+                </div>
+                <div class="advanced-field">
+                    <label for="net">Nätverk</label>
+                    <select id="net" autocomplete="off">
+                        <option value="auto">Auto (läs från filen)</option>
+                        <option value="18">Mainnet</option>
+                        <option value="53">Testnet</option>
+                        <option value="24">Stagenet</option>
+                    </select>
+                    <p class="hint" style="margin-top:6px">Styr adressens prefix. Auto använder fältet i filen.</p>
+                </div>
+            </div>
+        </details>
+
+        <div class="info-box">
+            Varje lösenord kräver en <strong>CryptoNight</strong>-beräkning (~0,5&ndash;1 s per lösenord). Monero är
+            avsiktligt långsamt att brute force:a, så långa listor tar tid. Datorn kan kännas trög medan det körs.
+        </div>
+
+        <!-- Progress -->
+        <div class="progress-wrap display-none" id="progress-wrap">
+            <div class="progress-track">
+                <div class="progress-bar" id="progress-bar"></div>
+            </div>
+            <div class="progress-status" id="progress-status"></div>
+        </div>
+
+        <!-- Output / resultat -->
+        <div class="output-wrap">
+            <div class="output-head">
+                <span>Resultat</span>
+                <div class="output-head-actions">
+                    <button id="run-btn">Kör</button>
+                    <button id="stop-btn" class="danger display-none">Stoppa</button>
+                    <button type="button" class="clear-btn" id="clear-btn">Rensa</button>
+                </div>
+            </div>
+            <div class="result-panel display-none" id="result-panel"></div>
+            <pre id="output">Väntar på .keys-fil och lösenord…</pre>
+        </div>
+
+        <div id="toast" class="toast"></div>
+
+    </div>
+
+    <!-- CryptoNight (variant 0) — pure-JS, cn_slow_hash-global. Ordningen är viktig. -->
+    <script src="vendor/cryptonight/sha3.js"></script>
+    <script src="vendor/cryptonight/aes.js"></script>
+    <script src="vendor/cryptonight/blake256.js"></script>
+    <script src="vendor/cryptonight/groestl-256.js"></script>
+    <script src="vendor/cryptonight/jh.js"></script>
+    <script src="vendor/cryptonight/skein.js"></script>
+    <script src="vendor/cryptonight/slowhash.js"></script>
+    <!-- Monero-ordlista + dekrypteringslogik -->
+    <script src="wordlist.js"></script>
+    <script src="monero-crypto.js"></script>
+    <script src="script.js"></script>
+
+</body>
+
+</html>

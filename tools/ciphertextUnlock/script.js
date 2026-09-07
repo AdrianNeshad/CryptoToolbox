@@ -2,7 +2,7 @@
    Ciphertext Unlock — porterad från ciphertextUnlock (Node).
    Multi-format-dekryptor som körs helt lokalt via WebCrypto, BigInt (keccak256)
    och en ren-JS scrypt. Stödjer:
-     • Ethereum / TrustWallet V3  (scrypt + AES-128-CTR + keccak256-MAC)
+     • Ethereum / TrustWallet V3  (scrypt eller pbkdf2 + AES-128-CTR + keccak256-MAC)
      • CryptoJS                   (PBKDF2 gissas + AES-CBC)
      • PBKDF2-vault               (PBKDF2 + AES-256-GCM/CBC)
      • Generic AES                (PBKDF2 + AES-256-CTR, ingen MAC)
@@ -171,10 +171,23 @@ async function aesGcmDecrypt(data, key, iv, authTag) {
 }
 
 /* ---------- wallet-format ---------- */
+async function deriveEthereumKey(c, password) {
+    const kp = c.kdfparams;
+    const kdf = String(c.kdf).toLowerCase();
+    if (kdf === 'scrypt') {
+        return scrypt(utf8(password), hexToBytes(kp.salt), kp.n, kp.r, kp.p, kp.dklen);
+    }
+    if (kdf === 'pbkdf2') {
+        const prf = String(kp.prf || 'hmac-sha256').toLowerCase();
+        if (prf !== 'hmac-sha256') throw new Error('PBKDF2-prf stöds inte: ' + kp.prf);
+        return pbkdf2(utf8(password), hexToBytes(kp.salt), kp.c, kp.dklen, 'SHA-256');
+    }
+    throw new Error('Okänd Ethereum-KDF: ' + c.kdf);
+}
+
 async function decryptEthereum(wallet, password) {
     const c = wallet.crypto || wallet.Crypto;
-    const kp = c.kdfparams;
-    const key = await scrypt(utf8(password), hexToBytes(kp.salt), kp.n, kp.r, kp.p, kp.dklen);
+    const key = await deriveEthereumKey(c, password);
     const ciphertext = hexToBytes(c.ciphertext);
     const mac = bytesToHex(keccak256(concatBytes(key.subarray(16, 32), ciphertext)));
     if (mac !== String(c.mac).toLowerCase()) throw new Error('Fel MAC');
@@ -243,8 +256,10 @@ function detectFormat(wallet) {
     }
     const c = wallet.crypto || wallet.Crypto;
     if (!c) throw new Error('Ingen crypto-struktur hittades (crypto/Crypto, eller cipher+iv+salt).');
-    if (c.cipher && String(c.cipher).toLowerCase() === 'aes-128-ctr' && c.kdf === 'scrypt') {
-        return { name: 'Ethereum / TrustWallet V3', decrypt: decryptEthereum, verified: true };
+    if (c.cipher && String(c.cipher).toLowerCase() === 'aes-128-ctr' &&
+        c.kdf && ['scrypt', 'pbkdf2'].includes(String(c.kdf).toLowerCase())) {
+        const kdfLabel = String(c.kdf).toLowerCase();
+        return { name: 'Ethereum / TrustWallet V3 (' + kdfLabel + ')', decrypt: decryptEthereum, verified: true };
     }
     return { name: 'Generic AES', decrypt: decryptGeneric, verified: false };
 }

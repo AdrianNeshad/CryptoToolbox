@@ -47,6 +47,7 @@ Lokal verktygslåda för **kryptografi och krypto-forensik**. Körs helt offline
 
 | Verktyg | Beskrivning |
 |---------|-------------|
+| Monero .keys Recovery | Brute force av Monero .keys-filer (dictionary attack) |
 | Exodus seed.seco Unlock | Brute force av Exodus `seed.seco`-filer (dictionary attack) |
 | Electrum Wallet Unlock | Brute force av Electrum-plånboksfiler (dictionary attack) |
 | MetaMask Vault Decryptor | Brute force av MetaMask-vault (dictionary attack) |
