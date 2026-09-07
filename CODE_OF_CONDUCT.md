@@ -1,0 +1,3 @@
+# “The blade itself incites to deeds of violence.” - Homer, The Odyssey
+
+## Use responsibly
