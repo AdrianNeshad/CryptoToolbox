@@ -118,3 +118,6 @@ rör `.md`-filer triggar ingen ny build.
 ## Licens
 
 Släppt under [MIT-licensen](LICENSE). © 2026 Adrian Neshad.
+
+### “The blade itself incites to deeds of violence.” - Homer, The Odyssey
+### Use responsibly
