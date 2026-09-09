@@ -1,14 +1,14 @@
 /* =========================================================================
-   MetaMask Vault Decryptor — dictionary-variant.
+   MetaMask Vault Decryptor — dictionary variant.
 
-   Dekrypteringskärnan är porterad byte-för-byte från
-   @metamask/browser-passworder (samma paket som MetaMasks officiella
-   vault-decryptor använder):
-     PBKDF2-SHA256  → nyckelsträckning (iterationer från vaultens keyMetadata,
-                      10 000 för äldre vaults utan keyMetadata)
-     AES-256-GCM    → dekryptering (auth-tag-fel = fel lösenord)
-   Vault-extraheringen (paste / fil / Chrome-loggformat) är porterad från
-   vault-decryptor/app/lib.js. Allt körs lokalt via WebCrypto.
+   The decryption core is ported byte-by-byte from
+   @metamask/browser-passworder (the same package that MetaMask's official
+   vault decryptor uses):
+     PBKDF2-SHA256  → key stretching (iterations from the vault's keyMetadata,
+                      10,000 for older vaults without keyMetadata)
+     AES-256-GCM    → decryption (auth-tag error = wrong password)
+   The vault extraction (paste / file / Chrome log format) is ported from
+   vault-decryptor/app/lib.js. Everything runs locally via WebCrypto.
    ========================================================================= */
 
 /* ---------- base64 → bytes ---------- */
@@ -20,7 +20,7 @@ function b64ToBytes(b64) {
     return out;
 }
 
-/* ---------- nyckelhärledning + dekryptering (browser-passworder-port) ---------- */
+/* ---------- key derivation + decryption (browser-passworder port) ---------- */
 
 async function deriveKey(password, saltB64, iterations) {
     const pwBytes = new TextEncoder().encode(password);
@@ -36,23 +36,23 @@ async function deriveKey(password, saltB64, iterations) {
 }
 
 function vaultIterations(vault) {
-    // browser-passworder: keyMetadata.params.iterations, annars OLD_DERIVATION_PARAMS (10000)
+    // browser-passworder: keyMetadata.params.iterations, otherwise OLD_DERIVATION_PARAMS (10000)
     return (vault.keyMetadata && vault.keyMetadata.params && vault.keyMetadata.params.iterations) || 10000;
 }
 
-/* Kastar OperationError vid fel lösenord (GCM-auth misslyckas). */
+/* Throws OperationError on a wrong password (GCM auth fails). */
 async function decryptVaultOnce(password, vault, key) {
     const cryptoKey = key || (await deriveKey(password, vault.salt, vaultIterations(vault)));
     const iv = b64ToBytes(vault.iv);
     const data = b64ToBytes(vault.data);
     const ptBuf = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, cryptoKey, data);
     const str = new TextDecoder().decode(new Uint8Array(ptBuf));
-    return JSON.parse(str); // array av keyrings
+    return JSON.parse(str); // array of keyrings
 }
 
 function decodeMnemonic(mnemonic) {
     if (typeof mnemonic === 'string') return mnemonic;
-    // modern MetaMask: array av UTF-8 byte-koder
+    // modern MetaMask: array of UTF-8 byte codes
     try { return new TextDecoder().decode(new Uint8Array(mnemonic)); }
     catch (e) { return String(mnemonic); }
 }
@@ -67,7 +67,7 @@ function collectMnemonics(keyrings) {
     return out;
 }
 
-/* ---------- vault-extrahering (port av app/lib.js) ---------- */
+/* ---------- vault extraction (port of app/lib.js) ---------- */
 
 function dedupe(arr) {
     const result = [];
@@ -88,9 +88,9 @@ function isVaultValid(vault) {
 
 function extractVaultFromFile(data) {
     let vaultBody;
-    try { return JSON.parse(data); } catch (err) { /* inte ren JSON */ }
+    try { return JSON.parse(data); } catch (err) { /* not pure JSON */ }
     {
-        // pre-v3 klartext
+        // pre-v3 plaintext
         const matches = data.match(/{"wallet-seed":"([^"}]*)"/);
         if (matches && matches.length) {
             const mnemonic = matches[1].replace(/\\n*/, '');
@@ -120,11 +120,11 @@ function extractVaultFromFile(data) {
                 const parts = [dataRegex, ivRegex, saltRegex, keyMetaRegex]
                     .map(r => frag.match(r)).map(m => m[1]);
                 return { data: parts[0], iv: parts[1], salt: parts[2], keyMetadata: JSON.parse(parts[3].replaceAll('\\', '')) };
-            } catch (err) { /* fortsätt */ }
+            } catch (err) { /* continue */ }
         }
     }
     {
-        // chromium 0000056.log (macOS, med keyringsMetadata)
+        // chromium 0000056.log (macOS, with keyringsMetadata)
         const matches = data.match(/"KeyringController":(\{.*?"vault":".*?=\\"\}"\})/);
         if (matches && matches.length) {
             try {
@@ -136,7 +136,7 @@ function extractVaultFromFile(data) {
                 const parts = [dataRegex, ivRegex, saltRegex, keyMetaRegex]
                     .map(r => frag.match(r)).map(m => m[1]);
                 return { data: parts[0], iv: parts[1], salt: parts[2], keyMetadata: JSON.parse(parts[3].replaceAll('\\', '')) };
-            } catch (err) { /* fortsätt */ }
+            } catch (err) { /* continue */ }
         }
     }
     {
@@ -153,7 +153,7 @@ function extractVaultFromFile(data) {
         if (vaults.length) return vaults[0];
     }
     {
-        // split state-format, chromium 000004.log (windows-2)
+        // split state format, chromium 000004.log (windows-2)
         const vaultRegex = /KeyringController[\s\S]*?"vault":"((?:[^"\\]|\\.)*)"/g;
         const vaults = [];
         let match;
@@ -161,7 +161,7 @@ function extractVaultFromFile(data) {
             try {
                 const vaultString = JSON.parse(`"${match[1]}"`);
                 vaults.push(JSON.parse(vaultString));
-            } catch (err) { /* fortsätt */ }
+            } catch (err) { /* continue */ }
         }
         const deduped = dedupe(vaults);
         if (deduped.length) return deduped[0];
@@ -169,21 +169,21 @@ function extractVaultFromFile(data) {
     return null;
 }
 
-/* Tolkar textrutan: ren JSON eller ett inklistrat loggformat. */
+/* Parses the text box: pure JSON or a pasted log format. */
 function parseVaultText(text) {
     const trimmed = text.trim();
     if (!trimmed) return null;
     try {
         const v = JSON.parse(trimmed);
         if (isVaultValid(v) || (v && v.data && v.data.mnemonic)) return v;
-    } catch (e) { /* prova extrahering nedan */ }
+    } catch (e) { /* try extraction below */ }
     const v2 = extractVaultFromFile(trimmed);
     if (v2 && (isVaultValid(v2) || (v2.data && v2.data.mnemonic))) return v2;
     return null;
 }
 
 /* =========================================================================
-   UI  (harness speglat från secoUnlock)
+   UI  (harness mirrored from secoUnlock)
    ========================================================================= */
 
 const $ = id => document.getElementById(id);
@@ -212,7 +212,7 @@ const toast = $('toast');
 let running = false;
 let stopRequested = false;
 
-/* MessageChannel-baserad yield (som secoUnlock) */
+/* MessageChannel-based yield (like secoUnlock) */
 const _mc = new MessageChannel();
 let _yieldResolve = null;
 _mc.port1.onmessage = () => { if (_yieldResolve) { const r = _yieldResolve; _yieldResolve = null; r(); } };
@@ -220,7 +220,7 @@ function yieldToUI() {
     return new Promise(resolve => { _yieldResolve = resolve; _mc.port2.postMessage(0); });
 }
 
-/* ---------- output-logg ---------- */
+/* ---------- output log ---------- */
 
 function log(text, cls) {
     const span = document.createElement('span');
@@ -238,7 +238,7 @@ function showToast(text) {
     setTimeout(() => toast.classList.remove('show'), 2200);
 }
 
-/* ---------- lösenordsräknare ---------- */
+/* ---------- password counter ---------- */
 
 function parsePasswords() {
     return pwList.value.split('\n').map(p => p.replace(/\r$/, '')).filter(p => p.length > 0);
@@ -246,7 +246,7 @@ function parsePasswords() {
 
 function updatePwCount() {
     const n = parsePasswords().length;
-    pwCount.textContent = n > 0 ? `${n} lösenord` : '';
+    pwCount.textContent = n > 0 ? `${n} passwords` : '';
 }
 
 pwList.addEventListener('input', updatePwCount);
@@ -262,14 +262,14 @@ function setVaultName(text, state, title) {
 
 function refreshVaultState() {
     const text = vaultText.value.trim();
-    if (!text) { setVaultName('Ingen vault inläst', null); return null; }
+    if (!text) { setVaultName('No vault loaded', null); return null; }
     const vault = parseVaultText(text);
     if (vault && vault.data && vault.data.mnemonic) {
-        setVaultName('Okrypterad vault (seed i klartext)', 'valid', 'Vaulten är redan dekrypterad');
+        setVaultName('Unencrypted vault (seed in plaintext)', 'valid', 'The vault is already decrypted');
     } else if (vault) {
-        setVaultName(`Giltig vault — PBKDF2 ${vaultIterations(vault).toLocaleString('sv-SE')} iterationer`, 'valid');
+        setVaultName(`Valid vault — PBKDF2 ${vaultIterations(vault).toLocaleString('en-US')} iterations`, 'valid');
     } else {
-        setVaultName('Ogiltig vault-data', 'invalid', 'Kunde inte hitta {data, iv, salt}');
+        setVaultName('Invalid vault data', 'invalid', 'Could not find {data, iv, salt}');
     }
     return vault;
 }
@@ -291,7 +291,7 @@ vaultInput.addEventListener('change', async () => {
         }
         refreshVaultState();
     } catch (e) {
-        setVaultName('Kunde inte läsa filen', 'invalid');
+        setVaultName('Could not read the file', 'invalid');
     }
 });
 
@@ -306,12 +306,12 @@ pwInput.addEventListener('change', async () => {
         pwName.classList.add('set');
         updatePwCount();
     } catch (e) {
-        pwName.textContent = 'Kunde inte läsa filen';
+        pwName.textContent = 'Could not read the file';
         pwName.classList.remove('set');
     }
 });
 
-/* ---------- körning ---------- */
+/* ---------- run ---------- */
 
 function setRunning(state) {
     running = state;
@@ -342,10 +342,10 @@ function showResult(success, titleText, fields) {
         if (f.copy !== false) {
             const btn = document.createElement('button');
             btn.className = 'copy-btn';
-            btn.textContent = 'Kopiera';
+            btn.textContent = 'Copy';
             btn.addEventListener('click', () => {
                 navigator.clipboard.writeText(f.value);
-                showToast(f.label + ' kopierad');
+                showToast(f.label + ' copied');
             });
             valueRow.appendChild(btn);
         }
@@ -358,9 +358,9 @@ function showResult(success, titleText, fields) {
 function mnemonicFields(mnemonics, extra) {
     const fields = (extra || []);
     if (mnemonics.length === 1) {
-        fields.push({ label: 'Seed-fras (mnemonic)', value: mnemonics[0] });
+        fields.push({ label: 'Seed phrase (mnemonic)', value: mnemonics[0] });
     } else if (mnemonics.length > 1) {
-        mnemonics.forEach((m, i) => fields.push({ label: `Seed-fras #${i + 1}`, value: m }));
+        mnemonics.forEach((m, i) => fields.push({ label: `Seed phrase #${i + 1}`, value: m }));
     }
     return fields;
 }
@@ -368,30 +368,30 @@ function mnemonicFields(mnemonics, extra) {
 runBtn.addEventListener('click', run);
 stopBtn.addEventListener('click', () => {
     stopRequested = true;
-    progressStatus.textContent = 'Stoppar…';
+    progressStatus.textContent = 'Stopping…';
 });
 
 async function run() {
     if (running) return;
 
     const vault = refreshVaultState();
-    if (!vault) { showToast('Klistra in eller ladda giltig vault-data först'); return; }
+    if (!vault) { showToast('Paste or load valid vault data first'); return; }
 
     resultPanel.classList.add('display-none');
 
-    // Redan dekrypterad vault (klartext)
+    // Already decrypted vault (plaintext)
     if (vault.data && vault.data.mnemonic) {
         clearOutput();
         const mnemonic = decodeMnemonic(vault.data.mnemonic);
-        log('Vaulten var redan okrypterad — inget lösenord behövdes.', 'log-ok');
+        log('The vault was already unencrypted — no password was needed.', 'log-ok');
         log(`Mnemonic: ${mnemonic}`, 'log-hit');
-        showResult(true, '✓ Seed-fras extraherad (okrypterad vault)',
+        showResult(true, '✓ Seed phrase extracted (unencrypted vault)',
             mnemonicFields([mnemonic]));
         return;
     }
 
     const passwords = parsePasswords();
-    if (passwords.length === 0) { showToast('Lägg till minst ett lösenord'); return; }
+    if (passwords.length === 0) { showToast('Add at least one password'); return; }
 
     stopRequested = false;
     setRunning(true);
@@ -400,11 +400,11 @@ async function run() {
     clearOutput();
 
     const iterations = vaultIterations(vault);
-    log(`PBKDF2-SHA256 med ${iterations.toLocaleString('sv-SE')} iterationer per försök.`, 'log-muted');
+    log(`PBKDF2-SHA256 with ${iterations.toLocaleString('en-US')} iterations per attempt.`, 'log-muted');
     if (iterations >= 100000) {
-        log('OBS: MetaMasks nyckelsträckning är avsiktligt tung — varje lösenord tar en stund.', 'log-muted');
+        log('NOTE: MetaMask\'s key stretching is deliberately heavy — each password takes a while.', 'log-muted');
     }
-    log(`Testar ${passwords.length} lösenord…`, 'log-muted');
+    log(`Testing ${passwords.length} passwords…`, 'log-muted');
 
     const total = passwords.length;
     const t0 = performance.now();
@@ -412,12 +412,12 @@ async function run() {
 
     for (let i = 0; i < total; i++) {
         if (stopRequested) {
-            log(`\nStoppad av användaren vid ${i} av ${total}.`, 'log-err');
+            log(`\nStopped by the user at ${i} of ${total}.`, 'log-err');
             break;
         }
 
         const pw = passwords[i];
-        progressStatus.textContent = `[${i + 1}/${total}] testar: ${pw}`;
+        progressStatus.textContent = `[${i + 1}/${total}] testing: ${pw}`;
         progressBar.style.width = ((i / total) * 100).toFixed(1) + '%';
         await yieldToUI();
 
@@ -427,9 +427,9 @@ async function run() {
             found = { password: pw, mnemonics, keyrings, index: i + 1 };
             break;
         } catch (e) {
-            // OperationError = fel lösenord; annat = oväntat fel
+            // OperationError = wrong password; anything else = unexpected error
             if (e && e.name !== 'OperationError') {
-                log(`  [${i + 1}] "${pw}" → oväntat fel: ${e.message}`, 'log-err');
+                log(`  [${i + 1}] "${pw}" → unexpected error: ${e.message}`, 'log-err');
             }
         }
     }
@@ -438,29 +438,29 @@ async function run() {
     const secs = ((performance.now() - t0) / 1000).toFixed(1);
 
     if (found) {
-        progressStatus.textContent = `Klar — lösenord hittat på försök ${found.index} av ${total} (${secs}s)`;
-        log(`\n✓ MATCH på lösenord #${found.index}: ${found.password}`, 'log-hit');
+        progressStatus.textContent = `Done — password found on attempt ${found.index} of ${total} (${secs}s)`;
+        log(`\n✓ MATCH on password #${found.index}: ${found.password}`, 'log-hit');
         if (found.mnemonics.length) {
             found.mnemonics.forEach(m => log(`Mnemonic: ${m}`, 'log-ok'));
         } else {
-            log('Vaulten dekrypterades men innehöll ingen HD-mnemonic (t.ex. bara importerade nycklar).', 'log-ok');
+            log('The vault was decrypted but contained no HD mnemonic (e.g. only imported keys).', 'log-ok');
         }
-        const extra = [{ label: 'Lösenord', value: found.password }];
+        const extra = [{ label: 'Password', value: found.password }];
         let fields;
         if (found.mnemonics.length) {
             fields = mnemonicFields(found.mnemonics, extra);
         } else {
-            extra.push({ label: 'Dekrypterad vault (rå)', value: JSON.stringify(found.keyrings, null, 2) });
+            extra.push({ label: 'Decrypted vault (raw)', value: JSON.stringify(found.keyrings, null, 2) });
             fields = extra;
         }
-        showResult(true, '✓ Lösenord hittat!', fields);
+        showResult(true, '✓ Password found!', fields);
     } else if (stopRequested) {
-        progressStatus.textContent = `Stoppad (${secs}s)`;
+        progressStatus.textContent = `Stopped (${secs}s)`;
     } else {
-        progressStatus.textContent = `Klar — inget matchande lösenord (${secs}s)`;
-        log(`\n✗ Inget av de ${total} lösenorden matchade.`, 'log-err');
-        showResult(false, '✗ Inget matchande lösenord', [
-            { label: 'Resultat', value: `Testade ${total} lösenord utan träff. Kontrollera vault-datan eller lägg till fler lösenord.`, copy: false },
+        progressStatus.textContent = `Done — no matching password (${secs}s)`;
+        log(`\n✗ None of the ${total} passwords matched.`, 'log-err');
+        showResult(false, '✗ No matching password', [
+            { label: 'Result', value: `Tested ${total} passwords with no match. Check the vault data or add more passwords.`, copy: false },
         ]);
     }
 
@@ -469,18 +469,18 @@ async function run() {
 
 clearBtn.addEventListener('click', () => {
     clearOutput();
-    output.textContent = 'Väntar på körning…';
+    output.textContent = 'Waiting to run…';
     progressWrap.classList.add('display-none');
     resultPanel.classList.add('display-none');
 });
 
-/* ---------- temasynk med Verktygslådan ---------- */
+/* ---------- theme sync with CryptoToolbox ---------- */
 window.addEventListener('message', function (event) {
     if (event.source !== window.parent) return;
     var data = event.data;
-    if (data && data.source === 'verktygslada' && data.type === 'theme' &&
+    if (data && data.source === 'cryptotoolbox' && data.type === 'theme' &&
         (data.theme === 'light' || data.theme === 'dark')) {
         document.documentElement.setAttribute('data-theme', data.theme);
-        try { localStorage.setItem('theme', data.theme); } catch (e) { /* ignoreras */ }
+        try { localStorage.setItem('theme', data.theme); } catch (e) { /* ignored */ }
     }
 });

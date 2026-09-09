@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="sv">
+<html lang="en">
 
 <head>
     <meta charset="UTF-8">
@@ -31,11 +31,11 @@
 
         <header class="page-header">
             <h1>JSON Formatter</h1>
-            <p>Formatera och minifiera JSON-data eller avkoda JSON Web Token</p>
+            <p>Format and minify JSON data or decode a JSON Web Token</p>
         </header>
 
         <div id="json-box">
-            <textarea id="json-input" spellcheck="false" placeholder="Klistra in JSON eller JSON Web Token här..."></textarea>
+            <textarea id="json-input" spellcheck="false" placeholder="Paste JSON or a JSON Web Token here..."></textarea>
         </div>
 
         <div class="button-row">
@@ -43,14 +43,14 @@
                 <svg viewBox="0 0 24 24" fill="none">
                     <path d="M4 6H20M4 12H20M4 18H14" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
                 </svg>
-                Formattera
+                Format
             </button>
 
             <button id="minify-button">
                 <svg viewBox="0 0 24 24" fill="none">
                     <path d="M5 12H19" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
                 </svg>
-                Minifiera
+                Minify
             </button>
         </div>
 
@@ -65,17 +65,17 @@
             </button>
 
             <button id="clear-button" class="secondary">
-                Rensa
+                Clear
             </button>
         </div>
 
         <div id="status">
-            Ingen JSON laddad
+            No JSON loaded
         </div>
 
         <div id="json-result">
             <pre id="output">
-                Resultat visas här
+                Result appears here
             </pre>
         </div>
 
@@ -86,7 +86,7 @@
                     <path d="M5 15H4C3.4 15 3 14.6 3 14V4C3 3.4 3.4 3 4 3H14C14.6 3 15 3.4 15 4V5" stroke="currentColor"
                         stroke-width="1.6" />
                 </svg>
-                Kopiera JSON
+                Copy JSON
             </button>
         </div>
 

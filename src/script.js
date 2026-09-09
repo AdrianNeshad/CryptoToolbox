@@ -71,16 +71,16 @@ function initThemeToggle() {
         try {
             localStorage.setItem(THEME_KEY, value);
         } catch (e) {
-            /* localStorage otillgängligt (t.ex. privat läge) — temat gäller ändå för sessionen */
+            /* localStorage unavailable (e.g. private mode) — the theme still applies for the session */
         }
     }
 
     function broadcastTheme(value) {
         if (frame && frame.contentWindow) {
             try {
-                frame.contentWindow.postMessage({ source: 'verktygslada', type: 'theme', theme: value }, '*');
+                frame.contentWindow.postMessage({ source: 'cryptotoolbox', type: 'theme', theme: value }, '*');
             } catch (e) {
-                /* verktyget kunde inte nås (t.ex. fortfarande under laddning) — ignorera */
+                /* the tool could not be reached (e.g. still loading) — ignore */
             }
         }
     }
@@ -100,8 +100,8 @@ function initThemeToggle() {
         broadcastTheme(theme);
     });
 
-    // Om ett verktyg laddas om (t.ex. via klick i sidofältet) — se till att det får
-    // rätt tema direkt, som ett komplement till ?theme= i src-URL:en.
+    // If a tool is reloaded (e.g. via a click in the sidebar) — make sure it gets
+    // the correct theme immediately, complementing the ?theme= in the src URL.
     if (frame) {
         frame.addEventListener('load', () => broadcastTheme(theme));
     }
@@ -120,8 +120,8 @@ function initDownloadConfirm() {
 
     function openModal(link) {
         pendingHref = link.href;
-        const title = link.querySelector('.nav-item-title')?.textContent.trim() || 'filen';
-        text.textContent = `Vill du ladda ner "${title}" som .zip-fil från GitHub?`;
+        const title = link.querySelector('.nav-item-title')?.textContent.trim() || 'the file';
+        text.textContent = `Do you want to download "${title}" as a .zip file from GitHub?`;
         modal.classList.remove('display-none');
     }
 
@@ -130,8 +130,8 @@ function initDownloadConfirm() {
         pendingHref = null;
     }
 
-    // Endast riktiga länk-nedladdningar (<a href>) ska visa bekräftelsemodalen.
-    // Nedladdnings-poster som numera öppnar en infosida hanteras av initToolNav (data-type="frame").
+    // Only real link downloads (<a href>) should show the confirmation modal.
+    // Download entries that now open an info page are handled by initToolNav (data-type="frame").
     document.querySelectorAll('a.nav-item--download[href]').forEach((link) => {
         link.addEventListener('click', (event) => {
             event.preventDefault();
@@ -175,8 +175,8 @@ function initExternalLinkConfirm() {
 
     function openModal(link) {
         pendingHref = link.href;
-        const title = link.querySelector('.nav-item-title')?.textContent.trim() || 'webbplatsen';
-        text.textContent = `Vill du lämna Verktygslådan och öppna "${title}" i ny flik?`;
+        const title = link.querySelector('.nav-item-title')?.textContent.trim() || 'the website';
+        text.textContent = `Do you want to leave CryptoToolbox and open "${title}" in a new tab?`;
         modal.classList.remove('display-none');
     }
 

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="sv">
+<html lang="en">
 
 <head>
     <meta charset="UTF-8">
@@ -32,12 +32,12 @@
 
         <header class="page-header">
             <h1>Entropy to Mnemonic</h1>
-            <p>Konvertera entropi-bytes (0&ndash;255) till en BIP39 mnemonic-fras</p>
+            <p>Convert entropy bytes (0&ndash;255) into a BIP39 mnemonic phrase</p>
         </header>
 
         <div class="word-count-toggle" id="word-count-toggle">
-            <button type="button" class="toggle-btn active" data-words="12">12 ord / 128-bit</button>
-            <button type="button" class="toggle-btn" data-words="24">24 ord / 256-bit</button>
+            <button type="button" class="toggle-btn active" data-words="12">12 words / 128-bit</button>
+            <button type="button" class="toggle-btn" data-words="24">24 words / 256-bit</button>
         </div>
 
         <div class="entropy-box">
@@ -45,7 +45,7 @@
         </div>
 
         <div class="paste-box">
-            <label class="paste-label" for="paste-input">Eller klistra in alla bytes på en gång (kommaseparerat)</label>
+            <label class="paste-label" for="paste-input">Or paste all bytes at once (comma-separated)</label>
             <input id="paste-input" type="text" spellcheck="false" autocomplete="off"
                 placeholder="34,83,38,148,136,254,124,59,160,186,149,60,155,68,241,6">
             <div class="paste-hint display-none" id="paste-hint"></div>
@@ -54,7 +54,7 @@
         <div class="validation display-none" id="validation"></div>
 
         <div id="entropy-result">
-            <pre id="output">Mnemonic-frasen visas här</pre>
+            <pre id="output">Mnemonic phrase appears here</pre>
         </div>
 
         <div class="checksum-status display-none" id="checksum-status"></div>
@@ -66,7 +66,7 @@
                     <path d="M5 15H4C3.4 15 3 14.6 3 14V4C3 3.4 3.4 3 4 3H14C14.6 3 15 3.4 15 4V5" stroke="currentColor"
                         stroke-width="1.6" />
                 </svg>
-                Kopiera mnemonic
+                Copy mnemonic
             </button>
         </div>
 

@@ -1,26 +1,26 @@
 /* =========================================================================
-   Monero .keys — dekryptering & plånboksåterställning (helt lokalt)
+   Monero .keys — decryption & wallet recovery (fully local)
    -------------------------------------------------------------------------
-   Portat från Monero-referensen (wallet2 / cryptonote_basic):
-     • Ytterbehållaren  keys_file_data : [8-byte chacha-IV][varint längd][ct]
+   Ported from the Monero reference (wallet2 / cryptonote_basic):
+     • Outer container   keys_file_data : [8-byte chacha-IV][varint length][ct]
        (::serialization / binary_archive, LEB128-varint)
-     • Nyckelhärledning  generate_chacha_key = cn_slow_hash(lösenord)[0..32]
-       (CryptoNight variant 0 — se vendor/cryptonight/, cn_slow_hash-global)
-     • Dekryptering      ChaCha20 (fallback ChaCha8) av account_data → JSON
-     • key_data          epee portable-storage-blob (parseEpee nedan)
-     • encrypted_secret_keys=1: hemliga nycklar är XOR:ade med en ChaCha20-
-       ström vars nyckel = cn_slow_hash(chacha_key || 0x6b) och IV = m_encryption_iv
-     • Adress            base58-blockkodning + keccak256-checksumma
-     • Fras (seed)       25-ords Monero-mnemonic (ordlista + CRC32-checksumma)
+     • Key derivation    generate_chacha_key = cn_slow_hash(password)[0..32]
+       (CryptoNight variant 0 — see vendor/cryptonight/, cn_slow_hash global)
+     • Decryption        ChaCha20 (fallback ChaCha8) of account_data → JSON
+     • key_data          epee portable-storage blob (parseEpee below)
+     • encrypted_secret_keys=1: secret keys are XOR:ed with a ChaCha20
+       stream whose key = cn_slow_hash(chacha_key || 0x6b) and IV = m_encryption_iv
+     • Address           base58 block encoding + keccak256 checksum
+     • Phrase (seed)     25-word Monero mnemonic (wordlist + CRC32 checksum)
 
-   keccak256, base58, mnemonic, sc_reduce32, chacha och epee-parsern nedan är
-   verifierade byte-för-byte mot en riktig Monero-plånbok (monero-wallet-cli
-   v0.18) samt mot python-biblioteket "monero" och OpenSSL:s ChaCha20.
+   keccak256, base58, mnemonic, sc_reduce32, chacha and the epee parser below are
+   verified byte-by-byte against a real Monero wallet (monero-wallet-cli
+   v0.18) as well as against the python library "monero" and OpenSSL's ChaCha20.
    ========================================================================= */
 (function (root) {
     "use strict";
 
-    /* ---------- keccak256 (original Keccak, padding 0x01 — som Monero) ---------- */
+    /* ---------- keccak256 (original Keccak, padding 0x01 — like Monero) ---------- */
     var M64 = (1n << 64n) - 1n;
     var KECCAK_RC = (function () {
         function rcBit(t) { var R = 1; for (var i = 0; i < t % 255; i++) { R <<= 1; if (R & 0x100) R ^= 0x171; } return R & 1; }
@@ -58,11 +58,11 @@
         return out;
     }
 
-    /* ---------- CRC32 (IEEE, för mnemonic-checksumman) ---------- */
+    /* ---------- CRC32 (IEEE, for the mnemonic checksum) ---------- */
     var CRCT = (function () { var t = new Uint32Array(256); for (var n = 0; n < 256; n++) { var c = n; for (var k = 0; k < 8; k++) c = (c & 1) ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1); t[n] = c >>> 0; } return t; })();
     function crc32(str) { var c = 0xFFFFFFFF; for (var i = 0; i < str.length; i++) c = CRCT[(c ^ str.charCodeAt(i)) & 0xff] ^ (c >>> 8); return (c ^ 0xFFFFFFFF) >>> 0; }
 
-    /* ---------- Monero 25-ords mnemonic (english, prefixlängd 3) ---------- */
+    /* ---------- Monero 25-word mnemonic (english, prefix length 3) ---------- */
     function bytesToMnemonic(bytes, words, prefixLen) {
         var n = words.length, out = [];
         for (var i = 0; i < bytes.length; i += 4) {
@@ -97,7 +97,7 @@
         return b58encode(f);
     }
 
-    /* ---------- ed25519-scalar reduce (för determinism/visningsnyckel-kontroll) ---------- */
+    /* ---------- ed25519-scalar reduce (for determinism / view-key check) ---------- */
     var L = (1n << 252n) + 27742317777372353535851937790883648493n;
     function scReduce32(bytes) {
         var num = 0n; for (var i = 31; i >= 0; i--) num = (num << 8n) | BigInt(bytes[i]); num %= L;
@@ -105,7 +105,7 @@
         return o;
     }
 
-    /* ---------- ChaCha (Monero-layout: 64-bit räknare + 64-bit IV) ---------- */
+    /* ---------- ChaCha (Monero layout: 64-bit counter + 64-bit IV) ---------- */
     function rotl32(v, c) { return ((v << c) | (v >>> (32 - c))) >>> 0; }
     function u32le(p, o) { return (p[o] | (p[o + 1] << 8) | (p[o + 2] << 16) | (p[o + 3] << 24)) >>> 0; }
     function chacha(rounds, data, key, iv) {
@@ -138,7 +138,7 @@
     function chacha8(d, k, iv) { return chacha(8, d, k, iv); }
     function chacha20(d, k, iv) { return chacha(20, d, k, iv); }
 
-    /* ---------- epee portable storage-parser (för key_data-blobben) ---------- */
+    /* ---------- epee portable-storage parser (for the key_data blob) ---------- */
     function epeeVarint(b, p) {
         var m = b[p] & 3, v, s;
         if (m === 0) { v = b[p] >>> 2; s = 1; }
@@ -167,7 +167,7 @@
             case 0x08: return [b[p], p + 1];
             case 0x09: return [readLE(b, p, 8), p + 8];
             case 0x0b: return [b[p], p + 1];
-            default: throw new Error('epee: okänd typ 0x' + type.toString(16));
+            default: throw new Error('epee: unknown type 0x' + type.toString(16));
         }
     }
     function epeeSection(b, p) {
@@ -181,66 +181,66 @@
     }
     function parseEpee(b) {
         if (!(b[0] === 0x01 && b[1] === 0x11 && b[2] === 0x01 && b[3] === 0x01 && b[4] === 0x01 && b[5] === 0x01 && b[6] === 0x02 && b[7] === 0x01 && b[8] === 0x01))
-            throw new Error('key_data har ogiltig epee-signatur.');
+            throw new Error('key_data has an invalid epee signature.');
         return epeeSection(b, 9)[0];
     }
 
-    /* ---------- hjälp ---------- */
+    /* ---------- helpers ---------- */
     function bytesToHex(b) { var s = ''; for (var i = 0; i < b.length; i++) s += b[i].toString(16).padStart(2, '0'); return s; }
     function latin1(bytes) { var s = ''; for (var i = 0; i < bytes.length; i++) s += String.fromCharCode(bytes[i]); return s; }
     function strToBytes(s) { var a = new Uint8Array(s.length); for (var i = 0; i < s.length; i++) a[i] = s.charCodeAt(i) & 0xff; return a; }
     function eqB(a, b) { if (a.length !== b.length) return false; for (var i = 0; i < a.length; i++) if (a[i] !== b[i]) return false; return true; }
     function readLEB128(buf, off) { var sh = 0n, res = 0n, i = off; for (; ;) { var b = buf[i++]; res |= BigInt(b & 0x7f) << sh; if (!(b & 0x80)) break; sh += 7n; } return { value: Number(res), next: i }; }
 
-    // nettype (0=main,1=test,2=stage) -> standardadressens nätbyte
+    // nettype (0=main,1=test,2=stage) -> the standard address's network byte
     var NET_BYTE = { 0: 18, 1: 53, 2: 24 };
     var NET_NAME = { 18: 'Mainnet', 53: 'Testnet', 24: 'Stagenet' };
 
-    /* ---------- steg 1: härled ChaCha-nyckel ur lösenordet ----------
+    /* ---------- step 1: derive the ChaCha key from the password ----------
        cnHash: function(Uint8Array) -> Uint8Array(32)  (CryptoNight variant 0) */
     function deriveChachaKey(passwordBytes, kdfRounds, cnHash) {
-        var h = cnHash(passwordBytes);            // 32 byte
+        var h = cnHash(passwordBytes);            // 32 bytes
         for (var n = 1; n < kdfRounds; n++) h = cnHash(h);
-        return h;                                 // hela hashen = chacha_key (32 byte)
+        return h;                                 // the whole hash = chacha_key (32 bytes)
     }
 
-    /* ---------- lättviktig strukturkontroll (utan lösenord) ----------
-       Verifierar att filen ser ut som en Monero .keys-behållare:
-       [8-byte IV][LEB128-varint längd][ciphertext] där längden matchar. */
+    /* ---------- lightweight structure check (no password) ----------
+       Verifies that the file looks like a Monero .keys container:
+       [8-byte IV][LEB128-varint length][ciphertext] where the length matches. */
     function inspectContainer(fileBytes) {
-        if (!fileBytes || fileBytes.length < 12) throw new Error('för liten för en .keys-fil');
+        if (!fileBytes || fileBytes.length < 12) throw new Error('too small for a .keys file');
         var hdr = readLEB128(fileBytes, 8);
         var remaining = fileBytes.length - hdr.next;
-        if (hdr.value !== remaining) throw new Error('behållarlängden stämmer inte');
+        if (hdr.value !== remaining) throw new Error('the container length does not match');
         return { ivHex: bytesToHex(fileBytes.slice(0, 8)), ciphertextLength: hdr.value };
     }
 
-    /* ---------- steg 2: dekryptera ytterlagret → JSON ---------- */
+    /* ---------- step 2: decrypt the outer layer → JSON ---------- */
     function decryptOuter(fileBytes, key) {
-        if (fileBytes.length < 12) throw new Error('Filen är för liten för att vara en .keys-fil.');
+        if (fileBytes.length < 12) throw new Error('The file is too small to be a .keys file.');
         var iv = fileBytes.slice(0, 8);
         var hdr = readLEB128(fileBytes, 8);
         var ct = fileBytes.slice(hdr.next, hdr.next + hdr.value);
-        if (ct.length !== hdr.value) throw new Error('Trasig .keys-fil (längden i behållaren stämmer inte).');
+        if (ct.length !== hdr.value) throw new Error('Corrupt .keys file (the length in the container does not match).');
         var obj = null, cipher = null;
         var attempts = [['ChaCha20', chacha20], ['ChaCha8', chacha8]];
         for (var i = 0; i < attempts.length; i++) {
             var pt = attempts[i][1](ct, key, iv);
             try { obj = JSON.parse(latin1(pt)); cipher = attempts[i][0]; break; } catch (e) { obj = null; }
         }
-        if (!obj) throw new Error('Kunde inte dekryptera. Fel lösenord, eller en filtyp som inte stöds.');
+        if (!obj) throw new Error('Could not decrypt. Wrong password, or an unsupported file type.');
         return { obj: obj, cipher: cipher, iv: iv };
     }
 
-    /* ---------- steg 3: plocka ut nycklar, ev. avmaska, härled adress/fras ---------- */
+    /* ---------- step 3: extract keys, optionally unmask, derive address/phrase ---------- */
     function extractKeys(obj, key, cnHash, netOverride, words) {
-        if (typeof obj.key_data !== 'string') throw new Error('key_data saknas i den dekrypterade datan.');
+        if (typeof obj.key_data !== 'string') throw new Error('key_data missing in the decrypted data.');
         var root = parseEpee(strToBytes(obj.key_data));
         var mk = root.m_keys;
-        if (!mk) throw new Error('m_keys saknas i key_data.');
+        if (!mk) throw new Error('m_keys missing in key_data.');
         var addr = mk.m_account_address || {};
         var spendPub = addr.m_spend_public_key, viewPub = addr.m_view_public_key;
-        if (!spendPub || !viewPub) throw new Error('Publika nycklar saknas i key_data.');
+        if (!spendPub || !viewPub) throw new Error('Public keys missing in key_data.');
         var spendSec = mk.m_spend_secret_key ? mk.m_spend_secret_key.slice() : new Uint8Array(32);
         var viewSec = mk.m_view_secret_key ? mk.m_view_secret_key.slice() : new Uint8Array(32);
         var encIv = mk.m_encryption_iv;
@@ -261,8 +261,8 @@
         var deterministic = !spendZero && eqB(scReduce32(keccak256(spendSec)), viewSec);
 
         return {
-            cipher: null, // fylls av anroparen
-            network: NET_NAME[net] || ('nätbyte ' + net),
+            cipher: null, // filled in by the caller
+            network: NET_NAME[net] || ('network byte ' + net),
             networkByte: net,
             nettypeField: nettype,
             watchOnly: watchOnly,

@@ -234,7 +234,7 @@ button.danger:hover { background: var(--error); opacity: 0.85; }
     font-family: Consolas, Monaco, monospace;
 }
 
-/* Resultat — färgad banner överst i Output-rutan */
+/* Result — colored banner at the top of the Output box */
 .result-panel {
     padding: 16px 18px;
     border-bottom: 1px solid var(--border);
@@ -340,8 +340,8 @@ button.danger:hover { background: var(--error); opacity: 0.85; }
     font-size: 12px;
 }
 
-/* Kör/Stoppa flyttade in i output-headern: samma storlek som Rensa. Rensa har
-   en 1px-ram, så ge Kör/Stoppa en genomskinlig ram så totalhöjden matchar. */
+/* Run/Stop moved into the output header: same size as Clear. Clear has
+   a 1px border, so give Run/Stop a transparent border so the total height matches. */
 .output-head-actions #run-btn,
 .output-head-actions #stop-btn {
     border: 1px solid transparent;
@@ -390,7 +390,7 @@ button.danger:hover { background: var(--error); opacity: 0.85; }
     button { min-width: 0; }
 }
 
-/* ============ Monero .keys-specifika tillägg ============ */
+/* ============ Monero .keys-specific additions ============ */
 
 input[type="password"],
 input[type="text"].text-input,
@@ -424,7 +424,7 @@ input[type="number"]:focus { border-color: var(--accent); }
 }
 .pw-toggle:hover { background: var(--border); }
 
-/* Avancerat-fällbart */
+/* Advanced collapsible */
 details.advanced {
     background: var(--surface);
     border: 1px solid var(--border);
@@ -470,7 +470,7 @@ select {
 }
 select:focus { border-color: var(--accent); }
 
-/* Säkerhetsbanner */
+/* Security banner */
 .warn-box {
     background: var(--error-soft);
     border: 1px solid var(--error);
@@ -494,7 +494,7 @@ select:focus { border-color: var(--accent); }
     color: var(--text-muted);
 }
 
-/* Fras-ruta (highlight) */
+/* Phrase box (highlight) */
 .seed-box {
     background: var(--success-soft);
     border: 1px solid var(--success-border);

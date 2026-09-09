@@ -1,8 +1,8 @@
-name: Bygg och publicera Windows-appen
+name: Build and publish the Windows app
 
-# Körs vid varje push till main (dvs varje gång du pushar till repot), samt manuellt
-# via "Run workflow" i GitHub-fliken Actions. Ändringar som bara rör .md-filer
-# triggar ingen ny build, eftersom de inte påverkar den byggda appen.
+# Runs on every push to main (i.e. every time you push to the repo), plus manually
+# via "Run workflow" in the GitHub Actions tab. Changes that only touch .md files
+# don't trigger a new build, since they don't affect the built app.
 on:
   push:
     branches: [main]
@@ -11,24 +11,24 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write # krävs för att skapa/uppdatera en GitHub Release med den byggda .exe-filen
+  contents: write # required to create/update a GitHub Release with the built .exe file
 
 jobs:
   build:
     runs-on: windows-latest
     steps:
-      - name: Checka ut repot
+      - name: Check out the repo
         uses: actions/checkout@v4
 
-      - name: Installera Node.js
+      - name: Install Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: npm
 
-      # Cachar de nedladdade Electron/electron-builder-binärerna mellan körningar så
-      # att inte varje push behöver ladda ner Chromium/Electron på nytt.
-      - name: Cacha electron-builder
+      # Caches the downloaded Electron/electron-builder binaries between runs so
+      # that not every push has to download Chromium/Electron again.
+      - name: Cache electron-builder
         uses: actions/cache@v4
         with:
           path: |
@@ -38,23 +38,23 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-electron-cache-
 
-      - name: Installera beroenden
+      - name: Install dependencies
         run: npm ci
 
-      - name: Läs version från Toolbox.html
+      - name: Read version from Toolbox.html
         id: version
         run: npm run sync-version
 
-      - name: Bygg Electron-appen (portabel .exe)
+      - name: Build the Electron app (portable .exe)
         run: |
           npx electron-builder --win portable
           node scripts/finalize-artifacts.js
 
-      # Om releasen för den här versionen redan finns (t.ex. flera pushar utan
-      # versionshöjning, eller ett filnamn som ändrats sen sist) — töm den på gamla
-      # bifogade filer innan vi laddar upp de nya. Annars lämnas gamla/omdöpta
-      # filer kvar vid sidan av de nya istället för att ersättas.
-      - name: Rensa gamla filer i releasen (om den redan finns)
+      # If the release for this version already exists (e.g. multiple pushes without
+      # a version bump, or a filename that changed since last time) — empty it of old
+      # attached files before we upload the new ones. Otherwise old/renamed files are
+      # left alongside the new ones instead of being replaced.
+      - name: Clean up old files in the release (if it already exists)
         env:
           GH_TOKEN: ${{ github.token }}
         shell: bash
@@ -63,24 +63,24 @@ jobs:
           if gh release view "$TAG" --repo "${{ github.repository }}" >/dev/null 2>&1; then
             gh release view "$TAG" --repo "${{ github.repository }}" --json assets --jq '.assets[].name' |
               while IFS= read -r name; do
-                echo "Tar bort tidigare asset: $name"
+                echo "Removing previous asset: $name"
                 gh release delete-asset "$TAG" "$name" --repo "${{ github.repository }}" --yes
               done
           else
-            echo "Ingen befintlig release för $TAG ännu — inget att rensa."
+            echo "No existing release for $TAG yet — nothing to clean up."
           fi
 
-      - name: Skapa/uppdatera GitHub Release
+      - name: Create/update GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ steps.version.outputs.version }}
-          name: Verktygslådan ${{ steps.version.outputs.version }}
+          name: CryptoToolbox ${{ steps.version.outputs.version }}
           body: |
-            Automatiskt byggd från commit ${{ github.sha }}.
+            Automatically built from commit ${{ github.sha }}.
 
-            - **Verktygslådan${{ steps.version.outputs.version }}.exe** — portabel version, behöver inte installeras. Ladda ner och dubbelklicka.
-            - **magic.html** — fristående Magic Tool i en enda fil. Ladda ner och öppna direkt i webbläsaren, inget annat krävs.
+            - **CryptoToolbox${{ steps.version.outputs.version }}.exe** — No installation needed, just download and open as usual.
+            - **magic.html** — standalone Magic Tool in a single file. Download and open directly in your browser, nothing else required.
 
           files: |
-            release/Verktygslådan${{ steps.version.outputs.version }}.exe
+            release/CryptoToolbox${{ steps.version.outputs.version }}.exe
             tools/Magic/magic.html

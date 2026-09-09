@@ -8,7 +8,7 @@ const resultEl = document.getElementById('result');
 const statsEl = document.getElementById('stats');
 const diffOutput = document.getElementById('diff-output');
 
-// Över denna gräns (rader_A × rader_B) skippas LCS och allt markeras som utbytt.
+// Above this limit (lines_A × lines_B) LCS is skipped and everything is marked as replaced.
 const MAX_LCS_CELLS = 4_000_000;
 
 function setStatus(msg, isError) {
@@ -24,7 +24,7 @@ function normalizeLine(line) {
 }
 
 /**
- * Rad-diff via LCS med trimning av gemensam början/slut.
+ * Line diff via LCS with trimming of the common start/end.
  * Returnerar ops: { type: 'equal' | 'del' | 'ins', a?: index, b?: index }
  */
 function computeDiff(aLines, bLines) {
@@ -60,7 +60,7 @@ function lcsDiff(aLines, bLines, aStart, aEnd, bStart, bEnd) {
         return ops;
     }
 
-    // DP-tabell över LCS-längder, (n+1) × (m+1)
+    // DP table of LCS lengths, (n+1) × (m+1)
     const width = m + 1;
     const table = new Uint32Array((n + 1) * width);
     for (let i = 1; i <= n; i++) {
@@ -75,7 +75,7 @@ function lcsDiff(aLines, bLines, aStart, aEnd, bStart, bEnd) {
         }
     }
 
-    // Backtracka och bygg ops baklänges
+    // Backtrack and build ops in reverse
     let i = n;
     let j = m;
     const reversed = [];
@@ -97,7 +97,7 @@ function lcsDiff(aLines, bLines, aStart, aEnd, bStart, bEnd) {
     return ops;
 }
 
-/** Gemensam prefix/suffix mellan två strängar → intervall som skiljer sig. */
+/** Common prefix/suffix between two strings → the range that differs. */
 function inlineHighlightRange(a, b) {
     let prefix = 0;
     while (prefix < a.length && prefix < b.length && a[prefix] === b[prefix]) prefix++;
@@ -162,7 +162,7 @@ function renderDiff(ops, aLines, bLines) {
             continue;
         }
 
-        // Samla ihop en sammanhängande grupp av del/ins och para ihop dem
+        // Collect a contiguous group of del/ins and pair them up
         const dels = [];
         const inss = [];
         while (k < ops.length && ops[k].type !== 'equal') {
@@ -204,7 +204,7 @@ function compare() {
     if (textA === '' && textB === '') {
         resultEl.classList.add('display-none');
         diffOutput.replaceChildren();
-        setStatus('Klistra in två texter — skillnaderna visas automatiskt');
+        setStatus('Paste two texts — the differences are shown automatically');
         return;
     }
 
@@ -222,16 +222,16 @@ function compare() {
     resultEl.classList.remove('display-none');
 
     if (added === 0 && removed === 0) {
-        setStatus('Texterna är identiska' +
-            (optIgnoreCase.checked || optIgnoreWhitespace.checked ? ' (med valda inställningar)' : ''));
-        statsEl.textContent = `(${unchanged} rader)`;
+        setStatus('The texts are identical' +
+            (optIgnoreCase.checked || optIgnoreWhitespace.checked ? ' (with the selected settings)' : ''));
+        statsEl.textContent = `(${unchanged} lines)`;
     } else {
-        setStatus('Skillnader hittades');
-        statsEl.textContent = `(+${added} tillagda · −${removed} borttagna · ${unchanged} oförändrade rader)`;
+        setStatus('Differences found');
+        statsEl.textContent = `(+${added} added · −${removed} removed · ${unchanged} unchanged lines)`;
     }
 }
 
-// Kort debounce så snabb inmatning i stora texter inte kör diffen för varje tangent
+// Short debounce so fast typing in large texts doesn't run the diff on every keystroke
 let debounceTimer = null;
 function scheduleCompare() {
     clearTimeout(debounceTimer);
@@ -249,16 +249,16 @@ clearButton.addEventListener('click', () => {
     inputB.value = '';
     diffOutput.replaceChildren();
     resultEl.classList.add('display-none');
-    setStatus('Klistra in två texter — skillnaderna visas automatiskt');
+    setStatus('Paste two texts — the differences are shown automatically');
     inputA.focus();
 });
 
 window.addEventListener('message', function (event) {
     if (event.source !== window.parent) return;
     const data = event.data;
-    if (data && data.source === 'verktygslada' &&
+    if (data && data.source === 'cryptotoolbox' &&
         data.type === 'theme' && (data.theme === 'light' || data.theme === 'dark')) {
         document.documentElement.setAttribute('data-theme', data.theme);
-        try { localStorage.setItem('theme', data.theme); } catch (e) { /* ignoreras */ }
+        try { localStorage.setItem('theme', data.theme); } catch (e) { /* ignored */ }
     }
 });

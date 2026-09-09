@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="sv">
+<html lang="en">
 
 <head>
     <meta charset="UTF-8">
@@ -96,9 +96,9 @@ main {
     gap: 20px;
 }
 
-/* Verktyg + kapabilitetspanel som ett centrerat block med lika marginaler på
-   båda sidor (inget tomrum till vänster). align-items: start gör att panelen
-   bara blir så hög som sitt eget innehåll, inte lika hög som resultaten. */
+/* Tool + capability panel as a centered block with equal margins on
+   both sides (no empty space on the left). align-items: start makes the panel
+   only as tall as its own content, not as tall as the results. */
 .content {
     display: grid;
     grid-template-columns: minmax(0, 760px) 300px;
@@ -115,9 +115,9 @@ main {
     gap: 20px;
 }
 
-/* Högerkolumn: färgkodslegend ovanför kapabilitetspanelen. align-self: start
-   gör att kolumnen bara blir så hög som sitt innehåll, inte lika hög som
-   resultaten till vänster. */
+/* Right column: color-code legend above the capability panel. align-self: start
+   makes the column only as tall as its content, not as tall as
+   the results on the left. */
 .side-column {
     grid-column: 2;
     align-self: start;
@@ -304,7 +304,7 @@ main {
     color: var(--text);
 }
 
-/* Dragover: samma visuella tillstånd som fokus på inmatningsrutan */
+/* Dragover: the same visual state as focus on the input box */
 #input-box.dragover {
     border-color: var(--accent);
     box-shadow: 0 0 0 3px var(--accent-soft);
@@ -390,7 +390,7 @@ main {
     color: var(--error);
 }
 
-/* ---------- färgkodslegend ---------- */
+/* ---------- color-code legend ---------- */
 
 .legend {
     display: flex;
@@ -545,7 +545,7 @@ main {
 
         <header class="page-header">
             <h1>Magic Tool</h1>
-            <p>Klistra in text eller läs in en fil - nycklar, adresser, entropy och krypteringsmetadata identifieras automatiskt</p>
+            <p>Paste text or load a file - keys, addresses, entropy, and encryption metadata are detected automatically</p>
         </header>
 
         <div class="content">
@@ -553,26 +553,26 @@ main {
             <div class="tool-column">
 
                 <div id="input-box">
-                    <textarea id="input" spellcheck="false" placeholder="Klistra in text eller släpp en fil här: wallet-JSON, minnesdump, loggar, nycklar, adresser..."></textarea>
+                    <textarea id="input" spellcheck="false" placeholder="Paste text or drop a file here: wallet JSON, memory dump, logs, keys, addresses..."></textarea>
                 </div>
 
                 <div class="input-toolbar">
                     <div class="toolbar-left">
-                        <button id="file-button" type="button">Läs in fil…</button>
+                        <button id="file-button" type="button">Load file…</button>
                         <span id="file-name"></span>
                         <input type="file" id="file-input" hidden>
                     </div>
                     <div class="toolbar-right">
                         <span id="result-count"></span>
                         <div class="toolbar-buttons">
-                            <button id="testdata-button" type="button">Testdata</button>
-                            <button id="clear-button" type="button">Rensa</button>
+                            <button id="testdata-button" type="button">Test data</button>
+                            <button id="clear-button" type="button">Clear</button>
                         </div>
                     </div>
                 </div>
 
                 <div class="empty-state" id="empty-state">
-                    <p>Klistra in text eller läs in en fil ovan för att identifiera kryptorelaterat innehåll</p>
+                    <p>Paste text or load a file above to identify crypto-related content</p>
                 </div>
 
                 <div id="results" class="display-none"></div>
@@ -582,58 +582,58 @@ main {
             <aside class="side-column">
             <div id="legend" class="legend"></div>
             <div class="capabilities">
-            <h2>Kan identifiera &amp; verifiera</h2>
+            <h2>Can identify &amp; verify</h2>
 
             <section>
-                <h3>Adresser</h3>
+                <h3>Addresses</h3>
                 <ul>
                     <li>Bitcoin - Legacy, P2SH, SegWit, Taproot</li>
                     <li>Litecoin, Dogecoin, Dash, Zcash</li>
-                    <li>Ethereum / EVM (EIP-55-checksumma)</li>
+                    <li>Ethereum / EVM (EIP-55 checksum)</li>
                     <li>Tron, XRP (Ripple), Bitcoin Cash</li>
                     <li>Monero (keccak), TON (CRC16)</li>
-                    <li>Solana, Cosmos-kedjor (bech32)</li>
+                    <li>Solana, Cosmos chains (bech32)</li>
                 </ul>
             </section>
 
             <section>
-                <h3>Nycklar</h3>
+                <h3>Keys</h3>
                 <ul>
-                    <li>WIF privata nycklar</li>
-                    <li>Utökade nycklar (xpub / xprv / zpub…)</li>
-                    <li>BIP38-krypterade nycklar</li>
-                    <li>Publika nycklar (secp256k1, på kurvan)</li>
-                    <li>PEM-nyckelblock (EC / RSA, DER)</li>
+                    <li>WIF private keys</li>
+                    <li>Extended keys (xpub / xprv / zpub…)</li>
+                    <li>BIP38-encrypted keys</li>
+                    <li>Public keys (secp256k1, on the curve)</li>
+                    <li>PEM key blocks (EC / RSA, DER)</li>
                 </ul>
             </section>
 
             <section>
                 <h3>Seed &amp; entropy</h3>
                 <ul>
-                    <li>BIP39-mnemonic (checksumma)</li>
-                    <li>Electrum-seedfraser (versionsprefix)</li>
+                    <li>BIP39 mnemonic (checksum)</li>
+                    <li>Electrum seed phrases (version prefix)</li>
                     <li>BIP32 derivation paths</li>
-                    <li>Entropy (hex, decimal, JSON-objekt)</li>
+                    <li>Entropy (hex, decimal, JSON object)</li>
                 </ul>
             </section>
 
             <section>
-                <h3>Kryptometadata</h3>
+                <h3>Crypto metadata</h3>
                 <ul>
                     <li>Ethereum Keystore V3</li>
                     <li>JSON-Keystore (cipher, kdf, iv, salt, mac)</li>
-                    <li>Algoritmer - AES, ChaCha20, Argon2, scrypt,
-                        PBKDF2, SHA, HMAC, Ed25519 m.fl.</li>
+                    <li>Algorithms - AES, ChaCha20, Argon2, scrypt,
+                        PBKDF2, SHA, HMAC, Ed25519, and more.</li>
                 </ul>
             </section>
 
             <section>
-                <h3>Format &amp; kodning</h3>
+                <h3>Format &amp; encoding</h3>
                 <ul>
-                    <li>JSON (syntaxverifierad)</li>
-                    <li>JWT (header avkodad)</li>
+                    <li>JSON (syntax verified)</li>
+                    <li>JWT (header decoded)</li>
                     <li>Base64 / Base64url, Base58, Hex</li>
-                    <li>Hashar - MD5, SHA-1/256/512, RIPEMD-160</li>
+                    <li>Hashes - MD5, SHA-1/256/512, RIPEMD-160</li>
                 </ul>
             </section>
             </div>
@@ -647,9 +647,9 @@ main {
 
     <script>
 // crypto-helpers.js
-// Fristående, beroendefria decode-/checksumfunktioner för Magic Tool.
-// Ingen extern bibliotek krävs: SHA-256 kommer från Web Crypto (crypto.subtle),
-// base58/base58check och bech32/bech32m är rena JS-implementationer.
+// Standalone, dependency-free decode/checksum functions for Magic Tool.
+// No external library required: SHA-256 comes from Web Crypto (crypto.subtle),
+// base58/base58check and bech32/bech32m are pure JS implementations.
 
 (function (global) {
     "use strict";
@@ -657,7 +657,7 @@ main {
     // ---------- Base58 ----------
 
     var BASE58_ALPHABET = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
-    // Ripple/XRP använder samma teckenuppsättning men i annan ordning.
+    // Ripple/XRP uses the same character set but in a different order.
     var RIPPLE_ALPHABET = "rpshnaf39wBUDNEGHJKLM4PQRST7VWXYZ2bcdeCg65jkm8oFqi1tuvAxyz";
 
     function base58Decode(str, alphabet) {
@@ -696,8 +696,8 @@ main {
         return new Uint8Array(digest);
     }
 
-    // Avkodar + verifierar dubbel-SHA256-checksumman (sista 4 byte).
-    // Returnerar {full, payload, checksum} vid giltig checksum, annars null.
+    // Decodes + verifies the double-SHA256 checksum (last 4 bytes).
+    // Returns {full, payload, checksum} on a valid checksum, otherwise null.
     async function base58CheckDecode(str, alphabet) {
         var full = base58Decode(str, alphabet);
         if (!full || full.length < 5) return null;
@@ -768,8 +768,8 @@ main {
         return ret;
     }
 
-    // Avkodar mot ETT specifikt konstant-värde (bech32 ELLER bech32m).
-    // Returnerar {hrp, words} (5-bitars ord, checksum borttagen) eller null.
+    // Decodes against ONE specific constant value (bech32 OR bech32m).
+    // Returns {hrp, words} (5-bit words, checksum removed) or null.
     function bech32DecodeGeneric(bstr, constant) {
         if (!bstr || bstr.length < 8 || bstr.length > 90) return null;
         var lower = bstr.toLowerCase();
@@ -801,9 +801,9 @@ main {
         return bech32DecodeGeneric(str, BECH32M_CONST);
     }
 
-    // Högnivåfunktion: försöker både bech32 och bech32m, tolkar segwit-adresser
-    // (witness version + program) när hrp ser ut som ett Bitcoin-liknande nät,
-    // annars returneras bara den råa bytepayloaden (t.ex. Cosmos-familjens adresser).
+    // High-level function: tries both bech32 and bech32m, parses segwit addresses
+    // (witness version + program) when the hrp looks like a Bitcoin-like network,
+    // otherwise only the raw byte payload is returned (e.g. Cosmos-family addresses).
     var SEGWIT_HRPS = { bc: true, tb: true, bcrt: true, ltc: true, tltc: true };
 
     function decodeBech32Address(str) {
@@ -838,12 +838,12 @@ main {
     }
 
     // ---------- Keccak-256 ----------
-    // Original Keccak (padding 0x01), samma variant som Ethereum och Monero
-    // använder — INTE NIST SHA-3 (padding 0x06). BigInt-baserad implementation:
-    // långsammare än optimerade 32-bitarsvarianter men körs bara på korta
-    // indata (adresser), så prestandan är irrelevant här. Runda-konstanter och
-    // rho-offsets genereras algoritmiskt enligt FIPS 202 istället för att
-    // hårdkodas.
+    // Original Keccak (padding 0x01), the same variant that Ethereum and Monero
+    // use — NOT NIST SHA-3 (padding 0x06). BigInt-based implementation:
+    // slower than optimized 32-bit variants but only runs on short
+    // inputs (addresses), so performance is irrelevant here. Round constants and
+    // rho offsets are generated algorithmically per FIPS 202 instead of being
+    // hardcoded.
 
     var KECCAK_MASK64 = (1n << 64n) - 1n;
 
@@ -954,9 +954,9 @@ main {
         return out;
     }
 
-    // EIP-55-checksumverifiering av en EVM-adress. hex40 = 40 hextecken utan
-    // 0x-prefix, med blandad case. Returnerar true om casingen exakt matchar
-    // keccak256-hashen av den gemena adressen.
+    // EIP-55 checksum verification of an EVM address. hex40 = 40 hex chars without
+    // the 0x prefix, mixed case. Returns true if the casing exactly matches
+    // the keccak256 hash of the lowercase address.
     function checkEip55(hex40) {
         var lower = hex40.toLowerCase();
         var hash = toHexString(keccak256(asciiBytes(lower)));
@@ -970,9 +970,9 @@ main {
     }
 
     // ---------- Monero base58 (blockkodning) ----------
-    // Monero kodar 8-byte-block till 11 tecken (sista blocket kortare), till
-    // skillnad från Bitcoins bigint-base58. Checksumman är de första 4 byten av
-    // keccak256 över resten av payloaden.
+    // Monero encodes 8-byte blocks to 11 chars (the last block shorter), unlike
+    // Bitcoin's bigint base58. The checksum is the first 4 bytes of
+    // keccak256 over the rest of the payload.
 
     var MONERO_DECODED_BLOCK_SIZES = { 2: 1, 3: 2, 5: 3, 6: 4, 7: 5, 9: 6, 10: 7, 11: 8 };
 
@@ -1012,8 +1012,8 @@ main {
         return new Uint8Array(out);
     }
 
-    // Avkodar + checksumverifierar en Monero-adress.
-    // Returnerar {network, payloadLength} vid giltig checksum, annars null.
+    // Decodes + checksum-verifies a Monero address.
+    // Returns {network, payloadLength} on a valid checksum, otherwise null.
     function decodeMoneroAddress(str) {
         var raw = moneroBase58Decode(str);
         if (!raw || raw.length < 5) return null;
@@ -1027,8 +1027,8 @@ main {
     }
 
     // ---------- CashAddr (Bitcoin Cash) ----------
-    // BCH:s adressformat: samma teckenuppsättning som bech32 men 40-bitars
-    // polymod-checksumma som täcker även prefixet ("bitcoincash" etc.).
+    // BCH's address format: the same character set as bech32 but a 40-bit
+    // polymod checksum that also covers the prefix ("bitcoincash" etc.).
 
     var CASHADDR_CHARSET = "qpzry9x8gf2tvdw0s3jn54khce6mua7l";
 
@@ -1045,8 +1045,8 @@ main {
         return chk ^ 1n;
     }
 
-    // Verifierar checksumman och returnerar {versionByte, hash} eller null.
-    // prefix anges utan kolon (t.ex. "bitcoincash"), data är payload-delen.
+    // Verifies the checksum and returns {versionByte, hash} or null.
+    // prefix is given without a colon (e.g. "bitcoincash"), data is the payload part.
     function decodeCashAddr(prefix, data) {
         data = data.toLowerCase();
         var values = [];
@@ -1066,7 +1066,7 @@ main {
         return { versionByte: bytes[0], hash: new Uint8Array(bytes.slice(1)) };
     }
 
-    // ---------- TON-adresser (CRC16-XMODEM) ----------
+    // ---------- TON addresses (CRC16-XMODEM) ----------
 
     function crc16Xmodem(bytes) {
         var crc = 0;
@@ -1079,9 +1079,9 @@ main {
         return crc;
     }
 
-    // TON user-friendly-adress: 48 tecken base64/base64url = 36 byte
-    // (1 taggbyte + 1 workchain + 32 byte hash + 2 byte CRC16).
-    // Returnerar {bounceable, testOnly, workchain} vid giltig CRC, annars null.
+    // TON user-friendly address: 48 chars base64/base64url = 36 bytes
+    // (1 tag byte + 1 workchain + 32-byte hash + 2-byte CRC16).
+    // Returns {bounceable, testOnly, workchain} on a valid CRC, otherwise null.
     function decodeTonAddress(str) {
         if (!/^[A-Za-z0-9+/_-]{48}$/.test(str)) return null;
         var b64 = str.replace(/-/g, "+").replace(/_/g, "/");
@@ -1110,7 +1110,7 @@ main {
     var SECP256K1_N = BigInt("0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141");
     var SECP256K1_P = BigInt("0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F");
 
-    // En 32-byte-skalär är en giltig secp256k1-privatnyckel om 0 < k < n.
+    // A 32-byte scalar is a valid secp256k1 private key if 0 < k < n.
     function isValidSecp256k1Scalar(hex) {
         if (!/^[0-9a-fA-F]{64}$/.test(hex)) return false;
         var v = BigInt("0x" + hex);
@@ -1128,9 +1128,9 @@ main {
         return result;
     }
 
-    // Verifierar att (x, y) ligger på kurvan y² = x³ + 7 (mod p). En slumpmässig
-    // 64-byte-sträng klarar detta med sannolikhet ~2^-256, så en träff är ett
-    // kryptografiskt starkt bevis på att det är en riktig okomprimerad nyckel.
+    // Verifies that (x, y) lies on the curve y² = x³ + 7 (mod p). A random
+    // 64-byte string passes this with probability ~2^-256, so a hit is a
+    // cryptographically strong proof that it is a real uncompressed key.
     function isPointOnSecp256k1(xHex, yHex) {
         if (!/^[0-9a-fA-F]{64}$/.test(xHex) || !/^[0-9a-fA-F]{64}$/.test(yHex)) return false;
         var x = BigInt("0x" + xHex);
@@ -1140,11 +1140,11 @@ main {
         return ((diff + SECP256K1_P) % SECP256K1_P) === 0n;
     }
 
-    // För komprimerade nycklar finns bara x: kontrollera att x³ + 7 är en
-    // kvadratisk rest mod p (dvs. att en y-koordinat existerar). p ≡ 3 (mod 4)
-    // så kandidaten är (x³+7)^((p+1)/4). En slumpmässig x klarar detta med
-    // ~50 % sannolikhet — det är alltså en svag indikation, ingen verifiering,
-    // men ett misslyckande bevisar att strängen INTE är en giltig secp256k1-nyckel.
+    // For compressed keys only x is present: check that x³ + 7 is a
+    // quadratic residue mod p (i.e. that a y coordinate exists). p ≡ 3 (mod 4)
+    // so the candidate is (x³+7)^((p+1)/4). A random x passes this with
+    // ~50% probability — so it is a weak indication, not verification,
+    // but a failure proves the string is NOT a valid secp256k1 key.
     function hasValidSecp256k1X(xHex) {
         if (!/^[0-9a-fA-F]{64}$/.test(xHex)) return false;
         var x = BigInt("0x" + xHex);
@@ -1154,7 +1154,7 @@ main {
         return (y * y) % SECP256K1_P === y2;
     }
 
-    // ---------- HMAC-SHA512 (för Electrum-seedversioner) ----------
+    // ---------- HMAC-SHA512 (for Electrum seed versions) ----------
 
     async function hmacSha512(keyStr, msgStr) {
         var enc = new TextEncoder();
@@ -3247,15 +3247,15 @@ window.entropyWordlists = {
 </script>
     <script>
 // script.js — Magic Tool
-// Klistra in valfri text, verktyget skannar och klassificerar allt
-// kryptorelaterat innehåll den hittar (nycklar, adresser, entropy,
-// plånboks-krypteringsmetadata, generiska kodningar).
+// Paste any text; the tool scans and classifies all
+// crypto-related content it finds (keys, addresses, entropy,
+// wallet encryption metadata, generic encodings).
 //
-// Konfidensnivåer (färgkodas i UI:t och förklaras i legenden):
-//   verified — checksumma/struktur kryptografiskt kontrollerad (grön)
-//   invalid  — formatet gör anspråk på checksumma men den stämmer inte (röd)
-//   likely   — formatet stämmer men kan inte verifieras (blå)
-//   unknown  — kodad data utan igenkänt format (gul)
+// Confidence levels (color-coded in the UI and explained in the legend):
+//   verified — checksum/structure cryptographically checked (green)
+//   invalid  — the format claims a checksum but it does not match (red)
+//   likely   — the format matches but cannot be verified (blue)
+//   unknown  — encoded data without a recognized format (yellow)
 
 var input = document.getElementById("input");
 var clearButton = document.getElementById("clear-button");
@@ -3274,7 +3274,7 @@ var fileNameEl = document.getElementById("file-name");
 
 var CH = window.CryptoHelpers;
 
-// ---------- Konfidensnivåer ----------
+// ---------- Confidence levels ----------
 
 var CONFIDENCE_ORDER = ["verified", "likely", "unknown", "invalid"];
 
@@ -3283,71 +3283,71 @@ var CONFIDENCE_META = {
         rank: 0,
         chipClass: "chip-verified",
         dotClass: "dot-verified",
-        legend: "Verifierad - checksumma korrekt eller struktur kryptografiskt kontrollerad"
+        legend: "Verified - checksum correct or structure cryptographically checked"
     },
     likely: {
         rank: 2,
         chipClass: "chip-likely",
         dotClass: "dot-likely",
-        legend: "Möjlig träff - formatet stämmer men kan inte verifieras"
+        legend: "Possible match - the format matches but cannot be verified"
     },
     unknown: {
         rank: 3,
         chipClass: "chip-unknown",
         dotClass: "dot-unknown",
-        legend: "Okänd - kodad data utan igenkänt format"
+        legend: "Unknown - encoded data without a recognized format"
     },
     invalid: {
         rank: 1,
         chipClass: "chip-invalid",
         dotClass: "dot-invalid",
-        legend: "Felaktig - formatet stämmer men checksumman är fel"
+        legend: "Invalid - the format matches but the checksum is wrong"
     }
 };
 
-// ---------- Referenstabeller ----------
+// ---------- Reference tables ----------
 
 var ADDRESS_VERSIONS = {
-    0x00: "Bitcoin-adress (Legacy P2PKH, mainnet)",
-    0x05: "Bitcoin-adress (P2SH, mainnet)",
-    0x6f: "Bitcoin-adress (Legacy P2PKH, testnet)",
-    0xc4: "Bitcoin-adress (P2SH, testnet)",
-    0x30: "Litecoin-adress (Legacy P2PKH, mainnet)",
-    0x32: "Litecoin-adress (P2SH, mainnet)",
-    0x1e: "Dogecoin-adress (P2PKH, mainnet)",
-    0x16: "Dogecoin-adress (P2SH, mainnet)",
-    0x4c: "Dash-adress (P2PKH, mainnet)",
-    0x10: "Dash-adress (P2SH, mainnet)",
-    0x41: "Tron-adress (TRC10/TRC20)"
+    0x00: "Bitcoin address (Legacy P2PKH, mainnet)",
+    0x05: "Bitcoin address (P2SH, mainnet)",
+    0x6f: "Bitcoin address (Legacy P2PKH, testnet)",
+    0xc4: "Bitcoin address (P2SH, testnet)",
+    0x30: "Litecoin address (Legacy P2PKH, mainnet)",
+    0x32: "Litecoin address (P2SH, mainnet)",
+    0x1e: "Dogecoin address (P2PKH, mainnet)",
+    0x16: "Dogecoin address (P2SH, mainnet)",
+    0x4c: "Dash address (P2PKH, mainnet)",
+    0x10: "Dash address (P2SH, mainnet)",
+    0x41: "Tron address (TRC10/TRC20)"
 };
 
 var WIF_VERSIONS = {
-    0x80: "Privat nyckel (WIF, Bitcoin mainnet)",
-    0xef: "Privat nyckel (WIF, Bitcoin testnet)",
-    0xb0: "Privat nyckel (WIF, Litecoin mainnet)",
-    0x9e: "Privat nyckel (WIF, Dogecoin mainnet)",
-    0xcc: "Privat nyckel (WIF, Dash mainnet)"
+    0x80: "Private key (WIF, Bitcoin mainnet)",
+    0xef: "Private key (WIF, Bitcoin testnet)",
+    0xb0: "Private key (WIF, Litecoin mainnet)",
+    0x9e: "Private key (WIF, Dogecoin mainnet)",
+    0xcc: "Private key (WIF, Dash mainnet)"
 };
 
-// Zcash transparenta adresser använder 2-byte-versioner (payload 22 byte).
+// Zcash transparent addresses use 2-byte versions (payload 22 bytes).
 var TWO_BYTE_ADDRESS_VERSIONS = {
-    "1cb8": "Zcash-adress (transparent, P2PKH)",
-    "1cbd": "Zcash-adress (transparent, P2SH)"
+    "1cb8": "Zcash address (transparent, P2PKH)",
+    "1cbd": "Zcash address (transparent, P2SH)"
 };
 
 var EXTENDED_KEY_VERSIONS = {
-    "0488b21e": "Utökad publik nyckel — xpub (BIP32 Legacy, mainnet)",
-    "0488ade4": "Utökad privat nyckel — xprv (BIP32 Legacy, mainnet)",
-    "049d7cb2": "Utökad publik nyckel — ypub (BIP49 SegWit-i-P2SH, mainnet)",
-    "049d7878": "Utökad privat nyckel — yprv (BIP49 SegWit-i-P2SH, mainnet)",
-    "04b24746": "Utökad publik nyckel — zpub (BIP84 Native SegWit, mainnet)",
-    "04b2430c": "Utökad privat nyckel — zprv (BIP84 Native SegWit, mainnet)",
-    "043587cf": "Utökad publik nyckel — tpub (BIP32, testnet)",
-    "04358394": "Utökad privat nyckel — tprv (BIP32, testnet)",
-    "044a5262": "Utökad publik nyckel — upub (BIP49, testnet)",
-    "044a4e28": "Utökad privat nyckel — uprv (BIP49, testnet)",
-    "045f1cf6": "Utökad publik nyckel — vpub (BIP84, testnet)",
-    "045f18bc": "Utökad privat nyckel — vprv (BIP84, testnet)"
+    "0488b21e": "Extended public key — xpub (BIP32 Legacy, mainnet)",
+    "0488ade4": "Extended private key — xprv (BIP32 Legacy, mainnet)",
+    "049d7cb2": "Extended public key — ypub (BIP49 SegWit-i-P2SH, mainnet)",
+    "049d7878": "Extended private key — yprv (BIP49 SegWit-i-P2SH, mainnet)",
+    "04b24746": "Extended public key — zpub (BIP84 Native SegWit, mainnet)",
+    "04b2430c": "Extended private key — zprv (BIP84 Native SegWit, mainnet)",
+    "043587cf": "Extended public key — tpub (BIP32, testnet)",
+    "04358394": "Extended private key — tprv (BIP32, testnet)",
+    "044a5262": "Extended public key — upub (BIP49, testnet)",
+    "044a4e28": "Extended private key — uprv (BIP49, testnet)",
+    "045f1cf6": "Extended public key — vpub (BIP84, testnet)",
+    "045f18bc": "Extended private key — vprv (BIP84, testnet)"
 };
 
 var BECH32_HRP_NAMES = {
@@ -3359,93 +3359,93 @@ var BECH32_HRP_NAMES = {
 };
 
 var MONERO_NETWORKS = {
-    18: "Monero-adress (mainnet, standard)",
-    19: "Monero-adress (mainnet, integrated)",
-    42: "Monero-adress (mainnet, subadress)",
-    53: "Monero-adress (testnet, standard)",
-    54: "Monero-adress (testnet, integrated)",
-    63: "Monero-adress (testnet, subadress)",
-    24: "Monero-adress (stagenet, standard)",
-    25: "Monero-adress (stagenet, integrated)",
-    36: "Monero-adress (stagenet, subadress)"
+    18: "Monero address (mainnet, standard)",
+    19: "Monero address (mainnet, integrated)",
+    42: "Monero address (mainnet, subaddress)",
+    53: "Monero address (testnet, standard)",
+    54: "Monero address (testnet, integrated)",
+    63: "Monero address (testnet, subaddress)",
+    24: "Monero address (stagenet, standard)",
+    25: "Monero address (stagenet, integrated)",
+    36: "Monero address (stagenet, subaddress)"
 };
 
-// Algoritm-nyckelord, ordnade specifik → generell. Varje träff maskeras i
-// arbetstexten så att generellare mönster inte dubbelrapporterar samma
-// förekomst (t.ex. "aes-256" inuti "aes-256-gcm", "sha512" inuti "hmac-sha512").
+// Algorithm keywords, ordered specific → general. Each match is masked in
+// the working text so that more general patterns don't double-report the same
+// occurrence (e.g. "aes-256" inside "aes-256-gcm", "sha512" inside "hmac-sha512").
 var ALGO_KEYWORDS = [
-    // — Chiffer —
-    { re: /\baes-?256-?gcm\b/gi, label: "AES-256-GCM (AEAD-chiffer)" },
-    { re: /\baes-?256-?cbc\b/gi, label: "AES-256-CBC (chiffer)" },
-    { re: /\baes-?256-?ctr\b/gi, label: "AES-256-CTR (chiffer)" },
-    { re: /\baes-?192-?(?:gcm|cbc|ctr)\b/gi, label: "AES-192 (chiffer)" },
-    { re: /\baes-?128-?gcm\b/gi, label: "AES-128-GCM (AEAD-chiffer)" },
-    { re: /\baes-?128-?cbc\b/gi, label: "AES-128-CBC (chiffer)" },
-    { re: /\baes-?128-?ctr\b/gi, label: "AES-128-CTR (chiffer)" },
-    { re: /\bxchacha20-?poly1305\b/gi, label: "XChaCha20-Poly1305 (AEAD-chiffer)" },
-    { re: /\bchacha20-?poly1305\b/gi, label: "ChaCha20-Poly1305 (AEAD-chiffer)" },
-    { re: /\bxchacha20\b/gi, label: "XChaCha20 (strömchiffer)" },
-    { re: /\bchacha20\b/gi, label: "ChaCha20 (strömchiffer)" },
-    { re: /\bxsalsa20\b/gi, label: "XSalsa20 (strömchiffer)" },
-    { re: /\bsalsa20\b/gi, label: "Salsa20 (strömchiffer)" },
-    { re: /\baes-?256\b/gi, label: "AES-256 (chiffer, läge ospecificerat)" },
-    { re: /\baes-?192\b/gi, label: "AES-192 (chiffer, läge ospecificerat)" },
-    { re: /\baes-?128\b/gi, label: "AES-128 (chiffer, läge ospecificerat)" },
-    { re: /\btwofish\b/gi, label: "Twofish (chiffer)" },
-    { re: /\bblowfish\b/gi, label: "Blowfish (chiffer, äldre)" },
-    { re: /\bcamellia\b/gi, label: "Camellia (chiffer)" },
-    { re: /\b(?:3des|triple-?des|des-?ede3?)\b/gi, label: "3DES (chiffer, föråldrat)" },
-    { re: /\brc4\b/gi, label: "RC4 (strömchiffer, osäkert)" },
+    // — Ciphers —
+    { re: /\baes-?256-?gcm\b/gi, label: "AES-256-GCM (AEAD cipher)" },
+    { re: /\baes-?256-?cbc\b/gi, label: "AES-256-CBC (cipher)" },
+    { re: /\baes-?256-?ctr\b/gi, label: "AES-256-CTR (cipher)" },
+    { re: /\baes-?192-?(?:gcm|cbc|ctr)\b/gi, label: "AES-192 (cipher)" },
+    { re: /\baes-?128-?gcm\b/gi, label: "AES-128-GCM (AEAD cipher)" },
+    { re: /\baes-?128-?cbc\b/gi, label: "AES-128-CBC (cipher)" },
+    { re: /\baes-?128-?ctr\b/gi, label: "AES-128-CTR (cipher)" },
+    { re: /\bxchacha20-?poly1305\b/gi, label: "XChaCha20-Poly1305 (AEAD cipher)" },
+    { re: /\bchacha20-?poly1305\b/gi, label: "ChaCha20-Poly1305 (AEAD cipher)" },
+    { re: /\bxchacha20\b/gi, label: "XChaCha20 (stream cipher)" },
+    { re: /\bchacha20\b/gi, label: "ChaCha20 (stream cipher)" },
+    { re: /\bxsalsa20\b/gi, label: "XSalsa20 (stream cipher)" },
+    { re: /\bsalsa20\b/gi, label: "Salsa20 (stream cipher)" },
+    { re: /\baes-?256\b/gi, label: "AES-256 (cipher, mode unspecified)" },
+    { re: /\baes-?192\b/gi, label: "AES-192 (cipher, mode unspecified)" },
+    { re: /\baes-?128\b/gi, label: "AES-128 (cipher, mode unspecified)" },
+    { re: /\btwofish\b/gi, label: "Twofish (cipher)" },
+    { re: /\bblowfish\b/gi, label: "Blowfish (cipher, legacy)" },
+    { re: /\bcamellia\b/gi, label: "Camellia (cipher)" },
+    { re: /\b(?:3des|triple-?des|des-?ede3?)\b/gi, label: "3DES (cipher, obsolete)" },
+    { re: /\brc4\b/gi, label: "RC4 (stream cipher, insecure)" },
 
-    // — Nyckelderivering / lösenordshash —
-    { re: /\bargon2(?:id|i|d)?\b/gi, label: "Argon2 (nyckelderivering)" },
-    { re: /\bpbkdf2(?:[-_](?:hmac[-_])?sha-?(?:1|256|512))?\b/gi, label: "PBKDF2 (nyckelderivering)" },
-    { re: /\bscrypt\b/gi, label: "scrypt (nyckelderivering)" },
-    { re: /\bbcrypt\b/gi, label: "bcrypt (lösenordshash)" },
-    { re: /\bhkdf\b/gi, label: "HKDF (nyckelderivering)" },
+    // — Key derivation / password hashing —
+    { re: /\bargon2(?:id|i|d)?\b/gi, label: "Argon2 (key derivation)" },
+    { re: /\bpbkdf2(?:[-_](?:hmac[-_])?sha-?(?:1|256|512))?\b/gi, label: "PBKDF2 (key derivation)" },
+    { re: /\bscrypt\b/gi, label: "scrypt (key derivation)" },
+    { re: /\bbcrypt\b/gi, label: "bcrypt (password hash)" },
+    { re: /\bhkdf\b/gi, label: "HKDF (key derivation)" },
 
     // — MAC —
-    { re: /\bhmac(?:-?(?:sha-?(?:1|224|256|384|512)|md5))?\b/gi, label: "HMAC (meddelandeautentisering)" },
+    { re: /\bhmac(?:-?(?:sha-?(?:1|224|256|384|512)|md5))?\b/gi, label: "HMAC (message authentication)" },
     { re: /\bpoly1305\b/gi, label: "Poly1305 (MAC)" },
 
-    // — Hashfunktioner —
-    { re: /\bkeccak-?(?:224|256|384|512)?\b/gi, label: "Keccak (hashfunktion)" },
-    { re: /\bsha3-?(?:224|256|384|512)?\b/gi, label: "SHA-3 (hashfunktion)" },
-    { re: /\bblake2[bs]?\b/gi, label: "BLAKE2 (hashfunktion)" },
-    { re: /\bblake3\b/gi, label: "BLAKE3 (hashfunktion)" },
-    { re: /\bripemd-?160\b/gi, label: "RIPEMD-160 (hashfunktion)" },
-    { re: /\bsha-?512\b/gi, label: "SHA-512 (hashfunktion)" },
-    { re: /\bsha-?384\b/gi, label: "SHA-384 (hashfunktion)" },
-    { re: /\bsha-?256\b/gi, label: "SHA-256 (hashfunktion)" },
-    { re: /\bsha-?224\b/gi, label: "SHA-224 (hashfunktion)" },
-    { re: /\bsha-?1\b/gi, label: "SHA-1 (hashfunktion, föråldrad)" },
-    { re: /\bmd5\b/gi, label: "MD5 (hashfunktion, osäker)" },
+    // — Hash functions —
+    { re: /\bkeccak-?(?:224|256|384|512)?\b/gi, label: "Keccak (hash function)" },
+    { re: /\bsha3-?(?:224|256|384|512)?\b/gi, label: "SHA-3 (hash function)" },
+    { re: /\bblake2[bs]?\b/gi, label: "BLAKE2 (hash function)" },
+    { re: /\bblake3\b/gi, label: "BLAKE3 (hash function)" },
+    { re: /\bripemd-?160\b/gi, label: "RIPEMD-160 (hash function)" },
+    { re: /\bsha-?512\b/gi, label: "SHA-512 (hash function)" },
+    { re: /\bsha-?384\b/gi, label: "SHA-384 (hash function)" },
+    { re: /\bsha-?256\b/gi, label: "SHA-256 (hash function)" },
+    { re: /\bsha-?224\b/gi, label: "SHA-224 (hash function)" },
+    { re: /\bsha-?1\b/gi, label: "SHA-1 (hash function, deprecated)" },
+    { re: /\bmd5\b/gi, label: "MD5 (hash function, insecure)" },
 
-    // — Kurvor, signaturer & nyckelutbyte —
-    { re: /\bed25519\b/gi, label: "Ed25519 (signaturalgoritm)" },
-    { re: /\bed448\b/gi, label: "Ed448 (signaturalgoritm)" },
-    { re: /\bx25519\b/gi, label: "X25519 (nyckelutbyte)" },
-    { re: /\bcurve25519\b/gi, label: "Curve25519 (elliptisk kurva)" },
-    { re: /\bsecp256k1\b/gi, label: "secp256k1 (elliptisk kurva — Bitcoin/Ethereum)" },
-    { re: /\b(?:secp256r1|prime256v1|nist-?p-?256)\b/gi, label: "P-256/secp256r1 (elliptisk kurva)" },
-    { re: /\becdsa\b/gi, label: "ECDSA (signaturalgoritm)" },
-    { re: /\beddsa\b/gi, label: "EdDSA (signaturalgoritm)" },
-    { re: /\bschnorr\b/gi, label: "Schnorr (signaturalgoritm)" },
-    { re: /\brsa(?:-?(?:1024|2048|3072|4096))?\b/gi, label: "RSA (asymmetrisk kryptering)" }
+    // — Curves, signatures & key exchange —
+    { re: /\bed25519\b/gi, label: "Ed25519 (signature algorithm)" },
+    { re: /\bed448\b/gi, label: "Ed448 (signature algorithm)" },
+    { re: /\bx25519\b/gi, label: "X25519 (key exchange)" },
+    { re: /\bcurve25519\b/gi, label: "Curve25519 (elliptic curve)" },
+    { re: /\bsecp256k1\b/gi, label: "secp256k1 (elliptic curve — Bitcoin/Ethereum)" },
+    { re: /\b(?:secp256r1|prime256v1|nist-?p-?256)\b/gi, label: "P-256/secp256r1 (elliptic curve)" },
+    { re: /\becdsa\b/gi, label: "ECDSA (signature algorithm)" },
+    { re: /\beddsa\b/gi, label: "EdDSA (signature algorithm)" },
+    { re: /\bschnorr\b/gi, label: "Schnorr (signature algorithm)" },
+    { re: /\brsa(?:-?(?:1024|2048|3072|4096))?\b/gi, label: "RSA (asymmetric encryption)" }
 ];
 
 var WALLET_JSON_FIELDS = ["ciphertext", "iv", "salt", "mac"];
 
 var BIP38_VERSIONS = {
-    "0142": "BIP38-krypterad privat nyckel (icke EC-multiplicerad)",
-    "0143": "BIP38-krypterad privat nyckel (EC-multiplicerad)"
+    "0142": "BIP38-encrypted private key (non-EC-multiplied)",
+    "0143": "BIP38-encrypted private key (EC-multiplied)"
 };
 
 var BIP39_WORDLIST = (window.entropyWordlists && window.entropyWordlists.bip39) || [];
 var BIP39_LENGTHS = { 12: true, 15: true, 18: true, 21: true, 24: true };
 
-// Electrum-seedfraser versioneras med HMAC-SHA512("Seed version", fras):
-// hex-prefixet på resultatet anger plånbokstypen. Mest specifika prefix först.
+// Electrum seed phrases are versioned with HMAC-SHA512("Seed version", phrase):
+// the hex prefix of the result indicates the wallet type. Most specific prefix first.
 var ELECTRUM_VERSIONS = [
     { prefix: "100", name: "segwit" },
     { prefix: "101", name: "2FA" },
@@ -3453,7 +3453,7 @@ var ELECTRUM_VERSIONS = [
     { prefix: "01", name: "standard" }
 ];
 
-// ---------- Hjälpfunktioner ----------
+// ---------- Helper functions ----------
 
 function bytesToHex(bytes) {
     var s = "";
@@ -3477,7 +3477,7 @@ function isEntropyObjectShape(node, keys) {
     return true;
 }
 
-// Base64url → avkodad UTF-8-sträng, eller null om avkodningen misslyckas.
+// Base64url → decoded UTF-8 string, or null if decoding fails.
 function base64UrlToString(s) {
     var b64 = s.replace(/-/g, "+").replace(/_/g, "/");
     while (b64.length % 4 !== 0) b64 += "=";
@@ -3492,7 +3492,7 @@ function base64UrlToString(s) {
     }
 }
 
-// ---------- Helhetstext-pass ----------
+// ---------- Full-text pass ----------
 
 function walkJson(node, addFinding) {
     if (node === null || node === undefined) return;
@@ -3507,18 +3507,18 @@ function walkJson(node, addFinding) {
             var bytes = [];
             for (var bi = 0; bi < keys.length; bi++) bytes.push(node[String(bi)]);
             var hex = bytesToHex(bytes);
-            addFinding(hex, "Entropy (" + bytes.length + " byte, JSON-objekt)", "verified",
+            addFinding(hex, "Entropy (" + bytes.length + " bytes, JSON object)", "verified",
                 { label: "Decimal", value: bytes.join(",") });
         }
 
-        // Ethereum Keystore V3: strukturen är specifik nog att känna igen direkt
-        // (version 3 + crypto.cipher/crypto.ciphertext) istället för att bara
-        // rapportera de enskilda cipher/kdf-fälten var för sig. Använder samma
-        // "value" som ciphertext-fältet nedan så de två träffarna slås ihop till
-        // ett kort.
+        // Ethereum Keystore V3: the structure is specific enough to recognize directly
+        // (version 3 + crypto.cipher/crypto.ciphertext) instead of just
+        // reporting the individual cipher/kdf fields separately. Uses the same
+        // "value" as the ciphertext field below so the two hits are merged into
+        // one card.
         if (node.version === 3 && node.crypto && typeof node.crypto === "object" &&
             typeof node.crypto.cipher === "string" && typeof node.crypto.ciphertext === "string") {
-            addFinding(node.crypto.ciphertext, "Ethereum Keystore V3 (nyckelfil)", "verified");
+            addFinding(node.crypto.ciphertext, "Ethereum Keystore V3 (key file)", "verified");
         }
 
         keys.forEach(function (key) {
@@ -3526,10 +3526,10 @@ function walkJson(node, addFinding) {
             var lowerKey = key.toLowerCase();
 
             if ((lowerKey === "kdf" || lowerKey === "cipher") && typeof value === "string") {
-                addFinding(value, "Krypteringsfält \"" + key + "\": " + value, "verified");
+                addFinding(value, "Encryption field \"" + key + "\": " + value, "verified");
             }
             if (WALLET_JSON_FIELDS.indexOf(lowerKey) !== -1 && typeof value === "string" && value.length >= 8) {
-                addFinding(value, "Plånboksfält \"" + key + "\" (" + Math.floor(value.length / 2) + " byte hex)", "verified");
+                addFinding(value, "Wallet field \"" + key + "\" (" + Math.floor(value.length / 2) + " bytes hex)", "verified");
             }
 
             walkJson(value, addFinding);
@@ -3537,9 +3537,9 @@ function walkJson(node, addFinding) {
     }
 }
 
-// Hittar toppnivå-{...}/[...]-block var som helst i texten (inte bara om HELA
-// texten är giltig JSON) genom att matcha ihop klamrar och hoppa över citerade
-// strängar, så JSON som klistrats in tillsammans med annan text ändå fångas.
+// Finds top-level {...}/[...] blocks anywhere in the text (not only if the ENTIRE
+// text is valid JSON) by matching up brackets and skipping over quoted
+// strings, so JSON pasted together with other text is still caught.
 function findJsonBlocks(text) {
     var blocks = [];
     for (var i = 0; i < text.length; i++) {
@@ -3585,16 +3585,16 @@ function findMatchingBracket(text, start) {
     return -1;
 }
 
-// Parsar varje funnet JSON-block: giltig syntax rapporteras som ett verifierat
-// fynd, och innehållet genomsöks rekursivt efter plånboksfält/entropy.
+// Parses each found JSON block: valid syntax is reported as a verified
+// finding, and the content is searched recursively for wallet fields/entropy.
 function scanJsonBlocks(text, addFinding) {
     findJsonBlocks(text).forEach(function (block) {
         var parsed;
         try {
             parsed = JSON.parse(block);
         } catch (e) {
-            // blocket var inte giltig JSON (t.ex. bara en kod-snutt med klamrar) —
-            // nyckelords- och token-passen fångar ändå upp relevant innehåll i det
+            // the block was not valid JSON (e.g. just a code snippet with brackets) —
+            // the keyword and token passes still catch relevant content in it
             return;
         }
         if (!parsed || typeof parsed !== "object") return;
@@ -3602,9 +3602,9 @@ function scanJsonBlocks(text, addFinding) {
         var count = Array.isArray(parsed) ? parsed.length : Object.keys(parsed).length;
         if (count > 0 && block.length >= 20) {
             var desc = Array.isArray(parsed)
-                ? "Giltig JSON-array (" + count + " element)"
-                : "Giltigt JSON-objekt (" + count + (count === 1 ? " nyckel" : " nycklar") + ")";
-            addFinding(block.trim(), desc + " · syntax verifierad", "verified");
+                ? "Valid JSON array (" + count + " elements)"
+                : "Valid JSON object (" + count + (count === 1 ? " key" : " keys") + ")";
+            addFinding(block.trim(), desc + " · syntax verified", "verified");
         }
         walkJson(parsed, addFinding);
     });
@@ -3618,16 +3618,16 @@ function scanAlgorithmKeywords(text, addFinding, consumed) {
         while ((m = kw.re.exec(work)) !== null) {
             addFinding(m[0], kw.label, "likely");
             consumed.add(m[0]);
-            // maskera träffen så generellare mönster inte matchar samma text igen
+            // mask the match so more general patterns don't match the same text again
             work = work.slice(0, m.index) + " ".repeat(m[0].length) + work.slice(m.index + m[0].length);
         }
     });
 }
 
 function scanEntropyLists(text, addFinding) {
-    // Negativ lookbehind/lookahead så en talrad inte "äter" en angränsande siffra
-    // som egentligen hör till ett hex/base58-ord precis före eller efter (t.ex.
-    // sista tecknet i en 0x-adress som råkar sluta på en siffra).
+    // Negative lookbehind/lookahead so a number row doesn't "eat" an adjacent digit
+    // that actually belongs to a hex/base58 word right before or after (e.g.
+    // the last character in a 0x address that happens to end in a digit).
     var re = /(?<![0-9a-zA-Z])\[?\s*\d{1,3}(?:\s*[,\s]\s*\d{1,3})*\s*\]?(?![0-9a-zA-Z])/g;
     var m;
     while ((m = re.exec(text)) !== null) {
@@ -3636,14 +3636,14 @@ function scanEntropyLists(text, addFinding) {
         var validCount = nums.length === 16 || nums.length === 32;
         var validBytes = nums.every(function (n) { return Number.isInteger(n) && n >= 0 && n <= 255; });
         if (validCount && validBytes) {
-            addFinding(raw.trim(), "Entropy (" + nums.length + " byte, talista)", "likely",
+            addFinding(raw.trim(), "Entropy (" + nums.length + " bytes, number list)", "likely",
                 { label: "Hex", value: bytesToHex(nums) });
         }
     }
 }
 
 function scanDerivationPaths(text, addFinding) {
-    // t.ex. m/44'/0'/0'/0/0 eller m/84h/0h/0h/0/0 (h/' markerar hardened index)
+    // e.g. m/44'/0'/0'/0/0 or m/84h/0h/0h/0/0 (h/' marks a hardened index)
     var re = /\bm(?:\/\d+[h']?)+/g;
     var m;
     while ((m = re.exec(text)) !== null) {
@@ -3651,8 +3651,8 @@ function scanDerivationPaths(text, addFinding) {
     }
 }
 
-// JWT: tre base64url-delar separerade med punkter. Headern avkodas och parsas
-// som JSON — lyckas det (och innehåller "alg") är identifieringen verifierad.
+// JWT: three base64url parts separated by dots. The header is decoded and parsed
+// as JSON — if that succeeds (and contains "alg") the identification is verified.
 function scanJwtTokens(text, addFinding, consumed) {
     var re = /\beyJ[A-Za-z0-9_-]{6,}\.[A-Za-z0-9_-]{6,}\.[A-Za-z0-9_-]{10,}\b/g;
     var m;
@@ -3667,20 +3667,20 @@ function scanJwtTokens(text, addFinding, consumed) {
         var payloadStr = base64UrlToString(parts[1]);
         var payloadOk = false;
         if (payloadStr) {
-            try { JSON.parse(payloadStr); payloadOk = true; } catch (e) { /* ej JSON */ }
+            try { JSON.parse(payloadStr); payloadOk = true; } catch (e) { /* not JSON */ }
         }
 
-        var label = "JWT (alg: " + header.alg + (typeof header.typ === "string" ? ", typ: " + header.typ : "") + ") · header avkodad och parsad";
+        var label = "JWT (alg: " + header.alg + (typeof header.typ === "string" ? ", typ: " + header.typ : "") + ") · header decoded and parsed";
         addFinding(m[0], label, "verified",
             payloadOk ? { label: "Payload", value: payloadStr } : undefined);
         parts.forEach(function (p) { consumed.add(p); });
     }
 }
 
-// PEM-block: BEGIN/END-huvuden med base64-innehåll emellan. Matchande huvuden
-// + giltig base64 som avkodas till DER (0x30-prefix) räknas som verifierad
-// struktur. Returnerar texten med funna block bortmaskerade, så att
-// nyckelordsskanningen inte reagerar på t.ex. "RSA" i huvudet.
+// PEM block: BEGIN/END headers with base64 content in between. Matching headers
+// + valid base64 that decodes to DER (0x30 prefix) counts as verified
+// structure. Returns the text with found blocks masked out, so that
+// the keyword scan doesn't react to e.g. "RSA" in the header.
 function scanPemBlocks(text, addFinding, consumed) {
     var masked = text;
     var re = /-----BEGIN ([A-Z0-9 ]+)-----([\s\S]*?)-----END \1-----/g;
@@ -3694,13 +3694,13 @@ function scanPemBlocks(text, addFinding, consumed) {
             var derNote = "";
             try {
                 var decoded = atob(body);
-                if (decoded.length > 0 && decoded.charCodeAt(0) === 0x30) derNote = ", DER-struktur";
+                if (decoded.length > 0 && decoded.charCodeAt(0) === 0x30) derNote = ", DER structure";
             } catch (e) {
                 validB64 = false;
             }
             if (validB64) {
                 addFinding(m[0].trim(),
-                    "PEM-block: " + type + " (~" + Math.floor(body.length * 3 / 4) + " byte" + derNote + ") · struktur verifierad",
+                    "PEM block: " + type + " (~" + Math.floor(body.length * 3 / 4) + " bytes" + derNote + ") · structure verified",
                     "verified");
                 m[2].split(/\s+/).forEach(function (line) {
                     if (line.length >= 8) consumed.add(line);
@@ -3708,16 +3708,16 @@ function scanPemBlocks(text, addFinding, consumed) {
             }
         }
         if (!validB64) {
-            addFinding(m[0].trim(), "PEM-block: " + type + " (ogiltig/ofullständig base64)", "likely");
+            addFinding(m[0].trim(), "PEM block: " + type + " (invalid/incomplete base64)", "likely");
         }
         masked = masked.slice(0, m.index) + " ".repeat(m[0].length) + masked.slice(m.index + m[0].length);
     }
     return masked;
 }
 
-// CashAddr med explicit prefix ("bitcoincash:q..."). Prefixet ingår i
-// polymod-checksumman, så en träff är fullt verifierad — och ett uttryckligt
-// prefix med felaktig checksumma är ett tydligt fel värt att flagga.
+// CashAddr with an explicit prefix ("bitcoincash:q..."). The prefix is part of
+// the polymod checksum, so a hit is fully verified — and an explicit
+// prefix with a wrong checksum is a clear error worth flagging.
 function scanCashAddr(text, addFinding, consumed) {
     var re = /\b(bitcoincash|bchtest|bchreg):([qpzry9x8gf2tvdw0s3jn54khce6mua7l]{34,112})\b/gi;
     var m;
@@ -3727,10 +3727,10 @@ function scanCashAddr(text, addFinding, consumed) {
         var decoded = CH.decodeCashAddr(prefix, m[2]);
         if (decoded) {
             var type = describeCashAddrType(decoded.versionByte);
-            addFinding(m[0], "Bitcoin Cash-adress (" + type + ", " + net + ") · checksumma verifierad", "verified");
+            addFinding(m[0], "Bitcoin Cash address (" + type + ", " + net + ") · checksum verified", "verified");
             consumed.add(m[2]);
         } else {
-            addFinding(m[0], "Bitcoin Cash-adress (" + net + ") — checksumman stämmer INTE", "invalid");
+            addFinding(m[0], "Bitcoin Cash address (" + net + ") — the checksum does NOT match", "invalid");
         }
     }
 }
@@ -3739,10 +3739,10 @@ function describeCashAddrType(versionByte) {
     var type = versionByte >> 3;
     if (type === 0) return "P2PKH";
     if (type === 1) return "P2SH";
-    return "typ " + type;
+    return "type " + type;
 }
 
-// ---------- BIP39/Electrum mnemonic-fraser ----------
+// ---------- BIP39/Electrum mnemonic phrases ----------
 
 function bytesToBinaryLocal(bytes) {
     var s = "";
@@ -3758,10 +3758,10 @@ function binaryToBytesLocal(bits) {
     return bytes;
 }
 
-// Avkodar orden tillbaka till bitar och räknar om SHA-256-checksumman från
-// entropy-delen, samma metod som Entropy2Mnemonic-verktyget använder — så en
-// hittad fras verifieras kryptografiskt istället för att bara matchas mot
-// ordlistan.
+// Decodes the words back to bits and recomputes the SHA-256 checksum from
+// the entropy part, the same method the Entropy2Mnemonic tool uses — so a
+// found phrase is verified cryptographically instead of just matched against
+// the wordlist.
 async function verifyBip39Checksum(words) {
     var bits = words.map(function (w) {
         return BIP39_WORDLIST.indexOf(w).toString(2).padStart(11, "0");
@@ -3781,8 +3781,8 @@ async function verifyBip39Checksum(words) {
     return recomputedChecksumBits === embeddedChecksumBits;
 }
 
-// Electrum-seedfraser har ingen BIP39-checksumma; istället är frasen giltig om
-// HMAC-SHA512("Seed version", fras) börjar på ett känt versionsprefix.
+// Electrum seed phrases have no BIP39 checksum; instead the phrase is valid if
+// HMAC-SHA512("Seed version", phrase) starts with a known version prefix.
 async function checkElectrumVersion(words) {
     var mac = await CH.hmacSha512("Seed version", words.join(" "));
     var hex = bytesToHex(mac);
@@ -3792,9 +3792,9 @@ async function checkElectrumVersion(words) {
     return null;
 }
 
-// Samlar runs av ordlisteord i en textsnutt. Ett run bryts av ord som inte
-// finns i BIP39-listan; bara run med giltig fraslängd (12/15/18/21/24) blir
-// kandidater.
+// Collects runs of wordlist words in a text snippet. A run is broken by words not
+// in the BIP39 list; only runs with a valid phrase length (12/15/18/21/24) become
+// candidates.
 function collectMnemonicCandidates(str, wordSet) {
     var candidates = [];
     var re = /[A-Za-z]+/g;
@@ -3829,8 +3829,8 @@ async function scanMnemonicPhrases(text, addFinding) {
     if (!BIP39_WORDLIST.length) return;
     var wordSet = new Set(BIP39_WORDLIST);
 
-    // Pass 1 — radvis: två fraser på angränsande rader får inte smälta ihop
-    // till en enda ogiltig jättekandidat.
+    // Pass 1 — line by line: two phrases on adjacent lines must not merge
+    // into a single invalid giant candidate.
     var candidates = [];
     text.split("\n").forEach(function (line) {
         collectMnemonicCandidates(line, wordSet).forEach(function (c) { candidates.push(c); });
@@ -3839,31 +3839,31 @@ async function scanMnemonicPhrases(text, addFinding) {
     for (var i = 0; i < candidates.length; i++) {
         var c = candidates[i];
         if (await verifyBip39Checksum(c.words)) {
-            addFinding(c.phrase, "BIP39 mnemonic-fras (" + c.words.length + " ord) · checksumma verifierad", "verified");
+            addFinding(c.phrase, "BIP39 mnemonic phrase (" + c.words.length + " words) · checksum verified", "verified");
             continue;
         }
         var electrumType = await checkElectrumVersion(c.words);
         if (electrumType) {
-            addFinding(c.phrase, "Electrum-seedfras (" + electrumType + ", " + c.words.length + " ord) · versionsprefix verifierad", "verified");
+            addFinding(c.phrase, "Electrum seed phrase (" + electrumType + ", " + c.words.length + " words) · version prefix verified", "verified");
         } else {
-            addFinding(c.phrase, c.words.length + " ord från BIP39-listan — ingen giltig BIP39/Electrum-checksumma", "likely");
+            addFinding(c.phrase, c.words.length + " words from the BIP39 list — no valid BIP39/Electrum checksum", "likely");
         }
     }
 
-    // Pass 2 — över radbrytningar (t.ex. seedfraser skrivna med ett ord per
-    // rad). För att inte skapa brus av run som råkat smälta ihop rapporteras
-    // radöverskridande kandidater bara när frasen faktiskt verifierar.
+    // Pass 2 — across line breaks (e.g. seed phrases written with one word per
+    // line). To avoid noise from runs that happened to merge, cross-line
+    // candidates are only reported when the phrase actually verifies.
     var crossCandidates = collectMnemonicCandidates(text, wordSet);
     for (var j = 0; j < crossCandidates.length; j++) {
         var cc = crossCandidates[j];
-        if (cc.phrase.indexOf("\n") === -1) continue; // redan täckt av pass 1
+        if (cc.phrase.indexOf("\n") === -1) continue; // already covered by pass 1
         if (await verifyBip39Checksum(cc.words)) {
-            addFinding(cc.phrase, "BIP39 mnemonic-fras (" + cc.words.length + " ord, flerradig) · checksumma verifierad", "verified");
+            addFinding(cc.phrase, "BIP39 mnemonic phrase (" + cc.words.length + " words, multi-line) · checksum verified", "verified");
             continue;
         }
         var crossElectrum = await checkElectrumVersion(cc.words);
         if (crossElectrum) {
-            addFinding(cc.phrase, "Electrum-seedfras (" + crossElectrum + ", " + cc.words.length + " ord, flerradig) · versionsprefix verifierad", "verified");
+            addFinding(cc.phrase, "Electrum seed phrase (" + crossElectrum + ", " + cc.words.length + " words, multi-line) · version prefix verified", "verified");
         }
     }
 }
@@ -3879,8 +3879,8 @@ function classifyBase58Payload(payload) {
         var v = payload[0];
         if (WIF_VERSIONS[v]) {
             var suffix = payload.length === 34
-                ? (payload[33] === 0x01 ? " · komprimerad" : " · okänt suffix")
-                : " · okomprimerad";
+                ? (payload[33] === 0x01 ? " · compressed" : " · unknown suffix")
+                : " · uncompressed";
             labels.push(WIF_VERSIONS[v] + suffix);
         }
     } else if (payload.length === 21) {
@@ -3901,35 +3901,35 @@ function describeBech32(decoded) {
     if (decoded.witnessVersion !== null) {
         if (decoded.witnessVersion === 0) {
             var kind = decoded.program.length === 20 ? "P2WPKH" : (decoded.program.length === 32 ? "P2WSH" : "SegWit v0");
-            return chainName + "-adress (Native SegWit, " + kind + ")";
+            return chainName + " address (Native SegWit, " + kind + ")";
         }
         if (decoded.witnessVersion === 1) {
-            return chainName + "-adress (Taproot)";
+            return chainName + " address (Taproot)";
         }
-        return chainName + "-adress (SegWit v" + decoded.witnessVersion + ")";
+        return chainName + " address (SegWit v" + decoded.witnessVersion + ")";
     }
-    return "Bech32-adress (" + chainName + ", " + decoded.program.length + " byte)";
+    return "Bech32 address (" + chainName + ", " + decoded.program.length + " bytes)";
 }
 
-// Publika nycklar i hex. Okomprimerade (04 + x + y) kan verifieras starkt:
-// punkten måste ligga på secp256k1-kurvan (en slumpsträng klarar det med
-// ~2^-256 sannolikhet). Komprimerade (02/03 + x) kan bara delvis kontrolleras —
-// men om x INTE ligger på kurvan är det bevisat att det inte är en giltig
-// secp256k1-nyckel, vilket halverar mängden falska positiver.
+// Public keys in hex. Uncompressed (04 + x + y) can be strongly verified:
+// the point must lie on the secp256k1 curve (a random string passes it with
+// ~2^-256 probability). Compressed (02/03 + x) can only be partially checked —
+// but if x is NOT on the curve it is proven that it is not a valid
+// secp256k1 key, which halves the number of false positives.
 function classifyPublicKeyHex(value, hexPart, addFinding) {
     if (hexPart.length === 66 && /^0[23]/.test(hexPart)) {
         if (CH.hasValidSecp256k1X(hexPart.slice(2))) {
-            addFinding(value, "Komprimerad publik nyckel (secp256k1, x-koordinaten ligger på kurvan)", "likely");
+            addFinding(value, "Compressed public key (secp256k1, the x coordinate lies on the curve)", "likely");
         } else {
-            addFinding(value, "Möjlig komprimerad publik nyckel (x ej på secp256k1 — annan kurva?)", "likely");
+            addFinding(value, "Possible compressed public key (x not on secp256k1 — different curve?)", "likely");
         }
         return true;
     }
     if (hexPart.length === 130 && /^04/.test(hexPart)) {
         if (CH.isPointOnSecp256k1(hexPart.slice(2, 66), hexPart.slice(66))) {
-            addFinding(value, "Okomprimerad publik nyckel (secp256k1) · punkten ligger på kurvan", "verified");
+            addFinding(value, "Uncompressed public key (secp256k1) · the point lies on the curve", "verified");
         } else {
-            addFinding(value, "Möjlig okomprimerad publik nyckel (ej på secp256k1 — annan kurva?)", "likely");
+            addFinding(value, "Possible uncompressed public key (not on secp256k1 — different curve?)", "likely");
         }
         return true;
     }
@@ -3939,52 +3939,52 @@ function classifyPublicKeyHex(value, hexPart, addFinding) {
 function classifyRawHex(token, addFinding) {
     var len = token.length;
     if (len === 32) {
-        addFinding(token, "Entropy (16 byte, hex)", "likely",
+        addFinding(token, "Entropy (16 bytes, hex)", "likely",
             { label: "Decimal", value: hexToDecimalList(token.toLowerCase()) });
-        addFinding(token, "Möjlig MD5-hash", "likely");
+        addFinding(token, "Possible MD5 hash", "likely");
         return true;
     }
     if (len === 40) {
-        // Blandad case som exakt matchar EIP-55-casingen är ett kryptografiskt
-        // starkt tecken på en EVM-adress som saknar sitt 0x-prefix.
+        // Mixed case that exactly matches the EIP-55 casing is a cryptographically
+        // strong sign of an EVM address missing its 0x prefix.
         var mixed = /[a-f]/.test(token) && /[A-F]/.test(token);
         if (mixed && CH.checkEip55(token)) {
-            addFinding(token, "EVM-adress utan 0x-prefix · EIP-55-checksumma verifierad", "verified");
+            addFinding(token, "EVM address without 0x prefix · EIP-55 checksum verified", "verified");
         } else {
-            addFinding(token, "Möjlig SHA-1- eller RIPEMD-160-hash", "likely");
+            addFinding(token, "Possible SHA-1 or RIPEMD-160 hash", "likely");
         }
         return true;
     }
     if (len === 56) {
-        addFinding(token, "Möjlig SHA-224-hash", "likely");
+        addFinding(token, "Possible SHA-224 hash", "likely");
         return true;
     }
     if (len === 64) {
         if (CH.isValidSecp256k1Scalar(token)) {
-            addFinding(token, "Möjlig privat nyckel (hex, inom secp256k1-intervallet)", "likely");
+            addFinding(token, "Possible private key (hex, within the secp256k1 range)", "likely");
         }
-        addFinding(token, "Möjlig SHA-256-hash", "likely");
-        addFinding(token, "Entropy (32 byte, hex)", "likely",
+        addFinding(token, "Possible SHA-256 hash", "likely");
+        addFinding(token, "Entropy (32 bytes, hex)", "likely",
             { label: "Decimal", value: hexToDecimalList(token.toLowerCase()) });
         return true;
     }
     if (classifyPublicKeyHex(token, token, addFinding)) return true;
     if (len === 96) {
-        addFinding(token, "Möjlig SHA-384-hash", "likely");
+        addFinding(token, "Possible SHA-384 hash", "likely");
         return true;
     }
     if (len === 128) {
-        addFinding(token, "Möjlig BIP39-seed (64 byte, hex)", "likely");
-        addFinding(token, "Möjlig SHA-512-hash", "likely");
+        addFinding(token, "Possible BIP39 seed (64 bytes, hex)", "likely");
+        addFinding(token, "Possible SHA-512 hash", "likely");
         return true;
     }
     return false;
 }
 
-// Base64-kandidater avkodas och innehållet inspekteras: JSON blir ett
-// verifierat fynd (och genomsöks), läsbar text visas avkodad, och rent binärt
-// innehåll katalogiseras som okänt. Kravet på blandade teckenklasser hindrar
-// vanliga ord och hex-strängar från att felflaggas som base64.
+// Base64 candidates are decoded and the content inspected: JSON becomes a
+// verified finding (and is scanned), readable text is shown decoded, and purely binary
+// content is catalogued as unknown. The requirement for mixed character classes prevents
+// common words and hex strings from being misflagged as base64.
 function inspectBase64(token, addFinding) {
     var isStd = token.length % 4 === 0 && /^[A-Za-z0-9+/]+={0,2}$/.test(token);
     var isUrl = !isStd && /^[A-Za-z0-9_-]+$/.test(token) && /[_-]/.test(token);
@@ -3994,8 +3994,8 @@ function inspectBase64(token, addFinding) {
     var hasLower = /[a-z]/.test(token);
     var hasDigit = /[0-9]/.test(token);
     if (isStd && !/[+/=]/.test(token) && !(hasUpper && hasLower && hasDigit)) return false;
-    // base64url utan tydlig signal ger många falska positiver på bindestreckade
-    // ord — kräv full teckenmix och lite längd innan vi ens försöker
+    // base64url without a clear signal gives many false positives on hyphenated
+    // words — require a full character mix and some length before we even try
     if (isUrl && !(hasUpper && hasLower && hasDigit && token.length >= 22)) return false;
 
     var b64 = isUrl ? token.replace(/-/g, "+").replace(/_/g, "/") : token;
@@ -4006,15 +4006,15 @@ function inspectBase64(token, addFinding) {
     for (var i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
 
     var decodedText = null;
-    try { decodedText = new TextDecoder("utf-8", { fatal: true }).decode(bytes); } catch (e) { /* binärt */ }
+    try { decodedText = new TextDecoder("utf-8", { fatal: true }).decode(bytes); } catch (e) { /* binary */ }
 
     if (decodedText !== null) {
         var trimmed = decodedText.trim();
         if (trimmed[0] === "{" || trimmed[0] === "[") {
             var parsed = null;
-            try { parsed = JSON.parse(trimmed); } catch (e) { /* ej JSON */ }
+            try { parsed = JSON.parse(trimmed); } catch (e) { /* not JSON */ }
             if (parsed && typeof parsed === "object") {
-                addFinding(token, "Base64-kodad JSON · avkodad och parsad", "verified",
+                addFinding(token, "Base64-encoded JSON · decoded and parsed", "verified",
                     { label: "JSON", value: trimmed });
                 walkJson(parsed, addFinding);
                 return true;
@@ -4022,49 +4022,49 @@ function inspectBase64(token, addFinding) {
         }
         var printable = trimmed.length > 0 && !/[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]/.test(decodedText);
         if (printable) {
-            addFinding(token, "Base64-kodad text (" + bytes.length + " byte)", "likely",
+            addFinding(token, "Base64-encoded text (" + bytes.length + " bytes)", "likely",
                 { label: "Text", value: trimmed.length > 300 ? trimmed.slice(0, 300) + "…" : trimmed });
             return true;
         }
     }
 
     var sizeNote = (bytes.length === 16 || bytes.length === 32 || bytes.length === 64)
-        ? bytes.length + " byte binärt — kan vara nyckel/entropy"
-        : bytes.length + " byte binärt";
-    addFinding(token, "Base64-data (" + sizeNote + ")", "unknown");
+        ? bytes.length + " bytes binary — could be a key/entropy"
+        : bytes.length + " bytes binary";
+    addFinding(token, "Base64 data (" + sizeNote + ")", "unknown");
     return true;
 }
 
 function genericFallback(token, addFinding) {
     if (token.length < 16) return;
     if (/^[0-9a-fA-F]+$/.test(token) && token.length % 2 === 0) {
-        addFinding(token, "Hex-data (" + (token.length / 2) + " byte, okänd betydelse)", "unknown");
+        addFinding(token, "Hex data (" + (token.length / 2) + " bytes, unknown meaning)", "unknown");
         return;
     }
     if (inspectBase64(token, addFinding)) return;
-    // Base58 utan träff i något känt format: kräv siffror + blandad case så
-    // vanliga ord inte felflaggas
+    // Base58 with no hit in any known format: require digits + mixed case so
+    // common words aren't misflagged
     if (token.length >= 20 && /^[1-9A-HJ-NP-Za-km-z]+$/.test(token) &&
         /[0-9]/.test(token) && /[A-Z]/.test(token) && /[a-z]/.test(token)) {
-        addFinding(token, "Base58-kodad data (okänt format, ingen giltig checksumma)", "unknown");
+        addFinding(token, "Base58-encoded data (unknown format, no valid checksum)", "unknown");
     }
 }
 
 async function classifyToken(token, addFinding) {
-    // 1. UUID (8-4-4-4-12): versions- och variantbitarna kontrolleras
+    // 1. UUID (8-4-4-4-12): the version and variant bits are checked
     var um = token.match(/^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-([0-9a-fA-F])[0-9a-fA-F]{3}-([0-9a-fA-F])[0-9a-fA-F]{3}-[0-9a-fA-F]{12}$/);
     if (um) {
         var uuidVersion = parseInt(um[1], 16);
         var variantNibble = parseInt(um[2], 16);
         if (uuidVersion >= 1 && uuidVersion <= 8 && variantNibble >= 8 && variantNibble <= 11) {
-            addFinding(token, "UUID v" + uuidVersion + " (RFC 4122) · struktur verifierad", "verified");
+            addFinding(token, "UUID v" + uuidVersion + " (RFC 4122) · structure verified", "verified");
         } else {
-            addFinding(token, "UUID-liknande format (ogiltiga versions-/variantbitar)", "likely");
+            addFinding(token, "UUID-like format (invalid version/variant bits)", "likely");
         }
         return;
     }
 
-    // 2. 0x-prefixad hex (EVM-adress / privat nyckel / tx-hash / pubnyckel)
+    // 2. 0x-prefixed hex (EVM address / private key / tx hash / pubkey)
     if (/^0x[0-9a-fA-F]+$/.test(token)) {
         var hexPart = token.slice(2);
         if (hexPart.length === 40) {
@@ -4072,107 +4072,107 @@ async function classifyToken(token, addFinding) {
             var hasUpper = /[A-F]/.test(hexPart);
             if (hasLower && hasUpper) {
                 if (CH.checkEip55(hexPart)) {
-                    addFinding(token, "EVM-adress (Ethereum/BSC/Polygon/...) · EIP-55-checksumma verifierad", "verified");
+                    addFinding(token, "EVM address (Ethereum/BSC/Polygon/...) · EIP-55 checksum verified", "verified");
                 } else {
-                    addFinding(token, "EVM-adress — EIP-55-checksumman stämmer INTE (felskriven adress?)", "invalid");
+                    addFinding(token, "EVM address — the EIP-55 checksum does NOT match (mistyped address?)", "invalid");
                 }
             } else {
-                addFinding(token, "EVM-adress (Ethereum/BSC/Polygon/...) — utan checksum-casing, kan ej verifieras", "likely");
+                addFinding(token, "EVM address (Ethereum/BSC/Polygon/...) — without checksum casing, cannot be verified", "likely");
             }
         } else if (hexPart.length === 64) {
             if (CH.isValidSecp256k1Scalar(hexPart)) {
-                addFinding(token, "Möjlig privat nyckel (hex, 0x-prefix, inom secp256k1-intervallet)", "likely");
+                addFinding(token, "Possible private key (hex, 0x prefix, within the secp256k1 range)", "likely");
             }
-            addFinding(token, "Möjlig transaktionshash", "likely");
+            addFinding(token, "Possible transaction hash", "likely");
         } else {
             classifyPublicKeyHex(token, hexPart, addFinding);
         }
         return;
     }
 
-    // 3. TON-adress (48 tecken base64/base64url med CRC16-checksumma)
+    // 3. TON address (48 chars base64/base64url with CRC16 checksum)
     if (token.length === 48 && /^[A-Za-z0-9+/_-]{48}$/.test(token)) {
         var ton = CH.decodeTonAddress(token);
         if (ton) {
-            var tonDesc = (ton.bounceable ? "bounceable" : "ej bounceable") +
-                (ton.testOnly ? ", endast test" : "") +
+            var tonDesc = (ton.bounceable ? "bounceable" : "non-bounceable") +
+                (ton.testOnly ? ", test only" : "") +
                 ", workchain " + ton.workchain;
-            addFinding(token, "TON-adress (" + tonDesc + ") · CRC16-checksumma verifierad", "verified");
+            addFinding(token, "TON address (" + tonDesc + ") · CRC16 checksum verified", "verified");
             return;
         }
     }
 
-    // 4. Bech32 / bech32m (BIP-173/350 separator-tecknet "1" saknas aldrig)
+    // 4. Bech32 / bech32m (the BIP-173/350 separator character "1" is never absent)
     var onePos = token.indexOf("1");
     if (onePos > 0 && onePos < token.length - 6) {
         var decoded = CH.decodeBech32Address(token);
         if (decoded) {
-            addFinding(token, describeBech32(decoded) + " · checksumma verifierad", "verified");
+            addFinding(token, describeBech32(decoded) + " · checksum verified", "verified");
             return;
         }
     }
 
-    // 5. Base58check (Bitcoin-familjens adresser/nycklar, Tron, Zcash, Ripple)
+    // 5. Base58check (Bitcoin-family addresses/keys, Tron, Zcash, Ripple)
     if (/^[1-9A-HJ-NP-Za-km-z]{20,120}$/.test(token)) {
         var result = await CH.base58CheckDecode(token, CH.BASE58_ALPHABET);
         if (result) {
             var labels = classifyBase58Payload(result.payload);
             if (labels.length) {
-                labels.forEach(function (label) { addFinding(token, label + " · checksumma verifierad", "verified"); });
+                labels.forEach(function (label) { addFinding(token, label + " · checksum verified", "verified"); });
                 return;
             }
         }
         if (token[0] === "r") {
             var rResult = await CH.base58CheckDecode(token, CH.RIPPLE_ALPHABET);
             if (rResult && rResult.payload.length === 21 && rResult.payload[0] === 0x00) {
-                addFinding(token, "Ripple-adress (XRP) · checksumma verifierad", "verified");
+                addFinding(token, "Ripple address (XRP) · checksum verified", "verified");
                 return;
             }
         }
     }
 
-    // 6. CashAddr utan prefix (42 tecken, antaget prefix "bitcoincash")
+    // 6. CashAddr without a prefix (42 chars, assumed prefix "bitcoincash")
     var lowerToken = token.toLowerCase();
     if (/^[qp][qpzry9x8gf2tvdw0s3jn54khce6mua7l]{41}$/.test(lowerToken)) {
         var cash = CH.decodeCashAddr("bitcoincash", lowerToken);
         if (cash) {
-            addFinding(token, "Bitcoin Cash-adress (" + describeCashAddrType(cash.versionByte) + ", utan prefix) · checksumma verifierad", "verified");
+            addFinding(token, "Bitcoin Cash address (" + describeCashAddrType(cash.versionByte) + ", no prefix) · checksum verified", "verified");
             return;
         }
     }
 
-    // 7. Rå hex utan 0x-prefix
+    // 7. Raw hex without 0x prefix
     if (/^[0-9a-fA-F]+$/.test(token) && token.length % 2 === 0) {
         if (classifyRawHex(token, addFinding)) return;
     }
 
-    // 8. Solana (rå base58 publik nyckel, formatet saknar checksumma)
+    // 8. Solana (raw base58 public key, the format lacks a checksum)
     if (/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(token)) {
         var raw58 = CH.base58Decode(token, CH.BASE58_ALPHABET);
         if (raw58 && raw58.length === 32) {
-            addFinding(token, "Möjlig Solana-adress / publik nyckel (formatet saknar checksumma)", "likely");
+            addFinding(token, "Possible Solana address / public key (the format lacks a checksum)", "likely");
             return;
         }
     }
 
-    // 9. Monero (egen base58-blockkodning, keccak-checksumman verifieras)
+    // 9. Monero (custom base58 block encoding, the keccak checksum is verified)
     if (/^[1-9A-HJ-NP-Za-km-z]{90,110}$/.test(token)) {
         var xmr = CH.decodeMoneroAddress(token);
         if (xmr) {
-            var name = MONERO_NETWORKS[xmr.network] || ("Monero-liknande adress (nätbyte " + xmr.network + ")");
-            addFinding(token, name + " · keccak-checksumma verifierad", "verified");
+            var name = MONERO_NETWORKS[xmr.network] || ("Monero-like address (network byte " + xmr.network + ")");
+            addFinding(token, name + " · keccak checksum verified", "verified");
             return;
         }
     }
 }
 
-// ---------- Skanningsorkestrering ----------
+// ---------- Scan orchestration ----------
 
 async function scanText(text) {
     var findings = new Map();
-    // Deltokens som redan förklarats av ett textpass (JWT-delar, PEM-rader,
-    // algoritm-nyckelord, cashaddr-payloads) hoppas över i token-passet så de
-    // inte dubbelrapporteras som generisk kodad data.
+    // Sub-tokens already explained by a text pass (JWT parts, PEM lines,
+    // algorithm keywords, cashaddr payloads) are skipped in the token pass so they
+    // aren't double-reported as generic encoded data.
     var consumed = new Set();
 
     function addFinding(value, label, confidence, alt) {
@@ -4181,8 +4181,8 @@ async function scanText(text) {
         if (!f.types.some(function (t) { return t.label === label; })) {
             f.types.push({ label: label, confidence: confidence });
         }
-        // Alternativ representation av samma värde (t.ex. entropy i både hex
-        // och decimal) — visas som en extra rad i kortet.
+        // Alternative representation of the same value (e.g. entropy in both hex
+        // and decimal) — shown as an extra row in the card.
         if (alt && !f.alt) f.alt = alt;
     }
 
@@ -4203,14 +4203,14 @@ async function scanText(text) {
         var token = uniqueTokens[i];
         if (consumed.has(token)) continue;
         await classifyToken(token, addFinding);
-        // Generisk katalogisering bara om inget pass gjorde anspråk på värdet
+        // Generic cataloguing only if no pass claimed the value
         if (!findings.has(token)) genericFallback(token, addFinding);
     }
 
     var list = Array.from(findings.values());
 
-    // Sortera chips i varje kort och korten sinsemellan: verifierat först,
-    // därefter felaktig checksumma, möjliga träffar och sist okänt.
+    // Sort chips within each card and the cards among themselves: verified first,
+    // then wrong checksum, possible matches, and unknown last.
     function rank(confidence) { return CONFIDENCE_META[confidence].rank; }
     list.forEach(function (f) {
         f.types.sort(function (a, b) { return rank(a.confidence) - rank(b.confidence); });
@@ -4265,10 +4265,10 @@ function buildValueRow(value, formatLabel) {
     var copyBtn = document.createElement("button");
     copyBtn.className = "copy-btn";
     copyBtn.type = "button";
-    copyBtn.textContent = "Kopiera";
+    copyBtn.textContent = "Copy";
     copyBtn.addEventListener("click", function () {
         navigator.clipboard.writeText(value).then(function () {
-            showToast("Kopierat till urklipp");
+            showToast("Copied to clipboard");
         });
     });
     valueRow.appendChild(copyBtn);
@@ -4276,7 +4276,7 @@ function buildValueRow(value, formatLabel) {
     return valueRow;
 }
 
-// Legenden visar alla färgkoder och är alltid synlig, även utan inmatad text.
+// The legend shows all color codes and is always visible, even without input text.
 function renderLegend() {
     legendEl.innerHTML = "";
     CONFIDENCE_ORDER.forEach(function (confidence) {
@@ -4303,10 +4303,10 @@ function render(findings, text) {
     }
 
     if (findings.length === 0) {
-        emptyStateText.textContent = "Inget kryptorelaterat innehåll hittades";
+        emptyStateText.textContent = "No crypto-related content found";
         emptyState.classList.remove("display-none");
         resultsEl.classList.add("display-none");
-        resultCount.textContent = "0 träffar";
+        resultCount.textContent = "0 matches";
         return;
     }
 
@@ -4316,8 +4316,8 @@ function render(findings, text) {
     var verifiedCount = findings.filter(function (f) {
         return f.types.some(function (t) { return t.confidence === "verified"; });
     }).length;
-    resultCount.textContent = findings.length + (findings.length === 1 ? " träff" : " träffar") +
-        (verifiedCount ? " · " + verifiedCount + (verifiedCount === 1 ? " verifierad" : " verifierade") : "");
+    resultCount.textContent = findings.length + (findings.length === 1 ? " match" : " matches") +
+        (verifiedCount ? " · " + verifiedCount + (verifiedCount === 1 ? " verified" : " verified") : "");
 
     findings.forEach(function (f) {
         resultsEl.appendChild(renderCard(f));
@@ -4332,10 +4332,10 @@ function showToast(text) {
     }, 2000);
 }
 
-// ---------- Testdata ----------
-// Exempel som täcker alla kategorier verktyget kan klassificera, med riktiga
-// checksumgiltiga nycklar/adresser — plus en avsiktligt felskriven EVM-adress
-// som demonstrerar den röda "checksumma felaktig"-nivån.
+// ---------- Test data ----------
+// Examples covering all categories the tool can classify, with real
+// checksum-valid keys/addresses — plus a deliberately mistyped EVM address
+// that demonstrates the red "checksum invalid" level.
 
 var TEST_DATA = [
     "L4ToPMbLRVxUAT5eixyDS1or4aFndPXsBFpgZkLhcZhYoQUVZ512",
@@ -4354,7 +4354,7 @@ var TEST_DATA = [
     "0xFB6916095ca1df60bB79Ce92cE3Ea74c37c5d359",
     "34,83,38,148,136,254,124,59,160,186,149,60,155,68,241,6",
     '{"version":1,"identifier":"7aec91735f7e125dde475e982aae316c88f336e361593f70a4e51c2e1c7c1dd7","name":"Account 1","entropy":{"0":34,"1":83,"2":38,"3":148,"4":136,"5":254,"6":124,"7":59,"8":160,"9":186,"10":149,"11":60,"12":155,"13":68,"14":241,"15":6}}',
-    'Wallet-dump: {"crypto":{"cipher":"aes-128-ctr","kdf":"scrypt","kdfparams":{"n":4096},"ciphertext":"9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a0"}} slutet av dumpen',
+    'Wallet dump: {"crypto":{"cipher":"aes-128-ctr","kdf":"scrypt","kdfparams":{"n":4096},"ciphertext":"9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a0"}} end of the dump',
     "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about",
     "leave flee turkey only common behind sausage stamp make opinion notice sample",
     "fd01247b947310a65f45a88a350a2be833570fea82bbcb6d4d32d6e3c89d6ebc0f1922b4815fefd1d4f5ea309de4be48b1ee2c7dae63b69eeca0c7d4d5214ef2",
@@ -4372,19 +4372,19 @@ var TEST_DATA = [
     "Gt0LbTeSg9EFVayQ/H1YC/GwV+4pq95JnPA0s/D8QkI=",
 ].join("\n");
 
-// ---------- Filinläsning ----------
-// Filer läses lokalt med File API - inget innehåll lämnar datorn. Texten hamnar
-// i inmatningsrutan så att den går att redigera och skannas som vanlig inmatning.
-// Filändelsen avgör ingenting: innehållet sniffas, så filer utan ändelse
-// (t.ex. Geth-keystores, "UTC--2024-...") fungerar också.
+// ---------- File reading ----------
+// Files are read locally with the File API - no content leaves the computer. The text lands
+// in the input box so it can be edited and scanned like normal input.
+// The file extension determines nothing: the content is sniffed, so files without an extension
+// (e.g. Geth keystores, "UTC--2024-...") work too.
 
 var MAX_FILE_BYTES = 5 * 1024 * 1024;
 var SNIFF_BYTES = 4096;
 
 function formatFileSize(bytes) {
     if (bytes < 1024) return bytes + " B";
-    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1).replace(".", ",") + " KB";
-    return (bytes / (1024 * 1024)).toFixed(1).replace(".", ",") + " MB";
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + " KB";
+    return (bytes / (1024 * 1024)).toFixed(1) + " MB";
 }
 
 function setFileName(text, isError) {
@@ -4400,7 +4400,7 @@ function hasNulByte(sample) {
     return false;
 }
 
-// BOM-lös UTF-16 känns igen på att varannan byte är NUL i vanlig text.
+// BOM-less UTF-16 is recognized by every other byte being NUL in normal text.
 // offset 1 = little endian ("a\0b\0"), offset 0 = big endian ("\0a\0b").
 function looksLikeUtf16(sample, offset) {
     var nuls = 0;
@@ -4414,7 +4414,7 @@ function looksLikeUtf16(sample, offset) {
     return total > 8 && nuls / total > 0.6;
 }
 
-// Många ersättningstecken efter UTF-8-avkodning betyder oftast Latin-1/Windows-1252
+// Many replacement characters after UTF-8 decoding usually mean Latin-1/Windows-1252
 function decodeUtf8(bytes) {
     var text = new TextDecoder("utf-8").decode(bytes);
     var broken = (text.match(/\ufffd/g) || []).length;
@@ -4426,7 +4426,7 @@ function decodeUtf8(bytes) {
     return { text: text, encoding: "UTF-8" };
 }
 
-// Returnerar {text, encoding} för textfiler, null för binära filer
+// Returns {text, encoding} for text files, null for binary files
 function decodeFileBytes(buffer) {
     var bytes = new Uint8Array(buffer);
 
@@ -4463,7 +4463,7 @@ async function loadFile(file) {
     if (!file) return;
 
     if (file.size > MAX_FILE_BYTES) {
-        setFileName(file.name + " - för stor (max " + formatFileSize(MAX_FILE_BYTES) + ")", true);
+        setFileName(file.name + " - too large (max " + formatFileSize(MAX_FILE_BYTES) + ")", true);
         return;
     }
 
@@ -4474,12 +4474,12 @@ async function loadFile(file) {
     }
 
     catch (e) {
-        setFileName(file.name + " - kunde inte läsas", true);
+        setFileName(file.name + " - could not be read", true);
         return;
     }
 
     if (!decoded) {
-        setFileName(file.name + " - binär fil, stöds inte än", true);
+        setFileName(file.name + " - binary file, not yet supported", true);
         return;
     }
 
@@ -4492,7 +4492,7 @@ async function loadFile(file) {
     scheduleScan();
 }
 
-// ---------- Init & event-koppling ----------
+// ---------- Init & event wiring ----------
 
 var scanTimer = null;
 var scanToken = 0;
@@ -4506,11 +4506,11 @@ async function runScan() {
     var myToken = ++scanToken;
     var text = input.value;
     var findings = await scanText(text);
-    if (myToken !== scanToken) return; // en nyare skanning har redan startat
+    if (myToken !== scanToken) return; // a newer scan has already started
     render(findings, text);
 }
 
-// Egen inmatning ersätter filens innehåll - då är filnamnet inte längre sant
+// Manual input replaces the file's content - then the file name is no longer true
 input.addEventListener("input", function () {
     setFileName("", false);
     scheduleScan();
@@ -4536,10 +4536,10 @@ fileButton.addEventListener("click", function () {
 
 fileInput.addEventListener("change", function () {
     loadFile(fileInput.files[0]);
-    fileInput.value = ""; // gör att samma fil kan läsas in igen
+    fileInput.value = ""; // allows the same file to be loaded again
 });
 
-// Drag & drop på inmatningsrutan
+// Drag & drop on the input box
 inputBox.addEventListener("dragover", function (e) {
     e.preventDefault();
     inputBox.classList.add("dragover");
@@ -4555,21 +4555,21 @@ inputBox.addEventListener("drop", function (e) {
     loadFile(e.dataTransfer.files[0]);
 });
 
-// Hindrar webbläsaren från att öppna filen om den släpps utanför rutan
+// Prevents the browser from opening the file if it's dropped outside the box
 document.addEventListener("dragover", function (e) { e.preventDefault(); });
 document.addEventListener("drop", function (e) { e.preventDefault(); });
 
 renderLegend();
 render([], "");
 
-// --- Temasynkronisering med Verktygslådan (postMessage från förälder-iframe) ---
+// --- Theme sync with CryptoToolbox (postMessage from parent iframe) ---
 window.addEventListener('message', function (event) {
     if (event.source !== window.parent) return;
     const data = event.data;
-    if (data && data.source === 'verktygslada' && data.type === 'theme' &&
+    if (data && data.source === 'cryptotoolbox' && data.type === 'theme' &&
         (data.theme === 'light' || data.theme === 'dark')) {
         document.documentElement.setAttribute('data-theme', data.theme);
-        try { localStorage.setItem('theme', data.theme); } catch (e) { /* ignoreras */ }
+        try { localStorage.setItem('theme', data.theme); } catch (e) { /* ignored */ }
     }
 });
 

@@ -39,16 +39,16 @@
 
         <div>
             <div class="seed-type-selector">
-                <label for="seedType">Välj typ av Seed Phrase</label>
+                <label for="seedType">Choose Seed Phrase type</label>
                 <select id="seedType" onchange="onSeedTypeChange()">
-                    <option value="bip39_12">BIP39 (12 ord)</option>
-                    <option value="bip39_24">BIP39 (24 ord)</option>
+                    <option value="bip39_12">BIP39 (12 words)</option>
+                    <option value="bip39_24">BIP39 (24 words)</option>
                 </select>
             </div>
         </div>
 
         <div>
-            <textarea placeholder="Skriv 11 ord, separerade med blanksteg" oninput="onInput()">
+            <textarea placeholder="Type 11 words, separated by spaces" oninput="onInput()">
         </textarea>
             <div class="validation display-none"></div>
         </div>

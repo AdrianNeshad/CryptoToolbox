@@ -181,8 +181,8 @@ button.secondary:hover {
     border-color: var(--border-hover);
 }
 
-/* Ljust läge: --success är mörkare/mättare där, så vit knapptext ger bäst kontrast
-   (gäller inte de sekundära knapparna, de behåller var(--text)) */
+/* Light mode: --success is darker/more saturated there, so white button text gives the best contrast
+   (does not apply to the secondary buttons, they keep var(--text)) */
 [data-theme="light"] button:not(.secondary) {
     color: #ffffff;
 }

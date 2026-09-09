@@ -1,14 +1,14 @@
 /* =========================================================================
-   Ciphertext Unlock — porterad från ciphertextUnlock (Node).
-   Multi-format-dekryptor som körs helt lokalt via WebCrypto, BigInt (keccak256)
-   och en ren-JS scrypt. Stödjer:
-     • Ethereum / TrustWallet V3  (scrypt eller pbkdf2 + AES-128-CTR + keccak256-MAC)
-     • CryptoJS                   (PBKDF2 gissas + AES-CBC)
+   Ciphertext Unlock — ported from ciphertextUnlock (Node).
+   Multi-format decryptor that runs fully locally via WebCrypto, BigInt (keccak256)
+   and a pure-JS scrypt. Supports:
+     • Ethereum / TrustWallet V3  (scrypt or pbkdf2 + AES-128-CTR + keccak256-MAC)
+     • CryptoJS                   (PBKDF2 guessed + AES-CBC)
      • PBKDF2-vault               (PBKDF2 + AES-256-GCM/CBC)
-     • Generic AES                (PBKDF2 + AES-256-CTR, ingen MAC)
+     • Generic AES                (PBKDF2 + AES-256-CTR, no MAC)
    ========================================================================= */
 
-/* ---------- hjälpare ---------- */
+/* ---------- helpers ---------- */
 function utf8(s) { return new TextEncoder().encode(s); }
 function hexToBytes(hex) {
     const clean = String(hex).trim();
@@ -33,7 +33,7 @@ function concatBytes(a, b) {
     return out;
 }
 
-/* ---------- keccak-256 (Ethereum, domän 0x01) ---------- */
+/* ---------- keccak-256 (Ethereum, domain 0x01) ---------- */
 const _MASK64 = (1n << 64n) - 1n;
 const _RC = [
     0x0000000000000001n, 0x0000000000008082n, 0x800000000000808an, 0x8000000080008000n,
@@ -94,7 +94,7 @@ function keccak256(msg) {
     return out;
 }
 
-/* ---------- scrypt (port av scryptsy) ---------- */
+/* ---------- scrypt (port of scryptsy) ---------- */
 function readUInt32LE(a, o) { return ((a[o]) | (a[o + 1] << 8) | (a[o + 2] << 16) | (a[o + 3] << 24)); }
 function blockxor(S, Si, D, Di, len) { for (let i = 0; i < len; i++) D[Di + i] ^= S[Si + i]; }
 function R(a, b) { return (a << b) | (a >>> (32 - b)); }
@@ -140,7 +140,7 @@ function smixSync(B, Bi, r, N, V, XY, _X, B32, x) {
     B.set(XY.subarray(Xi, Xi + Yi), Bi);
 }
 async function scrypt(passwordBytes, saltBytes, N, r, p, dkLen) {
-    if ((N & (N - 1)) !== 0 || N === 0) throw new Error('N måste vara en potens av 2');
+    if ((N & (N - 1)) !== 0 || N === 0) throw new Error('N must be a power of 2');
     const XY = new Uint8Array(256 * r), V = new Uint8Array(128 * r * N);
     const B32 = new Int32Array(16), x = new Int32Array(16), _X = new Uint8Array(64);
     const B = await pbkdf2(passwordBytes, saltBytes, 1, p * 128 * r, 'SHA-256');
@@ -179,10 +179,10 @@ async function deriveEthereumKey(c, password) {
     }
     if (kdf === 'pbkdf2') {
         const prf = String(kp.prf || 'hmac-sha256').toLowerCase();
-        if (prf !== 'hmac-sha256') throw new Error('PBKDF2-prf stöds inte: ' + kp.prf);
+        if (prf !== 'hmac-sha256') throw new Error('PBKDF2 prf not supported: ' + kp.prf);
         return pbkdf2(utf8(password), hexToBytes(kp.salt), kp.c, kp.dklen, 'SHA-256');
     }
-    throw new Error('Okänd Ethereum-KDF: ' + c.kdf);
+    throw new Error('Unknown Ethereum KDF: ' + c.kdf);
 }
 
 async function decryptEthereum(wallet, password) {
@@ -190,7 +190,7 @@ async function decryptEthereum(wallet, password) {
     const key = await deriveEthereumKey(c, password);
     const ciphertext = hexToBytes(c.ciphertext);
     const mac = bytesToHex(keccak256(concatBytes(key.subarray(16, 32), ciphertext)));
-    if (mac !== String(c.mac).toLowerCase()) throw new Error('Fel MAC');
+    if (mac !== String(c.mac).toLowerCase()) throw new Error('Wrong MAC');
     const iv = hexToBytes(c.cipherparams.iv);
     return aesCtrDecrypt(ciphertext, key.subarray(0, 16), iv);
 }
@@ -234,11 +234,11 @@ async function decryptCryptoJS(wallet, password) {
                 try {
                     const decrypted = await aesCbcDecrypt(ciphertext, key, iv);
                     if (isMostlyPrintable(decrypted)) return decrypted;
-                } catch (err) { /* fel paddning -> nästa kombination */ }
+                } catch (err) { /* wrong padding -> next combination */ }
             }
         }
     }
-    throw new Error('Fel lösenord');
+    throw new Error('Wrong password');
 }
 
 async function decryptGeneric(wallet, password) {
@@ -255,7 +255,7 @@ function detectFormat(wallet) {
         return { name: 'CryptoJS', decrypt: decryptCryptoJS, verified: true };
     }
     const c = wallet.crypto || wallet.Crypto;
-    if (!c) throw new Error('Ingen crypto-struktur hittades (crypto/Crypto, eller cipher+iv+salt).');
+    if (!c) throw new Error('No crypto structure found (crypto/Crypto, or cipher+iv+salt).');
     if (c.cipher && String(c.cipher).toLowerCase() === 'aes-128-ctr' &&
         c.kdf && ['scrypt', 'pbkdf2'].includes(String(c.kdf).toLowerCase())) {
         const kdfLabel = String(c.kdf).toLowerCase();
@@ -296,7 +296,7 @@ let detector = null;
 let running = false;
 let stopRequested = false;
 
-/* MessageChannel-baserad yield: släpper fram en repaint mellan lösenord. */
+/* MessageChannel-based yield: allows a repaint between passwords. */
 const _mc = new MessageChannel();
 let _yieldResolve = null;
 _mc.port1.onmessage = () => { if (_yieldResolve) { const r = _yieldResolve; _yieldResolve = null; r(); } };
@@ -318,15 +318,15 @@ function showToast(text) {
 }
 function cleanText(str) { return str.replace(/[^\x20-\x7E\n\r\t]/g, '').trim(); }
 
-/* ---------- lösenordsräknare ---------- */
+/* ---------- password counter ---------- */
 function parsePasswords() { return pwList.value.split('\n').map(p => p.trim()).filter(p => p.length > 0); }
 function updatePwCount() {
     const n = parsePasswords().length;
-    pwCount.textContent = n > 0 ? `${n} lösenord` : '';
+    pwCount.textContent = n > 0 ? `${n} passwords` : '';
 }
 pwList.addEventListener('input', updatePwCount);
 
-/* ---------- JSON-inmatning + formatdetektering ---------- */
+/* ---------- JSON input + format detection ---------- */
 function setDetectStatus(text, state) {
     detectStatus.textContent = text;
     detectStatus.classList.remove('display-none', 'valid', 'invalid');
@@ -343,15 +343,15 @@ function validateJson() {
     try {
         obj = JSON.parse(raw);
     } catch (e) {
-        setDetectStatus('✗ Ogiltig JSON: ' + e.message, 'invalid');
+        setDetectStatus('✗ Invalid JSON: ' + e.message, 'invalid');
         return;
     }
     try {
         const det = detectFormat(obj);
         parsedWallet = obj;
         detector = det;
-        const note = det.verified ? '' : ' (obs: inget MAC/verifieringssteg — resultatet kan bli felaktigt vid fel lösenord)';
-        setDetectStatus(`✓ Igenkänt format: ${det.name}${note}`, 'valid');
+        const note = det.verified ? '' : ' (note: no MAC/verification step — the result may be incorrect with a wrong password)';
+        setDetectStatus(`✓ Recognized format: ${det.name}${note}`, 'valid');
     } catch (e) {
         setDetectStatus('✗ ' + e.message, 'invalid');
     }
@@ -368,7 +368,7 @@ jsonFileInput.addEventListener('change', async () => {
         jsonFileName.classList.add('set');
         validateJson();
     } catch (e) {
-        jsonFileName.textContent = 'Kunde inte läsa filen';
+        jsonFileName.textContent = 'Could not read the file';
         jsonFileName.classList.remove('set');
     }
 });
@@ -383,12 +383,12 @@ pwInput.addEventListener('change', async () => {
         pwName.classList.add('set');
         updatePwCount();
     } catch (e) {
-        pwName.textContent = 'Kunde inte läsa filen';
+        pwName.textContent = 'Could not read the file';
         pwName.classList.remove('set');
     }
 });
 
-/* ---------- körning ---------- */
+/* ---------- run ---------- */
 function setRunning(state) {
     running = state;
     runBtn.classList.toggle('display-none', state);
@@ -418,10 +418,10 @@ function showResult(success, titleText, fields) {
         if (f.copy !== false) {
             const btn = document.createElement('button');
             btn.className = 'copy-btn';
-            btn.textContent = 'Kopiera';
+            btn.textContent = 'Copy';
             btn.addEventListener('click', () => {
                 navigator.clipboard.writeText(f.value);
-                showToast(f.label + ' kopierad');
+                showToast(f.label + ' copied');
             });
             valueRow.appendChild(btn);
         }
@@ -434,15 +434,15 @@ function showResult(success, titleText, fields) {
 runBtn.addEventListener('click', run);
 stopBtn.addEventListener('click', () => {
     stopRequested = true;
-    progressStatus.textContent = 'Stoppar…';
+    progressStatus.textContent = 'Stopping…';
 });
 
 async function run() {
     if (running) return;
     validateJson();
-    if (!parsedWallet || !detector) { showToast('Klistra in en giltig krypterad JSON först'); return; }
+    if (!parsedWallet || !detector) { showToast('Paste a valid encrypted JSON first'); return; }
     const passwords = parsePasswords();
-    if (passwords.length === 0) { showToast('Lägg till minst ett lösenord'); return; }
+    if (passwords.length === 0) { showToast('Add at least one password'); return; }
 
     stopRequested = false;
     setRunning(true);
@@ -451,17 +451,17 @@ async function run() {
     progressBar.style.width = '0%';
     clearOutput();
     log(`Format: ${detector.name}`, 'log-muted');
-    if (!detector.verified) log('Obs: detta format saknar MAC/verifiering — kontrollera att resultatet ser rimligt ut.', 'log-err');
-    log(`Testar ${passwords.length} lösenord…`, 'log-muted');
+    if (!detector.verified) log('Note: this format lacks a MAC/verification — check that the result looks reasonable.', 'log-err');
+    log(`Testing ${passwords.length} passwords…`, 'log-muted');
 
     const total = passwords.length;
     const t0 = performance.now();
     let found = null;
 
     for (let i = 0; i < total; i++) {
-        if (stopRequested) { log(`\nStoppad av användaren vid ${i} av ${total}.`, 'log-err'); break; }
+        if (stopRequested) { log(`\nStopped by the user at ${i} of ${total}.`, 'log-err'); break; }
         const pw = passwords[i];
-        progressStatus.textContent = `[${i + 1}/${total}] testar: ${pw}`;
+        progressStatus.textContent = `[${i + 1}/${total}] testing: ${pw}`;
         progressBar.style.width = ((i / total) * 100).toFixed(1) + '%';
         await yieldToUI();
         try {
@@ -469,7 +469,7 @@ async function run() {
             found = { password: pw, bytes: res, index: i + 1 };
             break;
         } catch (e) {
-            // fel lösenord (MAC/paddning) — fortsätt
+            // wrong password (MAC/padding) — continue
         }
     }
 
@@ -477,15 +477,15 @@ async function run() {
     const secs = ((performance.now() - t0) / 1000).toFixed(1);
 
     if (found) {
-        progressStatus.textContent = `Klar — lösenord hittat på försök ${found.index} av ${total} (${secs}s)`;
+        progressStatus.textContent = `Done — password found on attempt ${found.index} of ${total} (${secs}s)`;
         presentResult(found.password, found.bytes, found.index);
     } else if (stopRequested) {
-        progressStatus.textContent = `Stoppad (${secs}s)`;
+        progressStatus.textContent = `Stopped (${secs}s)`;
     } else {
-        progressStatus.textContent = `Klar — inget matchande lösenord (${secs}s)`;
-        log(`\n✗ Inget av de ${total} lösenorden matchade.`, 'log-err');
-        showResult(false, '✗ Inget matchande lösenord', [
-            { label: 'Resultat', value: `Testade ${total} lösenord utan träff. Kontrollera JSON:en och listan.`, copy: false },
+        progressStatus.textContent = `Done — no matching password (${secs}s)`;
+        log(`\n✗ None of the ${total} passwords matched.`, 'log-err');
+        showResult(false, '✗ No matching password', [
+            { label: 'Result', value: `Tested ${total} passwords with no match. Check the JSON and the list.`, copy: false },
         ]);
     }
     setRunning(false);
@@ -496,35 +496,35 @@ function presentResult(password, bytes, index) {
     const cleaned = cleanText(text);
     const hex = bytesToHex(bytes);
 
-    log(`\n✓ MATCH på lösenord #${index}: ${password}`, 'log-hit');
-    log(`\nDekrypterat (text): ${cleaned}`, 'log-ok');
+    log(`\n✓ MATCH on password #${index}: ${password}`, 'log-hit');
+    log(`\nDecrypted (text): ${cleaned}`, 'log-ok');
     log(`Hex: ${hex}`, 'log-ok');
 
     const fields = [
-        { label: 'Lösenord', value: password },
+        { label: 'Password', value: password },
         { label: 'Format', value: detector.name, copy: false },
     ];
-    if (cleaned) fields.push({ label: 'Dekrypterat (text)', value: cleaned });
-    else fields.push({ label: 'Dekrypterat', value: '(inget läsbart innehåll — se HEX nedan)', copy: false });
+    if (cleaned) fields.push({ label: 'Decrypted (text)', value: cleaned });
+    else fields.push({ label: 'Decrypted', value: '(no readable content — see HEX below)', copy: false });
     fields.push({ label: 'HEX', value: hex });
 
-    showResult(true, '✓ Dekryptering lyckades!', fields);
+    showResult(true, '✓ Decryption succeeded!', fields);
 }
 
 clearBtn.addEventListener('click', () => {
     clearOutput();
-    output.textContent = 'Väntar på körning…';
+    output.textContent = 'Waiting to run…';
     progressWrap.classList.add('display-none');
     resultPanel.classList.add('display-none');
 });
 
-/* ---------- temasynk med Verktygslådan ---------- */
+/* ---------- theme sync with CryptoToolbox ---------- */
 window.addEventListener('message', function (event) {
     if (event.source !== window.parent) return;
     var data = event.data;
-    if (data && data.source === 'verktygslada' && data.type === 'theme' &&
+    if (data && data.source === 'cryptotoolbox' && data.type === 'theme' &&
         (data.theme === 'light' || data.theme === 'dark')) {
         document.documentElement.setAttribute('data-theme', data.theme);
-        try { localStorage.setItem('theme', data.theme); } catch (e) { /* ignoreras */ }
+        try { localStorage.setItem('theme', data.theme); } catch (e) { /* ignored */ }
     }
 });

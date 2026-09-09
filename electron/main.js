@@ -2,9 +2,9 @@ const { app, BrowserWindow, shell, Menu, session, dialog } = require('electron')
 const path = require('node:path');
 const fs = require('node:fs');
 
-// Sökväg till projektroten. I dev-läge (npm start) är detta repo-roten.
-// I ett paketerat bygge (electron-builder, asar: false) är strukturen identisk under
-// resources/app, så samma relativa sökvägar fungerar i båda fallen.
+// Path to the project root. In dev mode (npm start) this is the repo root.
+// In a packaged build (electron-builder, asar: false) the structure is identical under
+// resources/app, so the same relative paths work in both cases.
 const APP_ROOT = path.join(__dirname, '..');
 const TOOLBOX_HTML = path.join(APP_ROOT, 'Toolbox.html');
 const ICON_PATH = path.join(APP_ROOT, 'build', 'icon.ico');
@@ -27,18 +27,18 @@ function createWindow() {
         minWidth: 960,
         minHeight: 640,
         backgroundColor: '#1e1e23',
-        autoHideMenuBar: true, // menyraden döljs men nås via Alt-tangenten
+        autoHideMenuBar: true, // the menu bar is hidden but reachable via the Alt key
         show: false,
         webPreferences: {
-            // Verktygen körs som lokalt, statiskt innehåll och behöver aldrig Node-åtkomst.
-            // Det här är säkra standardinställningar som isolerar sidans JS (inkl. tredjeparts-
-            // bibliotek som jQuery/bitcoinjs/CyberChef) från operativsystemet.
+            // The tools run as local, static content and never need Node access.
+            // These are safe default settings that isolate the page's JS (incl. third-party
+            // libraries like jQuery/bitcoinjs/CyberChef) from the operating system.
             contextIsolation: true,
             nodeIntegration: false,
             sandbox: true,
             webSecurity: true,
             spellcheck: false,
-            // Krävs för Chromiums inbyggda PDF-visare (används av documentation/phantom.pdf).
+            // Required for Chromium's built-in PDF viewer (used by documentation/phantom.pdf).
             plugins: true,
         },
     };
@@ -55,9 +55,9 @@ function createWindow() {
 
     mainWindow.loadFile(TOOLBOX_HTML);
 
-    // Sidopanelens externa länkar/nedladdningar öppnas idag via window.open() efter en
-    // bekräftelsedialog i sidan själv. Låt dem öppnas i systemets standardwebbläsare
-    // istället för i ett nytt Electron-fönster.
+    // The sidebar's external links/downloads currently open via window.open() after a
+    // confirmation dialog in the page itself. Let them open in the system's default browser
+    // instead of in a new Electron window.
     mainWindow.webContents.setWindowOpenHandler(({ url }) => {
         if (isHttpUrl(url)) {
             shell.openExternal(url);
@@ -65,8 +65,8 @@ function createWindow() {
         return { action: 'deny' };
     });
 
-    // Extra skyddsnät: om något top-level-försök att navigera till en extern URL skulle
-    // slinka igenom (t.ex. en trasig länk), öppna den externt istället för att lämna appen.
+    // Extra safety net: if some top-level attempt to navigate to an external URL should
+    // slip through (e.g. a broken link), open it externally instead of leaving the app.
     mainWindow.webContents.on('will-navigate', (event, url) => {
         if (isHttpUrl(url)) {
             event.preventDefault();
@@ -82,43 +82,43 @@ function createWindow() {
 function buildMenu() {
     const template = [
         {
-            label: 'Visa',
+            label: 'View',
             submenu: [
                 {
-                    label: 'Ladda om',
+                    label: 'Reload',
                     accelerator: 'CmdOrCtrl+R',
                     click: () => mainWindow && mainWindow.webContents.reload(),
                 },
                 {
-                    label: 'Tvinga omladdning',
+                    label: 'Force reload',
                     accelerator: 'CmdOrCtrl+Shift+R',
                     click: () => mainWindow && mainWindow.webContents.reloadIgnoringCache(),
                 },
                 { type: 'separator' },
-                { role: 'resetZoom', label: 'Återställ zoom' },
-                { role: 'zoomIn', label: 'Zooma in' },
-                { role: 'zoomOut', label: 'Zooma ut' },
+                { role: 'resetZoom', label: 'Reset zoom' },
+                { role: 'zoomIn', label: 'Zoom in' },
+                { role: 'zoomOut', label: 'Zoom out' },
                 { type: 'separator' },
-                { role: 'togglefullscreen', label: 'Helskärm' },
+                { role: 'togglefullscreen', label: 'Full screen' },
                 { type: 'separator' },
-                { role: 'toggleDevTools', label: 'Utvecklarverktyg' },
+                { role: 'toggleDevTools', label: 'Developer tools' },
             ],
         },
         {
-            label: 'Hjälp',
+            label: 'Help',
             submenu: [
                 {
-                    label: 'Öppna på GitHub',
+                    label: 'Open on GitHub',
                     click: () => shell.openExternal('https://github.com/AdrianNeshad/CryptoToolbox'),
                 },
                 {
-                    label: 'Om Verktygslådan',
+                    label: 'About CryptoToolbox',
                     click: () => {
                         dialog.showMessageBox(mainWindow, {
                             type: 'info',
-                            title: 'Om Verktygslådan',
-                            message: 'Verktygslådan',
-                            detail: `Version ${app.getVersion()}\n\nKörs helt lokalt på den här datorn. Ingen internetanslutning krävs för verktygen — endast för de valfria GitHub-nedladdningarna och externa länkarna i sidopanelen.`,
+                            title: 'About CryptoToolbox',
+                            message: 'CryptoToolbox',
+                            detail: `Version ${app.getVersion()}\n\nRuns entirely locally on this computer. No internet connection is required for the tools — only for the optional GitHub downloads and external links in the sidebar.`,
                         });
                     },
                 },
@@ -129,14 +129,14 @@ function buildMenu() {
     Menu.setApplicationMenu(Menu.buildFromTemplate(template));
 }
 
-// Samma AppUserModelID som "appId" i electron-builder-konfigurationen. Gör att
-// Windows kopplar fönstret till startmeny-genvägen så att rätt ikon används
-// i aktivitetsfältet, även när appen är fäst där.
-app.setAppUserModelId('se.adrianneshad.verktygslada');
+// Same AppUserModelID as "appId" in the electron-builder configuration. Makes
+// Windows associate the window with the Start-menu shortcut so the correct icon is used
+// in the taskbar, even when the app is pinned there.
+app.setAppUserModelId('se.adrianneshad.cryptotoolbox');
 
 app.whenReady().then(() => {
-    // Visa en "Spara som"-dialog för nedladdningar (t.ex. GitHub-zip-filerna i sidopanelen)
-    // istället för att tyst spara dem i standardmappen för nedladdningar.
+    // Show a "Save as" dialog for downloads (e.g. the GitHub zip files in the sidebar)
+    // instead of silently saving them to the default downloads folder.
     session.defaultSession.on('will-download', (_event, item) => {
         item.setSaveDialogOptions({ defaultPath: item.getFilename() });
     });

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="sv">
+<html lang="en">
 
 <head>
     <meta charset="UTF-8">
@@ -31,45 +31,45 @@
 
         <header class="page-header">
             <h1>MetaMask Vault Decryptor</h1>
-            <p>Dictionary-attack som låser upp en MetaMask-vault och extraherar seed-frasen &mdash; samma
-                dekryptering som MetaMasks officiella verktyg (PBKDF2 + AES-GCM), men testar en hel
-                lösenordslista. Allt körs lokalt i webbläsaren, inget lämnar din dator.</p>
+            <p>Dictionary attack that unlocks a MetaMask vault and extracts the seed phrase &mdash; the same
+                decryption as MetaMask's official tool (PBKDF2 + AES-GCM), but testing a whole
+                password list. Everything runs locally on your computer.</p>
         </header>
 
-        <!-- Steg 1 & 2 sida vid sida -->
+        <!-- Steps 1 & 2 side by side -->
         <div class="panel-row">
 
-            <!-- Steg 1: vault-data -->
+            <!-- Step 1: vault data -->
             <div class="panel">
                 <div class="panel-head">
                     <span class="step-num">1</span>
-                    <span class="panel-title">Vault-data</span>
+                    <span class="panel-title">Vault data</span>
                 </div>
-                <p class="hint">Klistra in JSON-vault <code>{"data","iv","salt"}</code> eller välj <code>.ldb</code>-fil</p>
+                <p class="hint">Paste a JSON vault <code>{"data","iv","salt"}</code> or choose a <code>.ldb</code> file</p>
                 <div class="file-row">
-                    <button type="button" class="secondary" id="vault-btn">Läs in fil…</button>
-                    <span class="file-name" id="vault-name">Ingen vault inläst</span>
+                    <button type="button" class="secondary" id="vault-btn">Load file…</button>
+                    <span class="file-name" id="vault-name">No vault loaded</span>
                 </div>
                 <input type="file" id="vault-input" hidden>
                 <textarea id="vault-text" spellcheck="false" autocomplete="off"
                     placeholder='{"data":"…","iv":"…","salt":"…","keyMetadata":{…}}'></textarea>
             </div>
 
-            <!-- Steg 2: lösenordslista -->
+            <!-- Step 2: password list -->
             <div class="panel">
                 <div class="panel-head">
                     <span class="step-num">2</span>
-                    <span class="panel-title">Lösenordslista</span>
+                    <span class="panel-title">Password list</span>
                 </div>
-                <p class="hint">Klistra in ett lösenord per rad, eller ladda in en <code>.txt</code>-fil.</p>
+                <p class="hint">Paste one password per line, or load a <code>.txt</code> file.</p>
                 <div class="file-row">
-                    <button type="button" class="secondary" id="pw-btn">Läs in .txt-fil…</button>
+                    <button type="button" class="secondary" id="pw-btn">Load .txt file…</button>
                     <span class="file-name" id="pw-name"></span>
                     <span class="pw-count" id="pw-count"></span>
                 </div>
                 <input type="file" id="pw-input" accept=".txt,text/plain" hidden>
                 <textarea id="pw-list" spellcheck="false" autocomplete="off"
-                    placeholder="lösenord1&#10;lösenord2&#10;lösenord3&#10;…"></textarea>
+                    placeholder="password1&#10;password2&#10;password3&#10;…"></textarea>
             </div>
 
         </div><!-- /panel-row -->
@@ -82,21 +82,21 @@
             <div class="progress-status" id="progress-status"></div>
         </div>
 
-        <!-- Logg / output -->
+        <!-- Log / output -->
         <div class="output-wrap">
             <div class="output-head">
                 <span>Output</span>
                 <div class="output-head-actions">
-                    <button id="run-btn">Kör</button>
-                    <button id="stop-btn" class="danger display-none">Stoppa</button>
-                    <button type="button" class="clear-btn" id="clear-btn">Rensa</button>
+                    <button id="run-btn">Run</button>
+                    <button id="stop-btn" class="danger display-none">Stop</button>
+                    <button type="button" class="clear-btn" id="clear-btn">Clear</button>
                 </div>
             </div>
             <div class="result-panel display-none" id="result-panel">
                 <div class="result-title" id="result-title"></div>
                 <div class="result-body" id="result-body"></div>
             </div>
-            <pre id="output">Väntar på körning…</pre>
+            <pre id="output">Waiting to run…</pre>
         </div>
 
         <div id="toast" class="toast"></div>

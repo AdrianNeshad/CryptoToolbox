@@ -1,4 +1,4 @@
-# Electron-byggartefakter
+# Electron build artifacts
 node_modules/
 release/
 dist/

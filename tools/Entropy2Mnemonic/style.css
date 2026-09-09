@@ -310,8 +310,8 @@ button:hover {
     background: var(--accent-hover);
 }
 
-/* Ljust läge: --success är mörkare/mättare där, så vit knapptext ger bäst kontrast.
-   Gäller bara den gröna kopiera-knappen — inte 12/24-ord-togglen, som har egen färgsättning. */
+/* Light mode: --success is darker/more saturated there, so white button text gives the best contrast.
+   Applies only to the green copy button — not the 12/24-word toggle, which has its own coloring. */
 [data-theme="light"] button:not(.toggle-btn) {
     color: #ffffff;
 }

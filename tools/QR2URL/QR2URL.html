@@ -30,7 +30,7 @@
 
         <header class="page-header">
             <h1>QR Code Decoder</h1>
-            <p>Konvertera QR-koder från en bild till URL/Clear Text</p>
+            <p>Convert QR codes from an image to URL/Clear Text</p>
         </header>
 
         <div id="drop-area">
@@ -44,16 +44,16 @@
                             fill="currentColor" />
                     </svg>
                 </div>
-                <p class="drop-primary">Dra och släpp en bild (PNG, JPG eller WEBP)</p>
-                <p class="drop-secondary">eller klicka för att välja en fil</p>
-                <p class="drop-secondary">eller klistra in en bild (Ctrl + V)</p>
+                <p class="drop-primary">Drag and drop an image (PNG, JPG or WEBP)</p>
+                <p class="drop-secondary">or click to choose a file</p>
+                <p class="drop-secondary">or paste an image (Ctrl + V)</p>
             </div>
             <img id="preview-image" style="display: none" />
             <input type="file" id="file-input" accept="image/png, image/jpeg, image/webp" style="display: none" />
         </div>
 
         <div id="qrcode-result">
-            <p>Avkodad text visas här</p>
+            <p>Decoded text appears here</p>
         </div>
 
         <button id="copy-button">
@@ -62,7 +62,7 @@
                 <path d="M5 15H4C3.44772 15 3 14.5523 3 14V4C3 3.44772 3.44772 3 4 3H14C14.5523 3 15 3.44772 15 4V5"
                     stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
             </svg>
-            Kopiera avkodad text
+            Copy decoded text
         </button>
 
         <div id="toast" class="toast"></div>

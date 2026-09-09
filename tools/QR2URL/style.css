@@ -226,7 +226,7 @@ body {
     background: var(--accent-hover);
 }
 
-/* Ljust läge: --success är mörkare/mättare där, så vit knapptext ger bäst kontrast */
+/* Light mode: --success is darker/more saturated there, so white button text gives the best contrast */
 [data-theme="light"] #copy-button,
 [data-theme="light"] #ocr-copy-button {
     color: #ffffff;

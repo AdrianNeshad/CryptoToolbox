@@ -109,7 +109,7 @@ body {
     display: none;
 }
 
-/* Kollapsat: tightare luft mellan ikon-klustren (avdelarna ärvs från basreglerna) */
+/* Collapsed: tighter spacing between the icon clusters (the dividers are inherited from the base rules) */
 .app.sidebar-collapsed .nav-group + .nav-group,
 .app.sidebar-collapsed .nav-subgroup + .nav-subgroup {
     margin-top: 10px;
@@ -263,7 +263,7 @@ body {
     margin-bottom: 0;
 }
 
-/* Tunn avdelare mellan varje toppkategori (syns även i synligt läge) */
+/* Thin divider between each top-level category (also visible in expanded mode) */
 .nav-group + .nav-group {
     margin-top: 16px;
     padding-top: 16px;
@@ -367,7 +367,7 @@ body {
     background: var(--download);
 }
 
-/* Brute force-verktygen får orange ikoner, som skript-gruppen */
+/* The brute-force tools get orange icons, like the scripts group */
 .nav-subgroup--brute .nav-item-icon {
     background: var(--download);
 }

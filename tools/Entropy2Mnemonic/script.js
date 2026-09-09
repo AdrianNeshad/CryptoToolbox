@@ -170,8 +170,8 @@ function showChecksumStatus(valid, checksumBitLength) {
     checksumStatus.classList.toggle("valid", valid);
     checksumStatus.classList.toggle("invalid", !valid);
     checksumStatus.textContent = valid
-        ? `✓ Giltig checksum (${checksumBitLength} bitar kontrollerade)`
-        : `✗ Ogiltig checksum (${checksumBitLength} bitar kontrollerade)`;
+        ? `✓ Valid checksum (${checksumBitLength} bits checked)`
+        : `✗ Invalid checksum (${checksumBitLength} bits checked)`;
 }
 
 function onFieldsChanged() {
@@ -201,14 +201,14 @@ function onFieldsChanged() {
     }
 
     if (hasInvalidByte) {
-        showValidation("Varje fält måste vara ett heltal mellan 0 och 255.");
-        output.textContent = "Mnemonic-frasen visas här";
+        showValidation("Each field must be an integer between 0 and 255.");
+        output.textContent = "Mnemonic phrase appears here";
         return;
     }
 
     if (hasEmptyField) {
-        showValidation("Fyll i ett värde (0–255) i alla fält.");
-        output.textContent = "Mnemonic-frasen visas här";
+        showValidation("Enter a value (0–255) in every field.");
+        output.textContent = "Mnemonic phrase appears here";
         return;
     }
 
@@ -228,7 +228,7 @@ async function generateMnemonic(bytes) {
     } catch (e) {
         if (token !== renderToken) return;
         showValidation(e.message);
-        output.textContent = "Mnemonic-frasen visas här";
+        output.textContent = "Mnemonic phrase appears here";
         hideChecksumStatus();
     }
 }
@@ -243,7 +243,7 @@ function showToast(text) {
 
 document.getElementById("copy-button").addEventListener("click", () => {
     navigator.clipboard.writeText(output.textContent);
-    showToast("Mnemonic kopierad");
+    showToast("Mnemonic copied");
 });
 
 document.getElementById("word-count-toggle").addEventListener("click", (event) => {
@@ -257,7 +257,7 @@ document.getElementById("word-count-toggle").addEventListener("click", (event) =
     setFieldCount(wordCount === 24 ? 32 : 16);
 });
 
-// --- Klistra in alla bytes på en gång (kommaseparerat) ---
+// --- Paste all bytes at once (comma-separated) ---
 const pasteInput = document.getElementById("paste-input");
 const pasteHint = document.getElementById("paste-hint");
 
@@ -295,12 +295,12 @@ function applyPastedEntropy() {
     const invalid = parts.filter(p => !/^\d+$/.test(p) || Number(p) > 255);
 
     if (invalid.length > 0) {
-        showPasteHint(`Ogiltigt värde: "${invalid[0]}" — varje värde måste vara ett heltal 0–255.`, true);
+        showPasteHint(`Invalid value: "${invalid[0]}" — each value must be an integer 0–255.`, true);
         return;
     }
 
     if (parts.length !== 16 && parts.length !== 32) {
-        showPasteHint(`Hittade ${parts.length} värden — förväntade 16 (12 ord) eller 32 (24 ord).`, true);
+        showPasteHint(`Found ${parts.length} values — expected 16 (12 words) or 32 (24 words).`, true);
         return;
     }
 
@@ -309,20 +309,20 @@ function applyPastedEntropy() {
         input.value = parts[i];
     });
     onFieldsChanged();
-    showPasteHint(`✓ ${parts.length} värden ifyllda`, false);
+    showPasteHint(`✓ ${parts.length} values filled in`, false);
 }
 
 pasteInput.addEventListener("input", applyPastedEntropy);
 
 setFieldCount(FIELD_COUNT);
 
-// --- Temasynkronisering med Verktygslådan (postMessage från förälder-iframe) ---
+// --- Theme sync with CryptoToolbox (postMessage from parent iframe) ---
 window.addEventListener('message', function (event) {
     if (event.source !== window.parent) return;
     var data = event.data;
-    if (data && data.source === 'verktygslada' && data.type === 'theme' &&
+    if (data && data.source === 'cryptotoolbox' && data.type === 'theme' &&
         (data.theme === 'light' || data.theme === 'dark')) {
         document.documentElement.setAttribute('data-theme', data.theme);
-        try { localStorage.setItem('theme', data.theme); } catch (e) { /* ignoreras */ }
+        try { localStorage.setItem('theme', data.theme); } catch (e) { /* ignored */ }
     }
 });

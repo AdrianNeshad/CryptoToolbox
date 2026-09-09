@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="sv">
+<html lang="en">
 
 <head>
     <meta charset="UTF-8">
@@ -395,11 +395,11 @@
                 <thead>
                     <tr>
                         <th>Wallet</th>
-                        <th>Plattform</th>
-                        <th>Filformat</th>
-                        <th>Kryptering</th>
-                        <th>KDF / Lagring</th>
-                        <th>Anteckning</th>
+                        <th>Platform</th>
+                        <th>File format</th>
+                        <th>Encryption</th>
+                        <th>KDF / Storage</th>
+                        <th>Note</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -417,7 +417,7 @@
                         <td class="w-fmt">JSON Vault</td>
                         <td><span class="chip chip-gcm">AES-256-GCM</span></td>
                         <td class="w-kdf">Keychain/Keystore</td>
-                        <td class="w-note">iterations: 5000 för mobile</td>
+                        <td class="w-note">iterations: 5000 for mobile</td>
                     </tr>
                     <tr>
                         <td class="w-name">Phantom</td>
@@ -425,7 +425,7 @@
                         <td class="w-fmt">JSON Vault</td>
                         <td><span class="chip chip-gcm">AES-256-GCM</span></td>
                         <td class="w-kdf">PBKDF2/Keychain</td>
-                        <td class="w-note">Lagras i keychain med entropy som går att konvertera till mnemonic</td>
+                        <td class="w-note">Stored in the keychain with entropy that can be converted to a mnemonic</td>
                     </tr>
                     <tr>
                         <td class="w-name">Exodus</td>
@@ -449,7 +449,7 @@
                         <td class="w-fmt">.keys</td>
                         <td><span class="chip chip-chacha">ChaCha20</span></td>
                         <td class="w-kdf">Wallet password</td>
-                        <td class="w-note">Återställ .keys-fil i moneroGUI eller featherWallet — dekrypterat men encodat lösenord går att använda som password</td>
+                        <td class="w-note">Recover the .keys file in moneroGUI or featherWallet — the decrypted but encoded password can be used as the password</td>
                     </tr>
                     <tr>
                         <td class="w-name">Trust Wallet</td>
@@ -496,8 +496,8 @@
         </div>
 
         <section>
-            <h2>Fältreferens</h2>
-            <p class="section-lede">Filnamn och nycklar att leta efter när en wallet-mapp ska identifieras.</p>
+            <h2>Field reference</h2>
+            <p class="section-lede">File names and keys to look for when identifying a wallet folder.</p>
             <div class="cards">
                 <div class="card">
                     <h3>Exodus</h3>
@@ -529,12 +529,12 @@
 
         <section>
             <h2>Ethereum Keystore V3</h2>
-            <p class="section-lede">Standardformatet som MetaMask, Geth och de flesta ETH-wallets baserar sin JSON-vault på.</p>
+            <p class="section-lede">The standard format that MetaMask, Geth, and most ETH wallets base their JSON vault on.</p>
             <div class="panels">
                 <div class="panel">
                     <div class="panel-head">
-                        <span>struktur</span>
-                        <button class="copy-btn" data-copy="struct">Kopiera</button>
+                        <span>structure</span>
+                        <button class="copy-btn" data-copy="struct">Copy</button>
                     </div>
                     <pre id="struct">crypto {
   cipher = aes-128-ctr,
@@ -544,8 +544,8 @@
                 </div>
                 <div class="panel">
                     <div class="panel-head">
-                        <span>exempel.json</span>
-                        <button class="copy-btn" data-copy="example">Kopiera</button>
+                        <span>example.json</span>
+                        <button class="copy-btn" data-copy="example">Copy</button>
                     </div>
                     <pre id="example">{
     <span class="jk">"version"</span>: <span class="jn">3</span>,
@@ -576,11 +576,11 @@
 
         <section>
             <h2>Phantom Wallet</h2>
-            <p class="section-lede">JSON Vault med entropy-array som går att konvertera till mnemonic.</p>
+            <p class="section-lede">JSON vault with an entropy array that can be converted to a mnemonic.</p>
             <div class="panel">
                 <div class="panel-head">
                     <span>phantom.json</span>
-                    <button class="copy-btn" data-copy="phantom-example">Kopiera</button>
+                    <button class="copy-btn" data-copy="phantom-example">Copy</button>
                 </div>
                 <pre id="phantom-example">{
     <span class="jk">"version"</span>: <span class="jn">1</span>,
@@ -615,10 +615,10 @@
             window.addEventListener('message', function (event) {
                 if (event.source !== window.parent) return;
                 var data = event.data;
-                if (data && data.source === 'verktygslada' && data.type === 'theme' &&
+                if (data && data.source === 'cryptotoolbox' && data.type === 'theme' &&
                     (data.theme === 'light' || data.theme === 'dark')) {
                     document.documentElement.setAttribute('data-theme', data.theme);
-                    try { localStorage.setItem('theme', data.theme); } catch (e) { /* ignoreras */ }
+                    try { localStorage.setItem('theme', data.theme); } catch (e) { /* ignored */ }
                 }
             });
 
@@ -628,7 +628,7 @@
                     var text = target ? target.textContent : '';
                     var done = function () {
                         var original = btn.textContent;
-                        btn.textContent = 'Kopierat';
+                        btn.textContent = 'Copied';
                         setTimeout(function () { btn.textContent = original; }, 1200);
                     };
                     if (navigator.clipboard && navigator.clipboard.writeText) {

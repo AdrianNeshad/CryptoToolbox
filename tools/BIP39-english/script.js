@@ -1,4 +1,4 @@
-// Denna fil förväntar sig en global array `window.bipWords` från bip39_english.js
+// This file expects a global array `window.bipWords` from bip39_english.js
 
 const grid = document.getElementById("word-grid");
 const emptyState = document.getElementById("empty-state");
@@ -34,8 +34,8 @@ function renderWords(words, query) {
 
     const count = words.length;
     resultCount.textContent = query
-        ? `${count} av ${wordlist.length} ord`
-        : `${count} ord totalt`;
+        ? `${count} of ${wordlist.length} words`
+        : `${count} words total`;
 
     if (count === 0) {
         grid.classList.add("display-none");
@@ -55,20 +55,20 @@ function onSearchInput() {
 }
 
 if (wordlist.length === 0) {
-    resultCount.textContent = "Kunde inte hitta ordlistan (window.bipWords saknas).";
+    resultCount.textContent = "Could not find the word list (window.bipWords is missing).";
     emptyState.classList.remove("display-none");
     grid.classList.add("display-none");
 } else {
     renderWords(wordlist, "");
 }
 
-// --- Temasynkronisering med Verktygslådan (postMessage från förälder-iframe) ---
+// --- Theme sync with CryptoToolbox (postMessage from parent iframe) ---
 window.addEventListener('message', function (event) {
     if (event.source !== window.parent) return;
     const data = event.data;
-    if (data && data.source === 'verktygslada' && data.type === 'theme' &&
+    if (data && data.source === 'cryptotoolbox' && data.type === 'theme' &&
         (data.theme === 'light' || data.theme === 'dark')) {
         document.documentElement.setAttribute('data-theme', data.theme);
-        try { localStorage.setItem('theme', data.theme); } catch (e) { /* ignoreras */ }
+        try { localStorage.setItem('theme', data.theme); } catch (e) { /* ignored */ }
     }
 });

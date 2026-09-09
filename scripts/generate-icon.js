@@ -1,9 +1,9 @@
 #!/usr/bin/env node
-// Renderar build/icon-source.svg till en Windows .ico (build/icon.ico) med flera
-// upplösningar, plus en 512px PNG-förhandsvisning (build/icon-preview.png).
+// Renders build/icon-source.svg to a Windows .ico (build/icon.ico) with multiple
+// resolutions, plus a 512px PNG preview (build/icon-preview.png).
 //
-// Körs manuellt när ikonen ska bytas/uppdateras: `node scripts/generate-icon.js`
-// (kräver devDependencies sharp + png-to-ico, `npm install` först).
+// Run manually when the icon needs to be changed/updated: `node scripts/generate-icon.js`
+// (requires devDependencies sharp + png-to-ico, run `npm install` first).
 
 const fs = require('node:fs');
 const path = require('node:path');
@@ -26,12 +26,12 @@ async function main() {
 
     const icoBuffer = await pngToIco(pngBuffers);
     fs.writeFileSync(ICO_PATH, icoBuffer);
-    console.log(`generate-icon: skrev ${ICO_PATH} (${SIZES.join(', ')}px)`);
+    console.log(`generate-icon: wrote ${ICO_PATH} (${SIZES.join(', ')}px)`);
 
-    // Separat, större PNG för snabb visuell koll (Windows-ikoner går inte att
-    // förhandsgranska direkt i en bildvisare på samma sätt som en vanlig PNG).
+    // Separate, larger PNG for a quick visual check (Windows icons cannot be
+    // previewed directly in an image viewer the way a regular PNG can).
     await sharp(svg, { density: 384 }).resize(512, 512).png().toFile(PREVIEW_PATH);
-    console.log(`generate-icon: skrev ${PREVIEW_PATH} (förhandsvisning)`);
+    console.log(`generate-icon: wrote ${PREVIEW_PATH} (preview)`);
 }
 
 main().catch((err) => {

@@ -1,8 +1,8 @@
 {
-  "name": "verktygslada",
-  "productName": "Verktygslådan",
+  "name": "cryptotoolbox",
+  "productName": "CryptoToolbox",
   "version": "1.6.0",
-  "description": "Lokal verktygslåda för kryptografi, BIP38/BIP39, QR-avkodning, CyberChef m.m. Körs helt offline.",
+  "description": "Local toolbox for cryptography, BIP38/BIP39, QR decoding, CyberChef, and more. Runs fully offline.",
   "author": "Adrian Neshad",
   "license": "UNLICENSED",
   "private": true,
@@ -22,8 +22,8 @@
     "sharp": "^0.35.3"
   },
   "build": {
-    "appId": "se.adrianneshad.verktygslada",
-    "productName": "Verktygslådan",
+    "appId": "se.adrianneshad.cryptotoolbox",
+    "productName": "CryptoToolbox",
     "directories": {
       "output": "release"
     },
@@ -62,10 +62,10 @@
       "allowToChangeInstallationDirectory": true,
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
-      "shortcutName": "Verktygslådan"
+      "shortcutName": "CryptoToolbox"
     },
     "portable": {
-      "artifactName": "Verktygslådan-Portable-${version}.exe"
+      "artifactName": "CryptoToolbox-Portable-${version}.exe"
     }
   },
   "allowScripts": {

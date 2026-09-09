@@ -12,7 +12,7 @@ const interpretationRows = document.getElementById('interpretation-rows');
 const toast = document.getElementById('toast');
 
 const FORMAT_LABELS = {
-    'unix-s': 'Unix (sekunder)',
+    'unix-s': 'Unix (seconds)',
     'unix-ms': 'Unix (ms)',
     'unix-us': 'Unix (µs)',
     'unix-ns': 'Unix (ns)',
@@ -90,7 +90,7 @@ function detectFormat(n, raw) {
         const asFt = fromFiletime(n);
         const y = asFt.getUTCFullYear();
         if (y >= 1980 && y <= 2100) {
-            return { format: 'filetime', reason: 'Ser ut som Windows FILETIME (100 ns sedan 1601).' };
+            return { format: 'filetime', reason: 'Looks like Windows FILETIME (100 ns since 1601).' };
         }
     }
 
@@ -99,23 +99,23 @@ function detectFormat(n, raw) {
         const asWk = fromWebkit(n);
         const y = asWk.getUTCFullYear();
         if (y >= 1980 && y <= 2100) {
-            return { format: 'webkit', reason: 'Ser ut som WebKit/Chrome (µs sedan 1601).' };
+            return { format: 'webkit', reason: 'Looks like WebKit/Chrome (µs since 1601).' };
         }
     }
 
     // Unix ns
     if (digits >= 18 && abs >= 1e17) {
-        return { format: 'unix-ns', reason: 'Mycket stort tal — tolkas som Unix-nanosekunder.' };
+        return { format: 'unix-ns', reason: 'Very large number — interpreted as Unix nanoseconds.' };
     }
 
     // Unix µs
     if (digits >= 15 && digits <= 16) {
-        return { format: 'unix-us', reason: 'Tolkas som Unix-mikrosekunder.' };
+        return { format: 'unix-us', reason: 'Interpreted as Unix microseconds.' };
     }
 
     // Unix ms
     if (digits >= 12 && digits <= 14) {
-        return { format: 'unix-ms', reason: 'Tolkas som Unix-millisekunder.' };
+        return { format: 'unix-ms', reason: 'Interpreted as Unix milliseconds.' };
     }
 
     // Ambiguous seconds-scale: Unix vs Apple Cocoa
@@ -125,23 +125,23 @@ function detectFormat(n, raw) {
 
         // Typical Cocoa for 2015–2030 is ~4.4e8–9.5e8; Unix is ~1.4e9–1.9e9
         if (abs >= 1.2e9 && abs < 4e9 && unixPlausible) {
-            return { format: 'unix-s', reason: 'Tolkas som Unix-sekunder (vanligt i loggar).' };
+            return { format: 'unix-s', reason: 'Interpreted as Unix seconds (common in logs).' };
         }
         if (abs < 1.2e9 && applePlausible) {
             return {
                 format: 'apple',
-                reason: 'Tolkas som Apple Cocoa/NSDate (s sedan 2001) — vanligt i iOS SQLite. Jämför även Unix-sekunder i listan nedan.',
+                reason: 'Interpreted as Apple Cocoa/NSDate (s since 2001) — common in iOS SQLite. Also compare Unix seconds in the list below.',
             };
         }
         if (unixPlausible) {
-            return { format: 'unix-s', reason: 'Tolkas som Unix-sekunder.' };
+            return { format: 'unix-s', reason: 'Interpreted as Unix seconds.' };
         }
         if (applePlausible) {
-            return { format: 'apple', reason: 'Tolkas som Apple Cocoa/NSDate.' };
+            return { format: 'apple', reason: 'Interpreted as Apple Cocoa/NSDate.' };
         }
     }
 
-    return { format: 'unix-s', reason: 'Kunde inte avgöra säkert — faller tillbaka på Unix-sekunder. Använd listan “Om råvärdet tolkas som…”.' };
+    return { format: 'unix-s', reason: 'Could not determine reliably — falling back to Unix seconds. Use the “If the raw value is interpreted as…” list.' };
 }
 
 function dateFromFormat(format, raw) {
@@ -178,7 +178,7 @@ function rowHtml(label, value, meta, plausible) {
           <code id="${id}">${escapeHtml(value)}</code>
           ${meta ? `<span class="meta">${escapeHtml(meta)}</span>` : ''}
         </div>
-        <button type="button" class="copy-btn secondary" data-copy-id="${id}">Kopiera</button>
+        <button type="button" class="copy-btn secondary" data-copy-id="${id}">Copy</button>
       </div>`;
 }
 
@@ -194,15 +194,15 @@ function renderMatrix(date) {
     const f = toFormats(date);
     matrixRows.innerHTML = [
         rowHtml('UTC', f.utc),
-        rowHtml('Lokal', f.local),
+        rowHtml('Local', f.local),
         rowHtml('ISO 8601', f.iso),
         rowHtml('Unix (s)', f['unix-s']),
         rowHtml('Unix (ms)', f['unix-ms']),
         rowHtml('Unix (µs)', f['unix-us']),
         rowHtml('Unix (ns)', f['unix-ns']),
-        rowHtml('Apple Cocoa / NSDate', f.apple, 'sekunder sedan 2001-01-01 UTC'),
-        rowHtml('WebKit / Chrome', f.webkit, 'mikrosekunder sedan 1601-01-01 UTC'),
-        rowHtml('Windows FILETIME', f.filetime, '100 ns sedan 1601-01-01 UTC'),
+        rowHtml('Apple Cocoa / NSDate', f.apple, 'seconds since 2001-01-01 UTC'),
+        rowHtml('WebKit / Chrome', f.webkit, 'microseconds since 1601-01-01 UTC'),
+        rowHtml('Windows FILETIME', f.filetime, '100 ns since 1601-01-01 UTC'),
     ].join('');
     matrixEl.classList.remove('display-none');
 }
@@ -227,9 +227,9 @@ function renderInterpretations(raw) {
     interpretationRows.innerHTML = candidates.map(([fmt, date]) => {
         const ok = !Number.isNaN(date.getTime());
         const plausible = isPlausibleDate(date);
-        const value = ok ? date.toISOString() : 'ogiltigt';
+        const value = ok ? date.toISOString() : 'invalid';
         const meta = ok ? `UTC: ${date.toUTCString()}` : '';
-        const tag = plausible ? ' — rimligt intervall' : '';
+        const tag = plausible ? ' — reasonable interval' : '';
         return rowHtml(FORMAT_LABELS[fmt] + tag, value, meta, plausible);
     }).join('');
 
@@ -239,7 +239,7 @@ function renderInterpretations(raw) {
 function convert() {
     const raw = rawInput.value.trim();
     if (!raw) {
-        setStatus('Klistra in ett värde först', true);
+        setStatus('Paste a value first', true);
         return;
     }
 
@@ -249,16 +249,16 @@ function convert() {
     if (format === 'auto') {
         if (/[tT]|-|:|\//.test(raw) && Number.isNaN(Number(cleanNumeric(raw)))) {
             format = 'iso';
-            reason = 'Indata ser ut som en datumsträng (ISO/datum).';
+            reason = 'The input looks like a date string (ISO/date).';
         } else {
             const n = parseNumber(raw);
             if (n === null) {
                 const asIso = dateFromFormat('iso', raw);
                 if (asIso) {
                     format = 'iso';
-                    reason = 'Tolkas som datumsträng.';
+                    reason = 'Interpreted as a date string.';
                 } else {
-                    setStatus('Kunde inte tolka indata', true);
+                    setStatus('Could not parse the input', true);
                     return;
                 }
             } else {
@@ -271,16 +271,16 @@ function convert() {
 
     const date = dateFromFormat(format, raw);
     if (!date || Number.isNaN(date.getTime())) {
-        setStatus('Ogiltigt värde för valt format', true);
+        setStatus('Invalid value for the selected format', true);
         matrixEl.classList.add('display-none');
         return;
     }
 
-    guessEl.textContent = `Använder: ${FORMAT_LABELS[format] || format}. ${reason}`.trim();
+    guessEl.textContent = `Using: ${FORMAT_LABELS[format] || format}. ${reason}`.trim();
     guessEl.classList.remove('display-none');
     renderMatrix(date);
     renderInterpretations(raw);
-    setStatus('Konvertering klar');
+    setStatus('Conversion done');
 }
 
 function bindCopies(root) {
@@ -293,7 +293,7 @@ function bindCopies(root) {
             await navigator.clipboard.writeText(el.textContent);
             showToast();
         } catch (e) {
-            setStatus('Kunde inte kopiera', true);
+            setStatus('Could not copy', true);
         }
     });
 }
@@ -320,15 +320,15 @@ document.getElementById('clear-button').addEventListener('click', () => {
     guessEl.classList.add('display-none');
     matrixEl.classList.add('display-none');
     interpretationsEl.classList.add('display-none');
-    setStatus('Klistra in ett timestamp eller datum');
+    setStatus('Paste a timestamp or date');
 });
 
 window.addEventListener('message', function (event) {
     if (event.source !== window.parent) return;
     const data = event.data;
-    if (data && (data.source === 'forensics-toolbox' || data.source === 'verktygslada') &&
+    if (data && (data.source === 'forensics-toolbox' || data.source === 'cryptotoolbox') &&
         data.type === 'theme' && (data.theme === 'light' || data.theme === 'dark')) {
         document.documentElement.setAttribute('data-theme', data.theme);
-        try { localStorage.setItem('theme', data.theme); } catch (e) { /* ignoreras */ }
+        try { localStorage.setItem('theme', data.theme); } catch (e) { /* ignored */ }
     }
 });

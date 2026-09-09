@@ -13,7 +13,7 @@ const JWT_SEGMENT = /^[A-Za-z0-9_-]+$/;
 
 const TIME_CLAIMS = ["iat", "nbf", "exp", "auth_time"];
 
-// Plockar bort citattecken, "Bearer "-prefix och radbrytningar från inklistrad token
+// Strips quotes, the "Bearer " prefix, and line breaks from a pasted token
 function cleanToken(text) {
     return text
         .trim()
@@ -22,7 +22,7 @@ function cleanToken(text) {
         .replace(/\s+/g, "");
 }
 
-// Returnerar tokens delar om texten ser ut som en JWS (3 delar) eller JWE (5 delar)
+// Returns the token's parts if the text looks like a JWS (3 parts) or JWE (5 parts)
 function splitToken(text) {
     const parts = cleanToken(text).split(".");
 
@@ -47,7 +47,7 @@ function base64UrlDecode(segment) {
     return new TextDecoder("utf-8").decode(bytes);
 }
 
-// Avkodar en del av token till ett objekt, eller till råtext om innehållet inte är JSON
+// Decodes a token part into an object, or to raw text if the content is not JSON
 function decodeSegment(segment) {
     const text = base64UrlDecode(segment);
 
@@ -67,12 +67,12 @@ function isObject(value) {
 function formatTime(seconds) {
     const date = new Date(seconds * 1000);
 
-    if (isNaN(date.getTime())) return "ogiltig tidsstämpel";
+    if (isNaN(date.getTime())) return "invalid timestamp";
 
     return date.toLocaleString("sv-SE");
 }
 
-// Läsbara datum för tidsstämpel-claims, som ett eget objekt i resultatet
+// Human-readable dates for timestamp claims, as a separate object in the result
 function timeClaims(payload) {
     if (!isObject(payload)) return null;
 
@@ -82,7 +82,7 @@ function timeClaims(payload) {
         .filter(claim => typeof payload[claim] === "number")
         .forEach(claim => {
             claims[claim] = formatTime(payload[claim])
-                + (claim === "exp" && isExpired(payload) ? " (utgången)" : "");
+                + (claim === "exp" && isExpired(payload) ? " (expired)" : "");
         });
 
     return Object.keys(claims).length ? claims : null;
@@ -104,7 +104,7 @@ function decodeJWT() {
     let payload = null;
 
     if (parts.length === 5) {
-        result.payload = "Krypterad token (JWE) - kan inte avkodas utan nyckel";
+        result.payload = "Encrypted token (JWE) - cannot be decoded without a key";
     }
 
     else {
@@ -118,16 +118,16 @@ function decodeJWT() {
 
     return {
         text: JSON.stringify(result, null, 2),
-        alg: isObject(header) && header.alg ? String(header.alg) : "okänd alg",
+        alg: isObject(header) && header.alg ? String(header.alg) : "unknown alg",
         expired: isExpired(payload)
     };
 }
 
-// Ger en tydligare felrad när det som klistrats in är en JWT och inte JSON
+// Gives a clearer error line when the pasted content is a JWT and not JSON
 function invalidJsonMessage() {
     return splitToken(input.value)
-        ? "Ogiltig JSON - ser ut som en JWT, använd Decode JWT"
-        : "Ogiltig JSON";
+        ? "Invalid JSON - looks like a JWT, use Decode JWT"
+        : "Invalid JSON";
 }
 
 function showToast(text) {
@@ -160,7 +160,7 @@ document
             const json = parseJSON();
             output.textContent =
                 JSON.stringify(json, null, 2);
-            setSuccess("Giltig JSON - formatterad");
+            setSuccess("Valid JSON - formatted");
         }
         
         catch (e) {
@@ -193,27 +193,27 @@ document
 
             if (!jwt) {
                 output.textContent =
-                    "Ingen JWT hittades i inmatningen.\n\n"
-                    + "En JWT består av Base64URL-delar separerade med punkter:\n"
+                    "No JWT found in the input.\n\n"
+                    + "A JWT consists of Base64URL parts separated by dots:\n"
                     + "header.payload.signatur";
-                setError("Ingen giltig JWT");
+                setError("No valid JWT");
                 return;
             }
 
             output.textContent = jwt.text;
 
             if (jwt.expired) {
-                setWarning("JWT avkodad (" + jwt.alg + ") - token har gått ut");
+                setWarning("JWT decoded (" + jwt.alg + ") - token has expired");
             }
 
             else {
-                setSuccess("JWT avkodad (" + jwt.alg + ") - signaturen verifieras inte");
+                setSuccess("JWT decoded (" + jwt.alg + ") - the signature is not verified");
             }
         }
 
         catch (e) {
             output.textContent = e.message;
-            setError("Kunde inte avkoda JWT");
+            setError("Could not decode JWT");
         }
     };
 
@@ -221,8 +221,8 @@ document
     .getElementById("clear-button")
     .onclick = function () {
         input.value = "";
-        output.textContent = "Resultat visas här";
-        status.textContent = "Ingen JSON laddad";
+        output.textContent = "Result appears here";
+        status.textContent = "No JSON loaded";
     };
 
 document
@@ -231,7 +231,7 @@ document
         navigator.clipboard.writeText(
             output.textContent
         );
-        showToast("JSON kopierad");
+        showToast("JSON copied");
     };
 
 document.addEventListener("keydown", e => {
@@ -257,13 +257,13 @@ input.addEventListener("keydown", e => {
     }
 });
 
-// --- Temasynkronisering med Verktygslådan (postMessage från förälder-iframe) ---
+// --- Theme sync with CryptoToolbox (postMessage from parent iframe) ---
 window.addEventListener('message', function (event) {
     if (event.source !== window.parent) return;
     const data = event.data;
-    if (data && data.source === 'verktygslada' && data.type === 'theme' &&
+    if (data && data.source === 'cryptotoolbox' && data.type === 'theme' &&
         (data.theme === 'light' || data.theme === 'dark')) {
         document.documentElement.setAttribute('data-theme', data.theme);
-        try { localStorage.setItem('theme', data.theme); } catch (e) { /* ignoreras */ }
+        try { localStorage.setItem('theme', data.theme); } catch (e) { /* ignored */ }
     }
 });

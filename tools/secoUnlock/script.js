@@ -1,13 +1,13 @@
 /* =========================================================================
-   SECO decrypt-kärna — porterad byte-för-byte från de node-paket som
-   originalskriptet (secoUnlock) använder:
-     seco-file / secure-container  → filformat + AES-256-GCM
-     scryptsy                      → scrypt (nyckelsträckning)
+   SECO decrypt core — ported byte-by-byte from the node packages that
+   the original script (secoUnlock) uses:
+     seco-file / secure-container  → file format + AES-256-GCM
+     scryptsy                      → scrypt (key stretching)
      bitcoin-seed + bip39          → entropy → mnemonic
-   Körs helt lokalt via WebCrypto (crypto.subtle) + DecompressionStream.
+   Runs fully locally via WebCrypto (crypto.subtle) + DecompressionStream.
    ========================================================================= */
 
-/* ---------- scrypt (port av scryptsy) ---------- */
+/* ---------- scrypt (port of scryptsy) ---------- */
 
 function readUInt32LE(a, o) {
     return ((a[o]) | (a[o + 1] << 8) | (a[o + 2] << 16) | (a[o + 3] << 24));
@@ -97,7 +97,7 @@ async function pbkdf2Sha256(passwordBytes, saltBytes, iterations, dkLenBytes) {
 }
 
 async function scrypt(passwordBytes, saltBytes, N, r, p, dkLen) {
-    if ((N & (N - 1)) !== 0 || N === 0) throw new Error('N måste vara en potens av 2');
+    if ((N & (N - 1)) !== 0 || N === 0) throw new Error('N must be a power of 2');
     const XY = new Uint8Array(256 * r);
     const V = new Uint8Array(128 * r * N);
     const B32 = new Int32Array(16);
@@ -128,16 +128,16 @@ async function gunzip(bytes) {
     return new Uint8Array(buf);
 }
 
-/* ---------- SECO-fil-parsning ---------- */
+/* ---------- SECO file parsing ---------- */
 
 function parseSeco(fileBytes) {
     // header(224) checksum(32) metadata(256) blobLen(UInt32BE) blob(blobLen)
     if (fileBytes.length < 224 + 32 + 256 + 4) {
-        throw new Error('Filen är för liten för att vara en giltig .seco-fil.');
+        throw new Error('The file is too small to be a valid .seco file.');
     }
     const magic = String.fromCharCode(fileBytes[0], fileBytes[1], fileBytes[2], fileBytes[3]);
     if (magic !== 'SECO') {
-        throw new Error('Ogiltig fil: saknar "SECO"-signatur. Är detta verkligen en seed.seco-fil?');
+        throw new Error('Invalid file: missing the "SECO" signature. Is this really a seed.seco file?');
     }
     const metadataOffset = 224 + 32;
     const md = fileBytes.subarray(metadataOffset, metadataOffset + 256);
@@ -187,13 +187,13 @@ async function entropyToMnemonic(entropyBytes, wordlist) {
     return words.join(' ');
 }
 
-/* ---------- dekryptera med ETT lösenord (kastar vid fel lösenord) ---------- */
+/* ---------- decrypt with ONE password (throws on a wrong password) ---------- */
 
 async function tryPassword(parsed, password, wordlist) {
     const { meta, blob } = parsed;
     const pwBytes = new TextEncoder().encode(password);
     const derivedKey = await scrypt(pwBytes, meta.salt, meta.n, meta.r, meta.p, 32);
-    // GCM-auth misslyckas → fel lösenord → kastar OperationError
+    // GCM auth fails → wrong password → throws OperationError
     const blobKey = await aesGcmDecrypt(derivedKey, meta.blobKey.key, meta.blobKey.iv, meta.blobKey.authTag);
     const data = await aesGcmDecrypt(blobKey, blob, meta.blob.iv, meta.blob.authTag);
     // shrink: UInt32BE(0) = t, slice(4, t+4)
@@ -237,8 +237,8 @@ let secoBytes = null;   // Uint8Array
 let running = false;
 let stopRequested = false;
 
-/* MessageChannel-baserad yield: släpper fram en repaint mellan lösenord
-   utan setTimeout(0):s ~4 ms-klämma. */
+/* MessageChannel-based yield: allows a repaint between passwords
+   without the setTimeout(0) ~4 ms clamp. */
 const _mc = new MessageChannel();
 let _yieldResolve = null;
 _mc.port1.onmessage = () => { if (_yieldResolve) { const r = _yieldResolve; _yieldResolve = null; r(); } };
@@ -246,7 +246,7 @@ function yieldToUI() {
     return new Promise(resolve => { _yieldResolve = resolve; _mc.port2.postMessage(0); });
 }
 
-/* ---------- output-logg ---------- */
+/* ---------- output log ---------- */
 
 function log(text, cls) {
     const span = document.createElement('span');
@@ -266,7 +266,7 @@ function showToast(text) {
     setTimeout(() => toast.classList.remove('show'), 2200);
 }
 
-/* ---------- lösenordsräknare ---------- */
+/* ---------- password counter ---------- */
 
 function parsePasswords() {
     return pwList.value.split('\n').map(p => p.trim()).filter(p => p.length > 0);
@@ -274,12 +274,12 @@ function parsePasswords() {
 
 function updatePwCount() {
     const n = parsePasswords().length;
-    pwCount.textContent = n > 0 ? `${n} lösenord` : '';
+    pwCount.textContent = n > 0 ? `${n} passwords` : '';
 }
 
 pwList.addEventListener('input', updatePwCount);
 
-/* ---------- filval ---------- */
+/* ---------- file selection ---------- */
 
 function setSecoName(text, state, title) {
     secoName.textContent = text;
@@ -297,16 +297,16 @@ secoInput.addEventListener('change', async () => {
         const buf = await file.arrayBuffer();
         secoBytes = new Uint8Array(buf);
         const label = `${file.name} (${secoBytes.length} byte)`;
-        // Validera signatur/storlek → grön text om giltig, röd om inte
+        // Validate signature/size → green text if valid, red if not
         try {
             parseSeco(secoBytes);
-            setSecoName(label, 'valid', 'Giltig .seco-fil');
+            setSecoName(label, 'valid', 'Valid .seco file');
         } catch (e) {
-            setSecoName(label, 'invalid', 'Ogiltig .seco-fil: ' + e.message);
+            setSecoName(label, 'invalid', 'Invalid .seco file: ' + e.message);
         }
     } catch (e) {
         secoBytes = null;
-        setSecoName('Kunde inte läsa filen', null);
+        setSecoName('Could not read the file', null);
     }
 });
 
@@ -322,12 +322,12 @@ pwInput.addEventListener('change', async () => {
         pwName.classList.add('set');
         updatePwCount();
     } catch (e) {
-        pwName.textContent = 'Kunde inte läsa filen';
+        pwName.textContent = 'Could not read the file';
         pwName.classList.remove('set');
     }
 });
 
-/* ---------- körning ---------- */
+/* ---------- run ---------- */
 
 function setRunning(state) {
     running = state;
@@ -356,10 +356,10 @@ function showResult(success, titleText, fields) {
         valueRow.appendChild(code);
         const btn = document.createElement('button');
         btn.className = 'copy-btn';
-        btn.textContent = 'Kopiera';
+        btn.textContent = 'Copy';
         btn.addEventListener('click', () => {
             navigator.clipboard.writeText(f.value);
-            showToast(f.label + ' kopierad');
+            showToast(f.label + ' copied');
         });
         valueRow.appendChild(btn);
         field.appendChild(label);
@@ -371,32 +371,32 @@ function showResult(success, titleText, fields) {
 runBtn.addEventListener('click', run);
 stopBtn.addEventListener('click', () => {
     stopRequested = true;
-    progressStatus.textContent = 'Stoppar…';
+    progressStatus.textContent = 'Stopping…';
 });
 
 async function run() {
     if (running) return;
 
-    if (!secoBytes) { showToast('Välj en .seco-fil först'); return; }
+    if (!secoBytes) { showToast('Choose a .seco file first'); return; }
     const passwords = parsePasswords();
-    if (passwords.length === 0) { showToast('Lägg till minst ett lösenord'); return; }
+    if (passwords.length === 0) { showToast('Add at least one password'); return; }
 
     if (typeof DecompressionStream === 'undefined') {
         clearOutput();
-        log('Din webbläsare saknar stöd för DecompressionStream (gzip) — kan inte fortsätta.', 'log-err');
+        log('Your browser lacks DecompressionStream (gzip) support — cannot continue.', 'log-err');
         return;
     }
 
     const wordlist = window.entropyWordlists.bip39;
 
-    // Parsa .seco-filen
+    // Parse the .seco file
     let parsed;
     try {
         parsed = parseSeco(secoBytes);
     } catch (e) {
         clearOutput();
         resultPanel.classList.add('display-none');
-        log('Fel: ' + e.message, 'log-err');
+        log('Error: ' + e.message, 'log-err');
         return;
     }
 
@@ -406,8 +406,8 @@ async function run() {
     progressWrap.classList.remove('display-none');
     progressBar.style.width = '0%';
     clearOutput();
-    log(`scrypt-parametrar: N=${parsed.meta.n}, r=${parsed.meta.r}, p=${parsed.meta.p}`, 'log-muted');
-    log(`Testar ${passwords.length} lösenord…`, 'log-muted');
+    log(`scrypt parameters: N=${parsed.meta.n}, r=${parsed.meta.r}, p=${parsed.meta.p}`, 'log-muted');
+    log(`Testing ${passwords.length} passwords…`, 'log-muted');
 
     const total = passwords.length;
     const t0 = performance.now();
@@ -415,12 +415,12 @@ async function run() {
 
     for (let i = 0; i < total; i++) {
         if (stopRequested) {
-            log(`\nStoppad av användaren vid ${i} av ${total}.`, 'log-err');
+            log(`\nStopped by the user at ${i} of ${total}.`, 'log-err');
             break;
         }
 
         const pw = passwords[i];
-        progressStatus.textContent = `[${i + 1}/${total}] testar: ${pw}`;
+        progressStatus.textContent = `[${i + 1}/${total}] testing: ${pw}`;
         progressBar.style.width = ((i / total) * 100).toFixed(1) + '%';
         await yieldToUI();
 
@@ -429,9 +429,9 @@ async function run() {
             found = { password: pw, mnemonic, index: i + 1 };
             break;
         } catch (e) {
-            // OperationError = fel lösenord; annat = oväntat fel
+            // OperationError = wrong password; anything else = unexpected error
             if (e && e.name !== 'OperationError') {
-                log(`  [${i + 1}] "${pw}" → oväntat fel: ${e.message}`, 'log-err');
+                log(`  [${i + 1}] "${pw}" → unexpected error: ${e.message}`, 'log-err');
             }
         }
     }
@@ -440,20 +440,20 @@ async function run() {
     const secs = ((performance.now() - t0) / 1000).toFixed(1);
 
     if (found) {
-        progressStatus.textContent = `Klar — lösenord hittat på försök ${found.index} av ${total} (${secs}s)`;
-        log(`\n✓ MATCH på lösenord #${found.index}: ${found.password}`, 'log-hit');
+        progressStatus.textContent = `Done — password found on attempt ${found.index} of ${total} (${secs}s)`;
+        log(`\n✓ MATCH on password #${found.index}: ${found.password}`, 'log-hit');
         log(`Mnemonic: ${found.mnemonic}`, 'log-ok');
-        showResult(true, '✓ Lösenord hittat!', [
-            { label: 'Lösenord', value: found.password },
-            { label: 'Seed-fras (mnemonic)', value: found.mnemonic },
+        showResult(true, '✓ Password found!', [
+            { label: 'Password', value: found.password },
+            { label: 'Seed phrase (mnemonic)', value: found.mnemonic },
         ]);
     } else if (stopRequested) {
-        progressStatus.textContent = `Stoppad (${secs}s)`;
+        progressStatus.textContent = `Stopped (${secs}s)`;
     } else {
-        progressStatus.textContent = `Klar — inget matchande lösenord (${secs}s)`;
-        log(`\n✗ Inget av de ${total} lösenorden matchade.`, 'log-err');
-        showResult(false, '✗ Inget matchande lösenord', [
-            { label: 'Resultat', value: `Testade ${total} lösenord utan träff. Kontrollera listan eller lägg till fler.` },
+        progressStatus.textContent = `Done — no matching password (${secs}s)`;
+        log(`\n✗ None of the ${total} passwords matched.`, 'log-err');
+        showResult(false, '✗ No matching password', [
+            { label: 'Result', value: `Tested ${total} passwords with no match. Check the list or add more.` },
         ]);
     }
 
@@ -462,18 +462,18 @@ async function run() {
 
 clearBtn.addEventListener('click', () => {
     clearOutput();
-    output.textContent = 'Väntar på körning…';
+    output.textContent = 'Waiting to run…';
     progressWrap.classList.add('display-none');
     resultPanel.classList.add('display-none');
 });
 
-/* ---------- temasynk med Verktygslådan ---------- */
+/* ---------- theme sync with CryptoToolbox ---------- */
 window.addEventListener('message', function (event) {
     if (event.source !== window.parent) return;
     var data = event.data;
-    if (data && data.source === 'verktygslada' && data.type === 'theme' &&
+    if (data && data.source === 'cryptotoolbox' && data.type === 'theme' &&
         (data.theme === 'light' || data.theme === 'dark')) {
         document.documentElement.setAttribute('data-theme', data.theme);
-        try { localStorage.setItem('theme', data.theme); } catch (e) { /* ignoreras */ }
+        try { localStorage.setItem('theme', data.theme); } catch (e) { /* ignored */ }
     }
 });

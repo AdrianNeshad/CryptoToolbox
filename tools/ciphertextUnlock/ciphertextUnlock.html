@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="sv">
+<html lang="en">
 
 <head>
     <meta charset="UTF-8">
@@ -31,23 +31,22 @@
 
         <header class="page-header">
             <h1>Ethereum Keystore Unlock</h1>
-            <p>Dictionary-attack som dekrypterar en krypterad plånboks-JSON (Ethereum/TrustWallet V3-keystore,
-                CryptoJS, PBKDF2-vault m.fl.) och extraherar innehållet &mdash; allt körs lokalt i webbläsaren,
-                inget lämnar din dator.</p>
+            <p>Dictionary attack that decrypts an encrypted wallet JSON (Ethereum/TrustWallet V3 keystore,
+                CryptoJS, PBKDF2 vault, and more) and extracts the content &mdash; everything runs locally on your computer.</p>
         </header>
 
-        <!-- Steg 1 & 2 sida vid sida -->
+        <!-- Steps 1 & 2 side by side -->
         <div class="panel-row">
 
-            <!-- Steg 1: krypterad JSON -->
+            <!-- Step 1: encrypted JSON -->
             <div class="panel">
                 <div class="panel-head">
                     <span class="step-num">1</span>
-                    <span class="panel-title">Klistra in krypterad JSON</span>
+                    <span class="panel-title">Paste encrypted JSON</span>
                 </div>
-                <p class="hint">Hela keystore-/vault-JSON:en. Eller ladda in en <code>.json</code>-fil.</p>
+                <p class="hint">The full keystore/vault JSON. Or load a <code>.json</code> file.</p>
                 <div class="file-row">
-                    <button type="button" class="secondary" id="json-btn">Läs in .json-fil…</button>
+                    <button type="button" class="secondary" id="json-btn">Load .json file…</button>
                     <span class="file-name" id="json-file-name"></span>
                 </div>
                 <input type="file" id="json-file-input" accept=".json,application/json,text/plain" hidden>
@@ -56,21 +55,21 @@
                 <div class="detect-status display-none" id="detect-status"></div>
             </div>
 
-            <!-- Steg 2: lösenordslista -->
+            <!-- Step 2: password list -->
             <div class="panel">
                 <div class="panel-head">
                     <span class="step-num">2</span>
-                    <span class="panel-title">Lösenordslista</span>
+                    <span class="panel-title">Password list</span>
                 </div>
-                <p class="hint">Klistra in ett lösenord per rad, eller ladda in en <code>.txt</code>-fil.</p>
+                <p class="hint">Paste one password per line, or load a <code>.txt</code> file.</p>
                 <div class="file-row">
-                    <button type="button" class="secondary" id="pw-btn">Läs in .txt-fil…</button>
+                    <button type="button" class="secondary" id="pw-btn">Load .txt file…</button>
                     <span class="file-name" id="pw-name"></span>
                     <span class="pw-count" id="pw-count"></span>
                 </div>
                 <input type="file" id="pw-input" accept=".txt,text/plain" hidden>
                 <textarea id="pw-list" spellcheck="false" autocomplete="off"
-                    placeholder="lösenord1&#10;lösenord2&#10;lösenord3&#10;…"></textarea>
+                    placeholder="password1&#10;password2&#10;password3&#10;…"></textarea>
             </div>
 
         </div><!-- /panel-row -->
@@ -83,21 +82,21 @@
             <div class="progress-status" id="progress-status"></div>
         </div>
 
-        <!-- Logg / output (resultatbannern visas överst i samma ruta) -->
+        <!-- Log / output (the result banner appears at the top of the same box) -->
         <div class="output-wrap">
             <div class="output-head">
                 <span>Output</span>
                 <div class="output-head-actions">
-                    <button id="run-btn">Kör</button>
-                    <button id="stop-btn" class="danger display-none">Stoppa</button>
-                    <button type="button" class="clear-btn" id="clear-btn">Rensa</button>
+                    <button id="run-btn">Run</button>
+                    <button id="stop-btn" class="danger display-none">Stop</button>
+                    <button type="button" class="clear-btn" id="clear-btn">Clear</button>
                 </div>
             </div>
             <div class="result-panel display-none" id="result-panel">
                 <div class="result-title" id="result-title"></div>
                 <div class="result-body" id="result-body"></div>
             </div>
-            <pre id="output">Väntar på körning…</pre>
+            <pre id="output">Waiting to run…</pre>
         </div>
 
         <div id="toast" class="toast"></div>

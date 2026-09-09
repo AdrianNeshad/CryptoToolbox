@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="sv">
+<html lang="en">
 
 <head>
     <meta charset="UTF-8">
@@ -31,43 +31,43 @@
     <div id="container">
 
         <header class="page-header">
-            <h1>Exodus seed.seco Unlock</h1>
-            <p>Dictionary-attack som låser upp en Exodus <code>seed.seco</code>-fil och extraherar seed-frasen &mdash;
-                allt körs lokalt i webbläsaren, inget lämnar din dator.</p>
+            <h1>Exodus .seco Unlock</h1>
+            <p>Dictionary attack that unlocks an Exodus <code>.seco</code> file and extracts the seed phrase &mdash;
+                everything runs locally on your computer.</p>
         </header>
 
-        <!-- Steg 1 & 2 sida vid sida -->
+        <!-- Steps 1 & 2 side by side -->
         <div class="panel-row">
 
-        <!-- Steg 1: .seco-fil -->
+        <!-- Step 1: .seco file -->
         <div class="panel">
             <div class="panel-head">
                 <span class="step-num">1</span>
-                <span class="panel-title">Välj <code>seed.seco</code>-fil</span>
+                <span class="panel-title">Choose <code>.seco</code> file</span>
             </div>
-            <p class="hint">Hittas oftast i <code>%appdata%/Exodus/exodus.wallet/</code> på Windows.</p>
+            <p class="hint">Usually found in <code>%appdata%/Exodus/exodus.wallet/</code> on Windows.</p>
             <div class="file-row">
-                <button type="button" class="secondary" id="seco-btn">Välj .seco-fil…</button>
-                <span class="file-name" id="seco-name">Ingen fil vald</span>
+                <button type="button" class="secondary" id="seco-btn">Choose .seco file…</button>
+                <span class="file-name" id="seco-name">No file selected</span>
             </div>
             <input type="file" id="seco-input" accept=".seco" hidden>
         </div>
 
-        <!-- Steg 2: lösenordslista -->
+        <!-- Step 2: password list -->
         <div class="panel">
             <div class="panel-head">
                 <span class="step-num">2</span>
-                <span class="panel-title">Lösenordslista</span>
+                <span class="panel-title">Password list</span>
             </div>
-            <p class="hint">Klistra in ett lösenord per rad, eller ladda in en <code>.txt</code>-fil.</p>
+            <p class="hint">Paste one password per line, or load a <code>.txt</code> file.</p>
             <div class="file-row">
-                <button type="button" class="secondary" id="pw-btn">Läs in .txt-fil…</button>
+                <button type="button" class="secondary" id="pw-btn">Load .txt file…</button>
                 <span class="file-name" id="pw-name"></span>
                 <span class="pw-count" id="pw-count"></span>
             </div>
             <input type="file" id="pw-input" accept=".txt,text/plain" hidden>
             <textarea id="pw-list" spellcheck="false" autocomplete="off"
-                placeholder="lösenord1&#10;lösenord2&#10;lösenord3&#10;…"></textarea>
+                placeholder="password1&#10;password2&#10;password3&#10;…"></textarea>
         </div>
 
         </div><!-- /panel-row -->
@@ -80,21 +80,21 @@
             <div class="progress-status" id="progress-status"></div>
         </div>
 
-        <!-- Logg / output (resultatbannern visas överst i samma ruta) -->
+        <!-- Log / output (the result banner appears at the top of the same box) -->
         <div class="output-wrap">
             <div class="output-head">
                 <span>Output</span>
                 <div class="output-head-actions">
-                    <button id="run-btn">Kör</button>
-                    <button id="stop-btn" class="danger display-none">Stoppa</button>
-                    <button type="button" class="clear-btn" id="clear-btn">Rensa</button>
+                    <button id="run-btn">Run</button>
+                    <button id="stop-btn" class="danger display-none">Stop</button>
+                    <button type="button" class="clear-btn" id="clear-btn">Clear</button>
                 </div>
             </div>
             <div class="result-panel display-none" id="result-panel">
                 <div class="result-title" id="result-title"></div>
                 <div class="result-body" id="result-body"></div>
             </div>
-            <pre id="output">Väntar på körning…</pre>
+            <pre id="output">Waiting to run…</pre>
         </div>
 
         <div id="toast" class="toast"></div>

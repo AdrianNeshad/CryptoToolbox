@@ -184,7 +184,7 @@ button:hover {
     background: #3395ff;
 }
 
-/* Ljust läge: --accent är mörkare där, så knapptexten behöver vara ljus för kontrast */
+/* Light mode: --accent is darker there, so the button text needs to be light for contrast */
 [data-theme="light"] button {
     color: #ffffff;
 }

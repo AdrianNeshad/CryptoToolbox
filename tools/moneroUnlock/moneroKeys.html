@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="sv">
+<html lang="en">
 
 <head>
     <meta charset="UTF-8">
@@ -31,70 +31,71 @@
 
         <header class="page-header">
             <h1>Monero .keys Unlock</h1>
-            <p>Dictionary-attack som låser upp en Monero <code>.keys</code>-fil och extraherar seed-phrase samt nycklar &mdash;
-                allt körs lokalt i webbläsaren, inget lämnar din dator.</p>
+            <p>Dictionary attack that unlocks a Monero <code>.keys</code> file and extracts the seed phrase and keys &mdash;
+                everything runs locally on your computer.</p>
+            <p><code>.keys</code> files created by Cake Wallet are currently not supported.</p>
         </header>
 
         <div class="panel-row">
 
-            <!-- Steg 1: .keys-fil -->
+            <!-- Step 1: .keys file -->
             <div class="panel">
                 <div class="panel-head">
                     <span class="step-num">1</span>
-                    <span class="panel-title">Välj <code>.keys</code>-fil</span>
+                    <span class="panel-title">Choose <code>.keys</code> file</span>
                 </div>
-                <p class="hint">Hittas där du sparade plånboken (Monero GUI/CLI), eller i <code>Monero/wallets/</code>.</p>
+                <p class="hint">Found where you saved the wallet (Monero GUI/CLI), or in <code>Monero/wallets/</code>.</p>
                 <div class="file-row">
-                    <button type="button" class="secondary" id="keys-btn">Välj .keys-fil…</button>
-                    <span class="file-name" id="keys-name">Ingen fil vald</span>
+                    <button type="button" class="secondary" id="keys-btn">Choose .keys file…</button>
+                    <span class="file-name" id="keys-name">No file selected</span>
                 </div>
                 <input type="file" id="keys-input" accept=".keys,application/octet-stream" hidden>
             </div>
 
-            <!-- Steg 2: lösenordslista -->
+            <!-- Step 2: password list -->
             <div class="panel">
                 <div class="panel-head">
                     <span class="step-num">2</span>
-                    <span class="panel-title">Lösenord</span>
+                    <span class="panel-title">Password</span>
                 </div>
-                <p class="hint">Klistra in ett lösenord per rad, eller ladda in en <code>.txt</code>-fil.</p>
+                <p class="hint">Paste one password per line, or load a <code>.txt</code> file.</p>
                 <div class="file-row">
-                    <button type="button" class="secondary" id="pw-btn">Läs in .txt-fil…</button>
+                    <button type="button" class="secondary" id="pw-btn">Load .txt file…</button>
                     <span class="file-name" id="pw-name"></span>
                     <span class="pw-count" id="pw-count"></span>
                 </div>
                 <input type="file" id="pw-input" accept=".txt,text/plain" hidden>
                 <textarea id="pw-list" spellcheck="false" autocomplete="off"
-                    placeholder="lösenord1&#10;lösenord2&#10;lösenord3&#10;…"></textarea>
+                    placeholder="password1&#10;password2&#10;password3&#10;…"></textarea>
             </div>
 
         </div><!-- /panel-row -->
 
         <details class="advanced">
-            <summary>Avancerat</summary>
+            <summary>Advanced</summary>
             <div class="advanced-grid">
                 <div class="advanced-field">
-                    <label for="kdf-rounds">KDF-rundor</label>
+                    <label for="kdf-rounds">KDF rounds</label>
                     <input type="number" id="kdf-rounds" value="1" min="1" max="100" step="1" autocomplete="off">
-                    <p class="hint" style="margin-top:6px">Nästan alltid <code>1</code>. Ändra bara om plånboken skapades
-                        med<code>--kdf-rounds N</code>.</p>
+                    <p class="hint" style="margin-top:6px">Almost always <code>1</code>. Only change if the wallet was created
+                        with<code>--kdf-rounds N</code>.</p>
                 </div>
                 <div class="advanced-field">
-                    <label for="net">Nätverk</label>
+                    <label for="net">Network</label>
                     <select id="net" autocomplete="off">
-                        <option value="auto">Auto (läs från filen)</option>
+                        <option value="auto">Auto (read from file)</option>
                         <option value="18">Mainnet</option>
                         <option value="53">Testnet</option>
                         <option value="24">Stagenet</option>
                     </select>
-                    <p class="hint" style="margin-top:6px">Styr adressens prefix. Auto använder fältet i filen.</p>
+                    <p class="hint" style="margin-top:6px">Controls the address prefix. Auto uses the field in the file.</p>
                 </div>
             </div>
         </details>
 
         <div class="info-box">
-            Varje lösenord kräver en <strong>CryptoNight</strong>-beräkning (~0,5&ndash;1 s per lösenord). Monero är
-            avsiktligt långsamt att brute force:a, så långa listor tar tid. Datorn kan kännas trög medan det körs.
+            Each password requires a <strong>CryptoNight</strong> computation (~0.5&ndash;1 s per password). Monero is
+            deliberately slow to brute-force, so long lists take time. Your computer may feel sluggish while it runs.
         </div>
 
         <!-- Progress -->
@@ -105,25 +106,25 @@
             <div class="progress-status" id="progress-status"></div>
         </div>
 
-        <!-- Output / resultat -->
+        <!-- Output / result -->
         <div class="output-wrap">
             <div class="output-head">
-                <span>Resultat</span>
+                <span>Result</span>
                 <div class="output-head-actions">
-                    <button id="run-btn">Kör</button>
-                    <button id="stop-btn" class="danger display-none">Stoppa</button>
-                    <button type="button" class="clear-btn" id="clear-btn">Rensa</button>
+                    <button id="run-btn">Run</button>
+                    <button id="stop-btn" class="danger display-none">Stop</button>
+                    <button type="button" class="clear-btn" id="clear-btn">Clear</button>
                 </div>
             </div>
             <div class="result-panel display-none" id="result-panel"></div>
-            <pre id="output">Väntar på .keys-fil och lösenord…</pre>
+            <pre id="output">Waiting for .keys file and password…</pre>
         </div>
 
         <div id="toast" class="toast"></div>
 
     </div>
 
-    <!-- CryptoNight (variant 0) — pure-JS, cn_slow_hash-global. Ordningen är viktig. -->
+    <!-- CryptoNight (variant 0) — pure-JS, cn_slow_hash global. Order matters. -->
     <script src="vendor/cryptonight/sha3.js"></script>
     <script src="vendor/cryptonight/aes.js"></script>
     <script src="vendor/cryptonight/blake256.js"></script>
@@ -131,7 +132,7 @@
     <script src="vendor/cryptonight/jh.js"></script>
     <script src="vendor/cryptonight/skein.js"></script>
     <script src="vendor/cryptonight/slowhash.js"></script>
-    <!-- Monero-ordlista + dekrypteringslogik -->
+    <!-- Monero wordlist + decryption logic -->
     <script src="wordlist.js"></script>
     <script src="monero-crypto.js"></script>
     <script src="script.js"></script>

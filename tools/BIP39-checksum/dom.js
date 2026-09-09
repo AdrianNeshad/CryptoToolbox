@@ -26,7 +26,7 @@ const getSeedType = () => {
 const updatePlaceholder = () => {
     const seedType = getSeedType()
     const config = seedConfig[seedType]
-    getDOM.textarea().placeholder = `Skriv ${config.inputWords} ord, separerade med blanksteg`
+    getDOM.textarea().placeholder = `Type ${config.inputWords} words, separated by spaces`
 }
 
 const onClickGenerate = async () => {
@@ -58,7 +58,7 @@ const onSeedTypeChange = () => {
     const config = seedConfig[seedType]
     updatePlaceholder()
 
-    // Generera nya slumpmässiga ord baserat på typ
+    // Generate new random words based on type
     getDOM.textarea().value = randomElevenWords(config.inputWords).join(' ')
     onClickGenerate()
 }
@@ -71,13 +71,13 @@ document.addEventListener('DOMContentLoaded', () => {
     onClickGenerate()
 })
 
-// --- Temasynkronisering med Verktygslådan (postMessage från förälder-iframe) ---
+// --- Theme sync with CryptoToolbox (postMessage from parent iframe) ---
 window.addEventListener('message', function (event) {
     if (event.source !== window.parent) return;
     const data = event.data;
-    if (data && data.source === 'verktygslada' && data.type === 'theme' &&
+    if (data && data.source === 'cryptotoolbox' && data.type === 'theme' &&
         (data.theme === 'light' || data.theme === 'dark')) {
         document.documentElement.setAttribute('data-theme', data.theme);
-        try { localStorage.setItem('theme', data.theme); } catch (e) { /* ignoreras */ }
+        try { localStorage.setItem('theme', data.theme); } catch (e) { /* ignored */ }
     }
 });

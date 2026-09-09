@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="sv">
+<html lang="en">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Verktygslådan</title>
+    <title>CryptoToolbox</title>
     <link rel="icon" type="image/x-icon" href="/build/icon.ico">
 
     <script>
@@ -30,9 +30,9 @@
 
             <div class="sidebar-header">
                 <div class="sidebar-header-text">
-                    <h1>Verktygslådan</h1>
+                    <h1>Crypto Toolbox</h1>
                     <div class="version-row">
-                        <p>Version 2.9</p>
+                        <p>Version 3.0</p>
                         <div id="net-status" class="net-status">
                             <span id="net-status-text"></span>
                         </div>
@@ -40,7 +40,7 @@
                 </div>
                 <div class="sidebar-header-actions">
                     <button id="theme-toggle" class="theme-toggle" type="button" role="switch" aria-checked="false"
-                        aria-label="Ljust läge" title="Växla mellan mörkt och ljust läge">
+                        aria-label="Light mode" title="Toggle between dark and light mode">
                         <span class="theme-toggle-track">
                             <svg class="theme-toggle-icon theme-toggle-icon--sun" viewBox="0 0 24 24" fill="none"
                                 xmlns="http://www.w3.org/2000/svg">
@@ -57,7 +57,7 @@
                             <span class="theme-toggle-thumb"></span>
                         </span>
                     </button>
-                    <button id="sidebar-toggle" class="sidebar-toggle" title="Dölj/Visa verktygslista" aria-label="Dölj/Visa verktygslista">
+                    <button id="sidebar-toggle" class="sidebar-toggle" title="Hide/Show tool list" aria-label="Hide/Show tool list">
                         <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path d="M15 6L9 12L15 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
                         </svg>
@@ -68,10 +68,10 @@
             <nav class="tool-nav">
 
                 <div class="nav-group">
-                    <div class="nav-group-title">Lokala verktyg</div>
+                    <div class="nav-group-title">Local tools</div>
 
                     <div class="nav-subgroup">
-                        <div class="nav-subgroup-title">Konvertering &amp; Format</div>
+                        <div class="nav-subgroup-title">Conversion &amp; Format</div>
 
                     <button class="nav-item" data-type="frame" data-src="tools/Magic/magic.html">
                         <span class="nav-item-icon nav-item-icon--local">
@@ -97,7 +97,7 @@
                         </span>
                         <span class="nav-item-text">
                             <span class="nav-item-title">BIP38 Key Compression</span>
-                            <span class="nav-item-desc">Komprimera/dekomprimera Bitcoin-nycklar</span>
+                            <span class="nav-item-desc">Compress/decompress Bitcoin keys</span>
                         </span>
                     </button>
 
@@ -113,7 +113,7 @@
                         </span>
                         <span class="nav-item-text">
                             <span class="nav-item-title">QR Code Decoder</span>
-                            <span class="nav-item-desc">Avkoda QR-koder från bilder</span>
+                            <span class="nav-item-desc">Decode QR codes from images</span>
                         </span>
                     </button>
 
@@ -128,7 +128,7 @@
                         </span>
                         <span class="nav-item-text">
                             <span class="nav-item-title">JSON Formatter</span>
-                            <span class="nav-item-desc">Compact JSON till Pretty Print</span>
+                            <span class="nav-item-desc">Compact JSON to Pretty Print</span>
                         </span>
                     </button>
 
@@ -162,7 +162,7 @@
                         </span>
                         <span class="nav-item-text">
                             <span class="nav-item-title">Entropy to Mnemonic</span>
-                            <span class="nav-item-desc">Konvertera entropi-bytes till BIP39-fras</span>
+                            <span class="nav-item-desc">Convert entropy bytes to a BIP39 phrase</span>
                         </span>
                     </button>
 
@@ -187,7 +187,7 @@
                         </span>
                         <span class="nav-item-text">
                             <span class="nav-item-title">BIP39 English Word List</span>
-                            <span class="nav-item-desc">Alla BIP39-ord med sökfunktion</span>
+                            <span class="nav-item-desc">All BIP39 words with search</span>
                         </span>
                     </button>
 
@@ -201,14 +201,14 @@
                         </span>
                         <span class="nav-item-text">
                             <span class="nav-item-title">BIP39 Checksum Finder</span>
-                            <span class="nav-item-desc">Sista checksum-ord (12 &amp; 24 ord)</span>
+                            <span class="nav-item-desc">Final checksum word (12 &amp; 24 words)</span>
                         </span>
                     </button>
 
                     </div>
 
                     <div class="nav-subgroup">
-                        <div class="nav-subgroup-title">Övrigt</div>
+                        <div class="nav-subgroup-title">Other</div>
                     
                         <button class="nav-item" data-type="frame" data-src="tools/diff-checker/diff.html">
                             <span class="nav-item-icon nav-item-icon--local">
@@ -223,7 +223,7 @@
                             </span>
                             <span class="nav-item-text">
                                 <span class="nav-item-title">Diff Checker</span>
-                                <span class="nav-item-desc">Jämför två texter rad för rad</span>
+                                <span class="nav-item-desc">Compare two texts line by line</span>
                             </span>
                         </button>
                     
@@ -250,7 +250,7 @@
                             </span>
                             <span class="nav-item-text">
                                 <span class="nav-item-title">BalletCrypto Cold Storage Decoder</span>
-                                <span class="nav-item-desc">Dekryptera BalletCrypto-kort</span>
+                                <span class="nav-item-desc">Decode BalletCrypto cards</span>
                             </span>
                         </button>
                     
@@ -271,7 +271,7 @@
                         </span>
                         <span class="nav-item-text">
                             <span class="nav-item-title">Monero .keys Unlock</span>
-                            <span class="nav-item-desc">Brute force Monero .keys-filer</span>
+                            <span class="nav-item-desc">Brute-force Monero .keys files</span>
                         </span>
                     </button>
                     
@@ -286,8 +286,8 @@
                             </svg>
                         </span>
                         <span class="nav-item-text">
-                            <span class="nav-item-title">Exodus seed.seco Unlock</span>
-                            <span class="nav-item-desc">Brute force seed.seco</span>
+                            <span class="nav-item-title">Exodus .seco Unlock</span>
+                            <span class="nav-item-desc">Brute-force Exodus .seco files</span>
                         </span>
                     </button>
 
@@ -303,7 +303,7 @@
                         </span>
                         <span class="nav-item-text">
                             <span class="nav-item-title">Electrum Wallet Unlock</span>
-                            <span class="nav-item-desc">Brute force Electrum-wallet</span>
+                            <span class="nav-item-desc">Brute-force Electrum wallet</span>
                         </span>
                     </button>
 
@@ -319,7 +319,7 @@
                         </span>
                         <span class="nav-item-text">
                             <span class="nav-item-title">MetaMask Vault Decryptor</span>
-                            <span class="nav-item-desc">Brute force MetaMask vault</span>
+                            <span class="nav-item-desc">Brute-force MetaMask vault</span>
                         </span>
                     </button>
 
@@ -335,7 +335,7 @@
                         </span>
                         <span class="nav-item-text">
                             <span class="nav-item-title">Ethereum Keystore Unlock</span>
-                            <span class="nav-item-desc">Brute force Ethereum keystore</span>
+                            <span class="nav-item-desc">Brute-force Ethereum keystore</span>
                         </span>
                     </button>
 
@@ -344,7 +344,7 @@
                 </div>
 
                 <div class="nav-group">
-                    <div class="nav-group-title">Dokumentation</div>
+                    <div class="nav-group-title">Documentation</div>
                     
                     <button class="nav-item" data-type="frame" data-src="documentation/wallets.html">
                         <span class="nav-item-icon nav-item-icon--doc">
@@ -355,8 +355,8 @@
                             </svg>
                         </span>
                         <span class="nav-item-text">
-                            <span class="nav-item-title">Krypto wallets lagring</span>
-                            <span class="nav-item-desc">Wallet-lagringsformat och kryptering</span>
+                            <span class="nav-item-title">Crypto wallet storage</span>
+                            <span class="nav-item-desc">Wallet storage formats and encryption</span>
                         </span>
                     </button>
                 
@@ -392,7 +392,7 @@
                 </div>
 
                 <div class="nav-group">
-                    <div class="nav-group-title">Externa länkar</div>
+                    <div class="nav-group-title">External links</div>
 
                     <a class="nav-item nav-item--link" href="https://learnmeabitcoin.com/technical/" target="_blank"
                         rel="noopener noreferrer">
@@ -408,7 +408,7 @@
                         </span>
                         <span class="nav-item-text">
                             <span class="nav-item-title">Learn Me A Bitcoin</span>
-                            <span class="nav-item-desc">Teknisk information om Bitcoin</span>
+                            <span class="nav-item-desc">Technical information about Bitcoin</span>
                         </span>
                     </a>
 
@@ -440,7 +440,7 @@
                         </span>
                         <span class="nav-item-text">
                             <span class="nav-item-title">CRYPTO4ALL</span>
-                            <span class="nav-item-desc">Samling med kryptolänkar</span>
+                            <span class="nav-item-desc">Collection of crypto links</span>
                         </span>
                     </a>
 
@@ -457,7 +457,7 @@
                         </span>
                         <span class="nav-item-text">
                             <span class="nav-item-title">OSINT4ALL</span>
-                            <span class="nav-item-desc">Samling med OSINT-verktyg</span>
+                            <span class="nav-item-desc">Collection of OSINT tools</span>
                         </span>
                     </a>
                     
@@ -476,8 +476,8 @@
         <main class="content">
 
             <div id="content-placeholder" class="content-placeholder">
-                <h2>Verktygslådan</h2>
-                <p>Klicka på ett verktyg i listan till vänster för att öppna det här</p>
+                <h2>CryptoToolbox</h2>
+                <p>Click a tool in the list on the left to open it here</p>
 
                 <div class="good-to-know">
                     <div class="good-to-know-header">
@@ -486,15 +486,15 @@
                             <path d="M12 11V16.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
                             <circle cx="12" cy="7.75" r="1" fill="currentColor" />
                         </svg>
-                        <span>Bra att veta</span>
+                        <span>Good to know</span>
                     </div>
                     <ul class="good-to-know-list">
-                        <li>Allt innehåll körs lokalt i din webbläsare, inga nätverksanrop görs.</li>
-                        <li>Samtliga verktyg finns tillgängliga med öppen källkod på Github.</li>
+                        <li>All content runs locally in your browser; no network requests are made.</li>
+                        <li>All tools are available as open source on GitHub.</li>
                         <li>
-                            Glöm inte att rensa clipboard-historiken efter att du kopierat känslig data, t.ex. mnemonics/seed phrases eller
-                            privata nycklar.
-                            (Öppna clipboard-historik:
+                            Don't forget to clear your clipboard history after copying sensitive data, e.g. mnemonics/seed phrases or
+                            private keys.
+                            (Open clipboard history:
                             <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"
                                 style="width: 20px; height: 20px; vertical-align: -4px; margin: 0 2px;" aria-label="Windows">
                                 <path d="M3 4.5L11.2 3.35V11.35H3V4.5Z" fill="currentColor" />
@@ -507,7 +507,7 @@
                 </div>
             </div>
 
-            <iframe id="tool-frame" class="tool-frame" title="Verktyg" style="display:none;"></iframe>
+            <iframe id="tool-frame" class="tool-frame" title="Tool" style="display:none;"></iframe>
 
         </main>
 
@@ -515,11 +515,11 @@
 
     <div id="external-link-modal" class="modal-overlay display-none">
         <div class="modal-box">
-            <h3>Öppna länk i ny flik</h3>
-            <p id="external-link-modal-text">Du är på väg att lämna Verktygslådan.</p>
+            <h3>Open link in a new tab</h3>
+            <p id="external-link-modal-text">You are about to leave CryptoToolbox.</p>
             <div class="modal-actions">
-                <button id="external-link-modal-cancel" class="modal-button secondary">Avbryt</button>
-                <button id="external-link-modal-confirm" class="modal-button confirm">Fortsätt</button>
+                <button id="external-link-modal-cancel" class="modal-button secondary">Cancel</button>
+                <button id="external-link-modal-confirm" class="modal-button confirm">Continue</button>
             </div>
         </div>
     </div>

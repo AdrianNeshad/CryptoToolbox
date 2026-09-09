@@ -5,7 +5,7 @@ const hexToBinaryString = {
     'c': '1100', 'd': '1101', 'e': '1110', 'f': '1111',
 }
 
-// Konfiguration för olika seedphrase-typer
+// Configuration for different seedphrase types
 const seedConfig = {
     bip39_12: {
         name: 'BIP39 (12 words)',
@@ -13,7 +13,7 @@ const seedConfig = {
         totalWords: 12,
         entropyBits: 128,
         checksumBits: 4,
-        lastWordBits: 7,  // Sista ordet behöver 7 bits entropi + 4 bits checksum
+        lastWordBits: 7,  // The last word needs 7 bits of entropy + 4 bits checksum
         checksumHexChars: 1,
         checksumBitSlice: [0, 4]
     },
@@ -23,7 +23,7 @@ const seedConfig = {
         totalWords: 24,
         entropyBits: 256,
         checksumBits: 8,
-        lastWordBits: 3,  // Sista ordet behöver 3 bits entropi + 8 bits checksum
+        lastWordBits: 3,  // The last word needs 3 bits of entropy + 8 bits checksum
         checksumHexChars: 2,
         checksumBitSlice: [0, 8]
     },
@@ -31,9 +31,9 @@ const seedConfig = {
         name: 'Polyseed Monero (16 words)',
         inputWords: 15,
         totalWords: 16,
-        entropyBits: 172,  // Polyseed använder 172 bits entropi
+        entropyBits: 172,  // Polyseed uses 172 bits of entropy
         checksumBits: 4,
-        lastWordBits: 7,   // Sista ordet behöver 7 bits entropi + 4 bits checksum
+        lastWordBits: 7,   // The last word needs 7 bits of entropy + 4 bits checksum
         checksumHexChars: 1,
         checksumBitSlice: [0, 4]
     }
@@ -80,33 +80,33 @@ const calculateCandidates = async (validWords, config) => {
         let entropy = asBinary(validWords).join('')
         let b = ''
 
-        // Endast skapa bits om lastWordBits > 0
+        // Only create bits if lastWordBits > 0
         if (config.lastWordBits > 0) {
             b = (i).toString(2)
             while (b.length < config.lastWordBits) b = `0${b}`
             entropy += b
         }
 
-        // Truncate entropi till rätt längd
+        // Truncate entropy to the correct length
         entropy = entropy.substring(0, config.entropyBits)
 
-        // Beräkna checksumman
+        // Compute the checksum
         const checksum = await sha256(entropy)
 
-        // Extrahera checksumbitarna som hex
+        // Extract the checksum bits as hex
         const checksumHex = checksum.substring(0, config.checksumHexChars)
         let checksumBinary = ''
         for (let char of checksumHex) {
             checksumBinary += hexToBinaryString[char]
         }
 
-        // Ta rätt antal checksumbitar
+        // Take the correct number of checksum bits
         const checksumBits = checksumBinary.substring(config.checksumBitSlice[0], config.checksumBitSlice[1])
 
-        // Kombinera entropi och checksumbitar för ordet
+        // Combine entropy and checksum bits for the word
         const wordBits = b + checksumBits
 
-        // Hitta matchande ord
+        // Find matching words
         bipWords.forEach((bipWord, idx) => {
             let wordIndex = (idx).toString(2)
             while (wordIndex.length < 11) wordIndex = `0${wordIndex}`
@@ -120,7 +120,7 @@ const run = async (inputWords, seedType) => {
     if ((inputWords || []).length === 0) return []
 
     const config = seedConfig[seedType]
-    if (!config) return Promise.reject('Ogiltigt seed-typ')
+    if (!config) return Promise.reject('Invalid seed type')
 
     const validWords = []
     const wrongWords = []
