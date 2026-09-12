@@ -50,6 +50,12 @@ jobs:
           npx electron-builder --win portable
           node scripts/finalize-artifacts.js
 
+      # Builds the Chrome (MV3) extension and the two extra release .zip files into release/:
+      #   CryptoToolbox<ver>-Chrome-Extension.zip  (extension, CyberChef excluded)
+      #   CryptoToolbox<ver>-Local.zip             (plain browser version, no Electron/dev files)
+      - name: Build the Chrome extension and .zip bundles
+        run: node scripts/build-release-zips.js
+
       # If the release for this version already exists (e.g. multiple pushes without
       # a version bump, or a filename that changed since last time) — empty it of old
       # attached files before we upload the new ones. Otherwise old/renamed files are
@@ -78,9 +84,12 @@ jobs:
           body: |
             Automatically built from commit ${{ github.sha }}.
 
-            - **CryptoToolbox${{ steps.version.outputs.version }}.exe** — No installation needed, just download and open as usual.
-            - **magic.html** — standalone Magic Tool in a single file. Download and open directly in your browser, nothing else required.
+            - **CryptoToolbox${{ steps.version.outputs.version }}.zip** — Browser version, unzip and open `Toolbox.html`.
+            - **CryptoToolbox${{ steps.version.outputs.version }}.exe** — Windows app, just download and open as usual.
+            - **CryptoToolbox${{ steps.version.outputs.version }}-Chrome-Extension.zip** — Chrome extension, load via `chrome://extensions` → enable Developer mode → Load unpacked → pick the folder.
 
           files: |
+            release/CryptoToolbox${{ steps.version.outputs.version }}.zip
             release/CryptoToolbox${{ steps.version.outputs.version }}.exe
+            release/CryptoToolbox${{ steps.version.outputs.version }}-Chrome-Extension.zip
             tools/Magic/magic.html
