@@ -119,6 +119,3 @@ touch `.md` files do not trigger a new build.
 ## License
 
 Released under the [MIT license](LICENSE). © 2026 Adrian Neshad.
-
-## Use responsibly
-### “The blade itself incites to deeds of violence.” - Homer, The Odyssey
