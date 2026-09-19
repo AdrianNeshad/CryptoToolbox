@@ -187,9 +187,11 @@ async function entropyToMnemonic(entropyBytes, wordlist) {
     return words.join(' ');
 }
 
-/* ---------- decrypt with ONE password (throws on a wrong password) ---------- */
+/* ---------- decrypt with ONE password ---------- */
 
-async function tryPassword(parsed, password, wordlist) {
+// Returns the raw secret bytes on the correct password; throws OperationError on
+// a wrong password (GCM auth fail). Wordlist-free so it can run inside a Worker.
+async function tryPasswordCore(parsed, password) {
     const { meta, blob } = parsed;
     const pwBytes = new TextEncoder().encode(password);
     const derivedKey = await scrypt(pwBytes, meta.salt, meta.n, meta.r, meta.p, 32);
@@ -200,11 +202,163 @@ async function tryPassword(parsed, password, wordlist) {
     const t = new DataView(data.buffer, data.byteOffset, data.byteLength).getUint32(0, false);
     const shrinked = data.subarray(4, 4 + t);
     const gunzipped = await gunzip(shrinked);
-    const rest = gunzipped.subarray(64);
-    if (rest.length === 16 || rest.length === 32) {
-        return entropyToMnemonic(rest, wordlist);
-    }
+    return gunzipped.subarray(64);
+}
+
+// Converts the recovered secret bytes into a BIP39 phrase (or raw text). Runs on
+// the main thread only, since it needs the 2048-word list.
+async function secretToPhrase(rest, wordlist) {
+    if (rest.length === 16 || rest.length === 32) return entropyToMnemonic(rest, wordlist);
     return new TextDecoder().decode(rest);
+}
+
+/* =========================================================================
+   Parallel sweep across Web Workers — built inline from the crypto functions
+   above (via Function.prototype.toString), so they need no separate file and
+   work both in the Electron app and when opened directly from file://. Each
+   worker owns a contiguous slice of the password list. A single-threaded
+   fallback runs if Workers/subtle are unavailable.
+   ========================================================================= */
+
+const WORKER_FNS = [
+    readUInt32LE, blockxor, R, salsa20_8, blockmix_salsa8, smixSync,
+    pbkdf2Sha256, scrypt, aesGcmDecrypt, gunzip, tryPasswordCore,
+];
+
+const WORKER_BOOTSTRAP = `
+let __stop = false;
+self.onmessage = async function (e) {
+    const m = e.data || {};
+    if (m.type === 'stop') { __stop = true; return; }
+    if (m.type === 'ping') {
+        try { await crypto.subtle.digest('SHA-256', new Uint8Array([0])); self.postMessage({ type: 'pong' }); }
+        catch (err) { self.postMessage({ type: 'error', message: 'crypto.subtle unavailable in worker' }); }
+        return;
+    }
+    if (m.type !== 'start') return;
+    __stop = false;
+    try {
+        const parsed = m.parsed, passwords = m.passwords, base = m.base;
+        let since = 0;
+        for (let i = 0; i < passwords.length; i++) {
+            if (__stop) break;
+            let rest = null;
+            try { rest = await tryPasswordCore(parsed, passwords[i]); } catch (_) { rest = null; }
+            since++;
+            if (rest) {
+                self.postMessage({ type: 'progress', delta: since });
+                self.postMessage({ type: 'found', index: base + i, password: passwords[i], rest: rest });
+                return;
+            }
+            if (since >= 8) {
+                self.postMessage({ type: 'progress', delta: since });
+                since = 0;
+                await new Promise(function (r) { setTimeout(r, 0); }); // let 'stop' arrive
+                if (__stop) break;
+            }
+        }
+        if (since) self.postMessage({ type: 'progress', delta: since });
+        self.postMessage({ type: 'done' });
+    } catch (err) {
+        self.postMessage({ type: 'error', message: String(err && err.message ? err.message : err) });
+    }
+};
+`;
+
+let _workerUrl = null;
+function getWorkerUrl() {
+    if (_workerUrl) return _workerUrl;
+    const src = WORKER_FNS.map(fn => fn.toString()).join('\n\n') + '\n\n' + WORKER_BOOTSTRAP;
+    _workerUrl = URL.createObjectURL(new Blob([src], { type: 'application/javascript' }));
+    return _workerUrl;
+}
+
+let _workersUsable = null;
+async function workersUsable() {
+    if (_workersUsable !== null) return _workersUsable;
+    if (typeof Worker === 'undefined') { _workersUsable = false; return false; }
+    let w = null;
+    try { w = new Worker(getWorkerUrl()); } catch (e) { _workersUsable = false; return false; }
+    const ok = await new Promise((resolve) => {
+        const to = setTimeout(() => resolve(false), 3000);
+        w.onmessage = (e) => {
+            if (e.data && e.data.type === 'pong') { clearTimeout(to); resolve(true); }
+            else if (e.data && e.data.type === 'error') { clearTimeout(to); resolve(false); }
+        };
+        w.onerror = () => { clearTimeout(to); resolve(false); };
+        try { w.postMessage({ type: 'ping' }); } catch (e) { clearTimeout(to); resolve(false); }
+    });
+    try { w.terminate(); } catch (e) { /* ignore */ }
+    _workersUsable = ok;
+    return ok;
+}
+
+let activeWorkers = [];
+
+// Split the password list across workers; resolve with the first match.
+function runWithWorkers(parsed, passwords, onProgress) {
+    return new Promise((resolve) => {
+        const total = passwords.length;
+        let nThreads = navigator.hardwareConcurrency || 4;
+        nThreads = Math.max(1, Math.min(nThreads, 16, total));
+        const chunk = Math.ceil(total / nThreads);
+        const workers = [];
+        let finished = 0;
+        let settled = false;
+
+        const cleanup = () => {
+            workers.forEach(w => { try { w.terminate(); } catch (e) { /* ignore */ } });
+            activeWorkers = [];
+        };
+
+        for (let t = 0; t < nThreads; t++) {
+            const base = t * chunk;
+            const slice = passwords.slice(base, base + chunk);
+            if (slice.length === 0) continue;
+            const w = new Worker(getWorkerUrl());
+            workers.push(w);
+            w.onmessage = (e) => {
+                const msg = e.data || {};
+                if (settled) return;
+                if (msg.type === 'progress') {
+                    onProgress(msg.delta);
+                } else if (msg.type === 'found') {
+                    settled = true; cleanup();
+                    resolve({ found: true, index: msg.index, password: msg.password, rest: new Uint8Array(msg.rest) });
+                } else if (msg.type === 'done') {
+                    finished++;
+                    if (finished >= workers.length) { settled = true; cleanup(); resolve({ found: false, stopped: stopRequested }); }
+                } else if (msg.type === 'error') {
+                    settled = true; cleanup(); resolve({ found: false, error: msg.message });
+                }
+            };
+            w.onerror = (err) => {
+                if (settled) return;
+                settled = true; cleanup();
+                resolve({ found: false, error: (err && err.message) || 'worker error' });
+            };
+            w.postMessage({ type: 'start', parsed, passwords: slice, base });
+        }
+
+        activeWorkers = workers;
+        if (workers.length === 0) resolve({ found: false });
+    });
+}
+
+// Single-threaded fallback (Workers unavailable) — same cooperative yield model
+// the tool used before.
+async function runSingleThread(parsed, passwords, onProgress) {
+    let since = 0;
+    for (let i = 0; i < passwords.length; i++) {
+        if (stopRequested) return { found: false, stopped: true };
+        let rest = null;
+        try { rest = await tryPasswordCore(parsed, passwords[i]); } catch (_) { rest = null; }
+        since++;
+        if (rest) { onProgress(since); return { found: true, index: i, password: passwords[i], rest }; }
+        if (since >= 4) { onProgress(since); since = 0; await yieldToUI(); }
+    }
+    if (since) onProgress(since);
+    return { found: false };
 }
 
 /* =========================================================================
@@ -372,7 +526,17 @@ runBtn.addEventListener('click', run);
 stopBtn.addEventListener('click', () => {
     stopRequested = true;
     progressStatus.textContent = 'Stopping…';
+    activeWorkers.forEach(w => { try { w.postMessage({ type: 'stop' }); } catch (e) { /* ignore */ } });
 });
+
+function fmtDuration(sec) {
+    if (!isFinite(sec) || sec < 0) return '?';
+    sec = Math.round(sec);
+    const h = Math.floor(sec / 3600);
+    const m = Math.floor((sec % 3600) / 60);
+    const s = sec % 60;
+    return (h ? h + 'h ' : '') + (h || m ? m + 'm ' : '') + s + 's';
+}
 
 async function run() {
     if (running) return;
@@ -406,50 +570,65 @@ async function run() {
     progressWrap.classList.remove('display-none');
     progressBar.style.width = '0%';
     clearOutput();
-    log(`scrypt parameters: N=${parsed.meta.n}, r=${parsed.meta.r}, p=${parsed.meta.p}`, 'log-muted');
-    log(`Testing ${passwords.length} passwords…`, 'log-muted');
 
     const total = passwords.length;
+    const useWorkers = await workersUsable();
+    const nThreads = useWorkers ? Math.max(1, Math.min(navigator.hardwareConcurrency || 4, 16, total)) : 1;
+
+    log(`scrypt parameters: N=${parsed.meta.n}, r=${parsed.meta.r}, p=${parsed.meta.p}`, 'log-muted');
+    log(`Testing ${total} passwords…`, 'log-muted');
+    log(useWorkers ? `workers: ${nThreads} threads` : 'workers: unavailable — running single-threaded', 'log-muted');
+
+    let done = 0;
     const t0 = performance.now();
-    let found = null;
+    const onProgress = (delta) => { done += delta; };
 
-    for (let i = 0; i < total; i++) {
-        if (stopRequested) {
-            log(`\nStopped by the user at ${i} of ${total}.`, 'log-err');
-            break;
-        }
+    const timer = setInterval(() => {
+        const elapsed = (performance.now() - t0) / 1000;
+        const rate = done / Math.max(elapsed, 0.001);
+        const eta = rate > 0 ? (total - done) / rate : Infinity;
+        const pct = Math.min(100, (done / total) * 100).toFixed(1);
+        progressBar.style.width = pct + '%';
+        progressStatus.textContent = `${done}/${total} (${pct}%)  ${Math.round(rate)}/s  elapsed ${fmtDuration(elapsed)}  ETA ${fmtDuration(eta)}`;
+    }, 300);
 
-        const pw = passwords[i];
-        progressStatus.textContent = `[${i + 1}/${total}] testing: ${pw}`;
-        progressBar.style.width = ((i / total) * 100).toFixed(1) + '%';
-        await yieldToUI();
-
-        try {
-            const mnemonic = await tryPassword(parsed, pw, wordlist);
-            found = { password: pw, mnemonic, index: i + 1 };
-            break;
-        } catch (e) {
-            // OperationError = wrong password; anything else = unexpected error
-            if (e && e.name !== 'OperationError') {
-                log(`  [${i + 1}] "${pw}" → unexpected error: ${e.message}`, 'log-err');
-            }
-        }
+    let result;
+    try {
+        result = useWorkers
+            ? await runWithWorkers(parsed, passwords, onProgress)
+            : await runSingleThread(parsed, passwords, onProgress);
+    } catch (e) {
+        result = { found: false, error: (e && e.message) || String(e) };
     }
 
-    progressBar.style.width = '100%';
+    clearInterval(timer);
     const secs = ((performance.now() - t0) / 1000).toFixed(1);
 
-    if (found) {
-        progressStatus.textContent = `Done — password found on attempt ${found.index} of ${total} (${secs}s)`;
-        log(`\n✓ MATCH on password #${found.index}: ${found.password}`, 'log-hit');
-        log(`Mnemonic: ${found.mnemonic}`, 'log-ok');
+    if (result.error) {
+        progressBar.style.width = '0%';
+        progressStatus.textContent = 'Error';
+        log('\nError during run: ' + result.error, 'log-err');
+        setRunning(false);
+        return;
+    }
+
+    if (result.found) {
+        progressBar.style.width = '100%';
+        let phrase;
+        try { phrase = await secretToPhrase(result.rest, wordlist); }
+        catch (e) { phrase = '(could not decode secret: ' + e.message + ')'; }
+        progressStatus.textContent = `Done — password found on attempt ${result.index + 1} of ${total} (${secs}s)`;
+        log(`\n✓ MATCH on password #${result.index + 1}: ${result.password}`, 'log-hit');
+        log(`Mnemonic: ${phrase}`, 'log-ok');
         showResult(true, '✓ Password found!', [
-            { label: 'Password', value: found.password },
-            { label: 'Seed phrase (mnemonic)', value: found.mnemonic },
+            { label: 'Password', value: result.password },
+            { label: 'Seed phrase (mnemonic)', value: phrase },
         ]);
-    } else if (stopRequested) {
+    } else if (result.stopped || stopRequested) {
         progressStatus.textContent = `Stopped (${secs}s)`;
+        log('\nStopped by the user.', 'log-err');
     } else {
+        progressBar.style.width = '100%';
         progressStatus.textContent = `Done — no matching password (${secs}s)`;
         log(`\n✗ None of the ${total} passwords matched.`, 'log-err');
         showResult(false, '✗ No matching password', [

@@ -265,6 +265,174 @@ function detectFormat(wallet) {
 }
 
 /* =========================================================================
+   Parallel sweep across Web Workers — built inline from the crypto functions
+   above (via Function.prototype.toString), so they need no separate file and
+   work both in the Electron app and when opened directly from file://. This
+   helps most for scrypt keystores (pure-JS smix parallelizes across threads);
+   PBKDF2-only formats gain less since WebCrypto shares one backend thread. A
+   single-threaded fallback runs if Workers are unavailable.
+   ========================================================================= */
+
+// keccak + CryptoJS constants — the crypto functions reference these module-level
+// values, which toString() can't capture, so re-declare them in the worker
+// (generated from the live values to avoid any transcription error).
+const WORKER_CONSTS =
+    'const _MASK64 = ' + _MASK64.toString() + 'n;\n' +
+    'const _RC = [' + _RC.map(x => x.toString() + 'n').join(',') + '];\n' +
+    'const _ROTC = ' + JSON.stringify(_ROTC) + ';\n' +
+    'const _PILN = ' + JSON.stringify(_PILN) + ';\n' +
+    'const _KEY_SIZES = ' + JSON.stringify(_KEY_SIZES) + ';\n' +
+    'const _ITERATIONS = ' + JSON.stringify(_ITERATIONS) + ';\n' +
+    'const _HASHES = ' + JSON.stringify(_HASHES) + ';\n';
+
+const WORKER_FNS = [
+    utf8, hexToBytes, bytesToHex, b64ToBytes, concatBytes,
+    _rotl, _keccakf, _load64, _store64, keccak256,
+    readUInt32LE, blockxor, R, salsa20_8, blockmix_salsa8, smixSync, scrypt,
+    pbkdf2, aesCtrDecrypt, aesCbcDecrypt, aesGcmDecrypt,
+    deriveEthereumKey, decryptEthereum, decryptKeyMetadataVault,
+    isMostlyPrintable, decryptCryptoJS, decryptGeneric, detectFormat,
+];
+
+const WORKER_BOOTSTRAP = `
+let __stop = false;
+self.onmessage = async function (e) {
+    const m = e.data || {};
+    if (m.type === 'stop') { __stop = true; return; }
+    if (m.type === 'ping') {
+        try { await crypto.subtle.digest('SHA-256', new Uint8Array([0])); self.postMessage({ type: 'pong' }); }
+        catch (err) { self.postMessage({ type: 'error', message: 'crypto.subtle unavailable in worker' }); }
+        return;
+    }
+    if (m.type !== 'start') return;
+    __stop = false;
+    try {
+        const wallet = m.wallet, passwords = m.passwords, base = m.base;
+        const det = detectFormat(wallet);
+        let since = 0;
+        for (let i = 0; i < passwords.length; i++) {
+            if (__stop) break;
+            let bytes = null;
+            try { bytes = await det.decrypt(wallet, passwords[i]); } catch (_) { bytes = null; }
+            since++;
+            if (bytes) {
+                self.postMessage({ type: 'progress', delta: since });
+                self.postMessage({ type: 'found', index: base + i, password: passwords[i], bytes: bytes });
+                return;
+            }
+            if (since >= 4) {
+                self.postMessage({ type: 'progress', delta: since });
+                since = 0;
+                await new Promise(function (r) { setTimeout(r, 0); }); // let 'stop' arrive
+                if (__stop) break;
+            }
+        }
+        if (since) self.postMessage({ type: 'progress', delta: since });
+        self.postMessage({ type: 'done' });
+    } catch (err) {
+        self.postMessage({ type: 'error', message: String(err && err.message ? err.message : err) });
+    }
+};
+`;
+
+let _workerUrl = null;
+function getWorkerUrl() {
+    if (_workerUrl) return _workerUrl;
+    const src = WORKER_CONSTS + '\n' + WORKER_FNS.map(fn => fn.toString()).join('\n\n') + '\n\n' + WORKER_BOOTSTRAP;
+    _workerUrl = URL.createObjectURL(new Blob([src], { type: 'application/javascript' }));
+    return _workerUrl;
+}
+
+let _workersUsable = null;
+async function workersUsable() {
+    if (_workersUsable !== null) return _workersUsable;
+    if (typeof Worker === 'undefined') { _workersUsable = false; return false; }
+    let w = null;
+    try { w = new Worker(getWorkerUrl()); } catch (e) { _workersUsable = false; return false; }
+    const ok = await new Promise((resolve) => {
+        const to = setTimeout(() => resolve(false), 3000);
+        w.onmessage = (e) => {
+            if (e.data && e.data.type === 'pong') { clearTimeout(to); resolve(true); }
+            else if (e.data && e.data.type === 'error') { clearTimeout(to); resolve(false); }
+        };
+        w.onerror = () => { clearTimeout(to); resolve(false); };
+        try { w.postMessage({ type: 'ping' }); } catch (e) { clearTimeout(to); resolve(false); }
+    });
+    try { w.terminate(); } catch (e) { /* ignore */ }
+    _workersUsable = ok;
+    return ok;
+}
+
+let activeWorkers = [];
+
+// Split the password list across workers; resolve with the first match.
+function runWithWorkers(wallet, passwords, onProgress) {
+    return new Promise((resolve) => {
+        const total = passwords.length;
+        let nThreads = navigator.hardwareConcurrency || 4;
+        nThreads = Math.max(1, Math.min(nThreads, 16, total));
+        const chunk = Math.ceil(total / nThreads);
+        const workers = [];
+        let finished = 0;
+        let settled = false;
+
+        const cleanup = () => {
+            workers.forEach(w => { try { w.terminate(); } catch (e) { /* ignore */ } });
+            activeWorkers = [];
+        };
+
+        for (let t = 0; t < nThreads; t++) {
+            const base = t * chunk;
+            const slice = passwords.slice(base, base + chunk);
+            if (slice.length === 0) continue;
+            const w = new Worker(getWorkerUrl());
+            workers.push(w);
+            w.onmessage = (e) => {
+                const msg = e.data || {};
+                if (settled) return;
+                if (msg.type === 'progress') {
+                    onProgress(msg.delta);
+                } else if (msg.type === 'found') {
+                    settled = true; cleanup();
+                    resolve({ found: true, index: msg.index, password: msg.password, bytes: new Uint8Array(msg.bytes) });
+                } else if (msg.type === 'done') {
+                    finished++;
+                    if (finished >= workers.length) { settled = true; cleanup(); resolve({ found: false, stopped: stopRequested }); }
+                } else if (msg.type === 'error') {
+                    settled = true; cleanup(); resolve({ found: false, error: msg.message });
+                }
+            };
+            w.onerror = (err) => {
+                if (settled) return;
+                settled = true; cleanup();
+                resolve({ found: false, error: (err && err.message) || 'worker error' });
+            };
+            w.postMessage({ type: 'start', wallet, passwords: slice, base });
+        }
+
+        activeWorkers = workers;
+        if (workers.length === 0) resolve({ found: false });
+    });
+}
+
+// Single-threaded fallback (Workers unavailable) — same cooperative yield model
+// the tool used before.
+async function runSingleThread(wallet, passwords, onProgress) {
+    const det = detectFormat(wallet);
+    let since = 0;
+    for (let i = 0; i < passwords.length; i++) {
+        if (stopRequested) return { found: false, stopped: true };
+        let bytes = null;
+        try { bytes = await det.decrypt(wallet, passwords[i]); } catch (_) { bytes = null; }
+        since++;
+        if (bytes) { onProgress(since); return { found: true, index: i, password: passwords[i], bytes }; }
+        if (since >= 2) { onProgress(since); since = 0; await yieldToUI(); }
+    }
+    if (since) onProgress(since);
+    return { found: false };
+}
+
+/* =========================================================================
    UI
    ========================================================================= */
 const $ = id => document.getElementById(id);
@@ -435,7 +603,17 @@ runBtn.addEventListener('click', run);
 stopBtn.addEventListener('click', () => {
     stopRequested = true;
     progressStatus.textContent = 'Stopping…';
+    activeWorkers.forEach(w => { try { w.postMessage({ type: 'stop' }); } catch (e) { /* ignore */ } });
 });
+
+function fmtDuration(sec) {
+    if (!isFinite(sec) || sec < 0) return '?';
+    sec = Math.round(sec);
+    const h = Math.floor(sec / 3600);
+    const m = Math.floor((sec % 3600) / 60);
+    const s = sec % 60;
+    return (h ? h + 'h ' : '') + (h || m ? m + 'm ' : '') + s + 's';
+}
 
 async function run() {
     if (running) return;
@@ -450,38 +628,58 @@ async function run() {
     progressWrap.classList.remove('display-none');
     progressBar.style.width = '0%';
     clearOutput();
-    log(`Format: ${detector.name}`, 'log-muted');
-    if (!detector.verified) log('Note: this format lacks a MAC/verification — check that the result looks reasonable.', 'log-err');
-    log(`Testing ${passwords.length} passwords…`, 'log-muted');
 
     const total = passwords.length;
-    const t0 = performance.now();
-    let found = null;
+    const useWorkers = await workersUsable();
+    const nThreads = useWorkers ? Math.max(1, Math.min(navigator.hardwareConcurrency || 4, 16, total)) : 1;
 
-    for (let i = 0; i < total; i++) {
-        if (stopRequested) { log(`\nStopped by the user at ${i} of ${total}.`, 'log-err'); break; }
-        const pw = passwords[i];
-        progressStatus.textContent = `[${i + 1}/${total}] testing: ${pw}`;
-        progressBar.style.width = ((i / total) * 100).toFixed(1) + '%';
-        await yieldToUI();
-        try {
-            const res = await detector.decrypt(parsedWallet, pw);
-            found = { password: pw, bytes: res, index: i + 1 };
-            break;
-        } catch (e) {
-            // wrong password (MAC/padding) — continue
-        }
+    log(`Format: ${detector.name}`, 'log-muted');
+    if (!detector.verified) log('Note: this format lacks a MAC/verification — check that the result looks reasonable.', 'log-err');
+    log(`Testing ${total} passwords…`, 'log-muted');
+    log(useWorkers ? `workers: ${nThreads} threads` : 'workers: unavailable — running single-threaded', 'log-muted');
+
+    let done = 0;
+    const t0 = performance.now();
+    const onProgress = (delta) => { done += delta; };
+
+    const timer = setInterval(() => {
+        const elapsed = (performance.now() - t0) / 1000;
+        const rate = done / Math.max(elapsed, 0.001);
+        const eta = rate > 0 ? (total - done) / rate : Infinity;
+        const pct = Math.min(100, (done / total) * 100).toFixed(1);
+        progressBar.style.width = pct + '%';
+        progressStatus.textContent = `${done}/${total} (${pct}%)  ${Math.round(rate)}/s  elapsed ${fmtDuration(elapsed)}  ETA ${fmtDuration(eta)}`;
+    }, 300);
+
+    let result;
+    try {
+        result = useWorkers
+            ? await runWithWorkers(parsedWallet, passwords, onProgress)
+            : await runSingleThread(parsedWallet, passwords, onProgress);
+    } catch (e) {
+        result = { found: false, error: (e && e.message) || String(e) };
     }
 
-    progressBar.style.width = '100%';
+    clearInterval(timer);
     const secs = ((performance.now() - t0) / 1000).toFixed(1);
 
-    if (found) {
-        progressStatus.textContent = `Done — password found on attempt ${found.index} of ${total} (${secs}s)`;
-        presentResult(found.password, found.bytes, found.index);
-    } else if (stopRequested) {
+    if (result.error) {
+        progressBar.style.width = '0%';
+        progressStatus.textContent = 'Error';
+        log('\nError during run: ' + result.error, 'log-err');
+        setRunning(false);
+        return;
+    }
+
+    if (result.found) {
+        progressBar.style.width = '100%';
+        progressStatus.textContent = `Done — password found on attempt ${result.index + 1} of ${total} (${secs}s)`;
+        presentResult(result.password, result.bytes, result.index + 1);
+    } else if (result.stopped || stopRequested) {
         progressStatus.textContent = `Stopped (${secs}s)`;
+        log('\nStopped by the user.', 'log-err');
     } else {
+        progressBar.style.width = '100%';
         progressStatus.textContent = `Done — no matching password (${secs}s)`;
         log(`\n✗ None of the ${total} passwords matched.`, 'log-err');
         showResult(false, '✗ No matching password', [
