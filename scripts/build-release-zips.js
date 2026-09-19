@@ -32,7 +32,7 @@ const DIST_LOCAL = path.join(ROOT, 'dist', 'local');
 // Files/folders that make up the "run locally in a browser" bundle. Everything else in the
 // repo (electron/, extension/, scripts/, build/, node_modules/, dist/, .github/, config...) is
 // intentionally left out because it is not needed to run the toolbox.
-const LOCAL_INCLUDE = ['Toolbox.html', 'src', 'tools', 'documentation', 'LICENSE'];
+const LOCAL_INCLUDE = ['Toolbox.html', 'src', 'tools', 'documentation'];
 
 function log(msg) {
     console.log(`build-release-zips: ${msg}`);
