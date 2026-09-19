@@ -120,6 +120,22 @@
             min-width: 780px;
         }
 
+        /* Shrink every column to its own content width so the last column
+           (Note) absorbs all remaining space. */
+        #walletTable th:not(:last-child),
+        #walletTable td:not(:last-child) {
+            width: 1%;
+            white-space: nowrap;
+        }
+
+        /* File-format and KDF values are compound (e.g. "EncryptedData hex",
+           "SHA-256² / PBKDF2-SHA512"); let them wrap so the columns stay narrow
+           and Notes gets the width. */
+        #walletTable td.w-fmt,
+        #walletTable td.w-kdf {
+            white-space: normal;
+        }
+
         thead th {
             position: sticky;
             top: 0;
@@ -176,7 +192,10 @@
         .w-note {
             color: var(--text-muted);
             font-size: 13px;
+            width: auto;
             min-width: 220px;
+            white-space: normal;
+            overflow-wrap: anywhere;
         }
 
         .w-note a {
@@ -188,6 +207,20 @@
 
         .w-note a:hover {
             text-decoration: underline;
+        }
+
+        /* Green-highlighted badge at the bottom of the Note cell */
+        .tool-badge {
+            display: inline-block;
+            margin-top: 8px;
+            padding: 3px 8px;
+            border-radius: 6px;
+            background: var(--success-soft);
+            color: var(--success);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Helvetica, Arial, sans-serif;
+            font-size: 11px;
+            font-weight: 650;
+            line-height: 1.45;
         }
 
         .chip {
@@ -213,6 +246,11 @@
         .chip-chacha {
             background: var(--accent-soft);
             color: var(--accent);
+        }
+
+        .chip-ctr {
+            background: var(--warning-soft);
+            color: var(--warning);
         }
 
         .chip-plain {
@@ -353,6 +391,12 @@
             color: var(--text-muted);
         }
 
+        /* Compact two-line Phantom example: slightly smaller so both lines fit */
+        #phantom-example {
+            font-size: 11.5px;
+            padding-right: 14px;
+        }
+
         .jk {
             color: var(--accent);
         }
@@ -408,8 +452,8 @@
                         <td class="w-plat">PC/Web</td>
                         <td class="w-fmt">JSON Vault</td>
                         <td><span class="chip chip-gcm">AES-256-GCM</span></td>
-                        <td class="w-kdf">PBKDF2 / Browser Storage</td>
-                        <td class="w-note"><a href="https://support.metamask.io/configure/wallet/how-to-recover-your-secret-recovery-phrase/" target="_blank" rel="noopener">support.metamask.io ↗</a></td>
+                        <td class="w-kdf">PBKDF2-SHA256</td>
+                        <td class="w-note">600,000 iterations (10,000 for legacy vaults). <a href="https://support.metamask.io/configure/wallet/how-to-recover-your-secret-recovery-phrase/" target="_blank" rel="noopener">support.metamask.io ↗</a><br><span class="tool-badge">✓ Decryptable with Crypto Toolbox</span></td>
                     </tr>
                     <tr>
                         <td class="w-name">MetaMask</td>
@@ -425,31 +469,39 @@
                         <td class="w-fmt">JSON Vault</td>
                         <td><span class="chip chip-gcm">AES-256-GCM</span></td>
                         <td class="w-kdf">PBKDF2/Keychain</td>
-                        <td class="w-note">Stored in the keychain with entropy that can be converted to a mnemonic</td>
+                        <td class="w-note">Stored in the keychain with entropy that can be converted to a mnemonic<br><span class="tool-badge">✓ Decryptable with Crypto Toolbox</span></td>
                     </tr>
                     <tr>
                         <td class="w-name">Exodus</td>
                         <td class="w-plat">Desktop</td>
                         <td class="w-fmt">seed.seco</td>
-                        <td><span class="chip chip-plain">AES-256</span></td>
-                        <td class="w-kdf">PBKDF2</td>
-                        <td class="w-note"><a href="https://github.com/AdrianNeshad/secoUnlock" target="_blank" rel="noopener">github.com/AdrianNeshad/secoUnlock ↗</a></td>
+                        <td><span class="chip chip-gcm">AES-256-GCM</span></td>
+                        <td class="w-kdf">scrypt</td>
+                        <td class="w-note">SECO container, two nested AES-256-GCM layers. <a href="https://github.com/AdrianNeshad/secoUnlock" target="_blank" rel="noopener">github.com/AdrianNeshad/secoUnlock ↗</a><br><span class="tool-badge">✓ Decryptable with Crypto Toolbox</span></td>
                     </tr>
                     <tr>
                         <td class="w-name">Electrum</td>
                         <td class="w-plat">Desktop</td>
-                        <td class="w-fmt">wallet</td>
+                        <td class="w-fmt">default_wallet</td>
                         <td><span class="chip chip-cbc">AES-256-CBC</span></td>
-                        <td class="w-kdf">PBKDF2</td>
-                        <td class="w-note"><a href="https://github.com/AdrianNeshad/electrumUnlock" target="_blank" rel="noopener">github.com/AdrianNeshad/electrumUnlock ↗</a></td>
+                        <td class="w-kdf">SHA-256² / PBKDF2-SHA512</td>
+                        <td class="w-note">Whole-file wallets use BIE1-ECIES (AES-128-CBC) → zlib → JSON; seed/passphrase fields use AES-256-CBC keyed by SHA256(SHA256(pw)). <a href="https://github.com/AdrianNeshad/electrumUnlock" target="_blank" rel="noopener">github.com/AdrianNeshad/electrumUnlock ↗</a><br><span class="tool-badge">✓ Decryptable with Crypto Toolbox</span></td>
                     </tr>
                     <tr>
                         <td class="w-name">Monero GUI</td>
                         <td class="w-plat">Desktop</td>
                         <td class="w-fmt">.keys</td>
                         <td><span class="chip chip-chacha">ChaCha20</span></td>
-                        <td class="w-kdf">Wallet password</td>
-                        <td class="w-note">Recover the .keys file in moneroGUI or featherWallet — the decrypted but encoded password can be used as the password</td>
+                        <td class="w-kdf">CryptoNight (cn_slow_hash)</td>
+                        <td class="w-note">Key = cn_slow_hash(password); the outer container decrypts to JSON, then the secret keys unmask to the 25-word seed. Works with monero-wallet / Feather.<br><span class="tool-badge">✓ Decryptable with Crypto Toolbox</span></td>
+                    </tr>
+                    <tr>
+                        <td class="w-name">DeFiChain Light</td>
+                        <td class="w-plat">Mobile/Web</td>
+                        <td class="w-fmt">EncryptedData hex</td>
+                        <td><span class="chip chip-ctr">AES-256-CTR</span></td>
+                        <td class="w-kdf">scrypt</td>
+                        <td class="w-note">jellyfish-wallet-encrypted blob; protected by a 6-digit passcode (000000–999999). Plaintext is BIP39 entropy (N=16384) or a BIP32 root key (N=512). <a href="https://github.com/AdrianNeshad/defichainUnlock" target="_blank" rel="noopener">github.com/AdrianNeshad/defichainUnlock ↗</a><br><span class="tool-badge">✓ Decryptable with Crypto Toolbox</span></td>
                     </tr>
                     <tr>
                         <td class="w-name">Trust Wallet</td>
@@ -519,6 +571,12 @@
                     </ul>
                 </div>
                 <div class="card">
+                    <h3>DeFiChain</h3>
+                    <ul>
+                        <li>hex blob: <code>3-byte header</code> + <code>4-byte checksum</code> + 2× <code>[IV‖ciphertext]</code></li>
+                    </ul>
+                </div>
+                <div class="card">
                     <h3>JSON Vault</h3>
                     <div class="tagset">
                         <code>ciphertext</code><code>iv</code><code>salt</code><code>mac</code>
@@ -582,29 +640,8 @@
                     <span>phantom.json</span>
                     <button class="copy-btn" data-copy="phantom-example">Copy</button>
                 </div>
-                <pre id="phantom-example">{
-    <span class="jk">"version"</span>: <span class="jn">1</span>,
-    <span class="jk">"identifier"</span>: <span class="js">"7aec91735f7e125dde475e982aae316c88f336e361593f70a4e51c2e1c7c1dd7"</span>,
-    <span class="jk">"name"</span>: <span class="js">"Account 1"</span>,
-    <span class="jk">"entropy"</span>: {
-        <span class="jk">"0"</span>: <span class="jn">34</span>,
-        <span class="jk">"1"</span>: <span class="jn">83</span>,
-        <span class="jk">"2"</span>: <span class="jn">38</span>,
-        <span class="jk">"3"</span>: <span class="jn">148</span>,
-        <span class="jk">"4"</span>: <span class="jn">136</span>,
-        <span class="jk">"5"</span>: <span class="jn">254</span>,
-        <span class="jk">"6"</span>: <span class="jn">124</span>,
-        <span class="jk">"7"</span>: <span class="jn">59</span>,
-        <span class="jk">"8"</span>: <span class="jn">160</span>,
-        <span class="jk">"9"</span>: <span class="jn">186</span>,
-        <span class="jk">"10"</span>: <span class="jn">149</span>,
-        <span class="jk">"11"</span>: <span class="jn">60</span>,
-        <span class="jk">"12"</span>: <span class="jn">155</span>,
-        <span class="jk">"13"</span>: <span class="jn">68</span>,
-        <span class="jk">"14"</span>: <span class="jn">241</span>,
-        <span class="jk">"15"</span>: <span class="jn">6</span>
-    }
-}</pre>
+                <pre id="phantom-example">{<span class="jk">"version"</span>:<span class="jn">1</span>,<span class="jk">"identifier"</span>:<span class="js">"7aec91735f7e125dde475e982aae316c88f336e361593f70a4e51c2e1c7c1dd7"</span>,<span class="jk">"name"</span>:<span class="js">"Account 1"</span>,<span class="jk">"entropy"</span>:{
+<span class="jk">"0"</span>:<span class="jn">34</span>,<span class="jk">"1"</span>:<span class="jn">83</span>,<span class="jk">"2"</span>:<span class="jn">38</span>,<span class="jk">"3"</span>:<span class="jn">148</span>,<span class="jk">"4"</span>:<span class="jn">136</span>,<span class="jk">"5"</span>:<span class="jn">254</span>,<span class="jk">"6"</span>:<span class="jn">124</span>,<span class="jk">"7"</span>:<span class="jn">59</span>,<span class="jk">"8"</span>:<span class="jn">160</span>,<span class="jk">"9"</span>:<span class="jn">186</span>,<span class="jk">"10"</span>:<span class="jn">149</span>,<span class="jk">"11"</span>:<span class="jn">60</span>,<span class="jk">"12"</span>:<span class="jn">155</span>,<span class="jk">"13"</span>:<span class="jn">68</span>,<span class="jk">"14"</span>:<span class="jn">241</span>,<span class="jk">"15"</span>:<span class="jn">6</span>}}</pre>
             </div>
         </section>
 
