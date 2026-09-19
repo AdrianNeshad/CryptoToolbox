@@ -314,6 +314,68 @@ function applyPastedEntropy() {
 
 pasteInput.addEventListener("input", applyPastedEntropy);
 
+// --- Paste entropy as a hex string (e.g. 000102030405060708090a0b0c0d0e0f) ---
+const hexInput = document.getElementById("hex-input");
+const hexHint = document.getElementById("hex-hint");
+
+function hideHexHint() {
+    hexHint.textContent = "";
+    hexHint.classList.add("display-none");
+    hexHint.classList.remove("error", "ok");
+    hexInput.classList.remove("invalid");
+}
+
+function showHexHint(text, isError) {
+    hexHint.textContent = text;
+    hexHint.classList.remove("display-none");
+    hexHint.classList.toggle("error", isError);
+    hexHint.classList.toggle("ok", !isError);
+    hexInput.classList.toggle("invalid", isError);
+}
+
+function applyHexEntropy() {
+    const raw = hexInput.value.trim();
+
+    if (raw === "") {
+        hideHexHint();
+        return;
+    }
+
+    // Accept an optional 0x prefix and common byte separators (spaces, commas,
+    // colons, dashes, underscores), then require a clean even-length hex string.
+    const cleaned = raw.replace(/^0x/i, "").replace(/[\s,:_-]+/g, "");
+
+    if (!/^[0-9a-fA-F]*$/.test(cleaned)) {
+        showHexHint("Only hex characters (0–9, a–f) are allowed.", true);
+        return;
+    }
+
+    if (cleaned.length % 2 !== 0) {
+        showHexHint(`Odd number of hex digits (${cleaned.length}) — each byte needs 2 digits.`, true);
+        return;
+    }
+
+    const byteCount = cleaned.length / 2;
+    if (byteCount !== 16 && byteCount !== 32) {
+        showHexHint(`Found ${byteCount} bytes — expected 16 (12 words) or 32 (24 words).`, true);
+        return;
+    }
+
+    const bytes = [];
+    for (let i = 0; i < cleaned.length; i += 2) {
+        bytes.push(parseInt(cleaned.slice(i, i + 2), 16));
+    }
+
+    setWordCountMode(bytes.length);
+    getFieldInputs().forEach((input, i) => {
+        input.value = String(bytes[i]);
+    });
+    onFieldsChanged();
+    showHexHint(`✓ ${byteCount} bytes filled in`, false);
+}
+
+hexInput.addEventListener("input", applyHexEntropy);
+
 setFieldCount(FIELD_COUNT);
 
 // --- Theme sync with CryptoToolbox (postMessage from parent iframe) ---

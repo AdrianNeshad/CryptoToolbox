@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DeFiChain Wallet Unlock</title>
+    <script>
+        (function () {
+            try {
+                var params = new URLSearchParams(location.search);
+                var fromParent = params.get('theme');
+                var saved = localStorage.getItem('theme');
+                var theme = (fromParent === 'light' || fromParent === 'dark') ? fromParent
+                    : (saved === 'light' || saved === 'dark') ? saved : 'dark';
+                document.documentElement.setAttribute('data-theme', theme);
+                if (fromParent === 'light' || fromParent === 'dark') {
+                    localStorage.setItem('theme', fromParent);
+                }
+            } catch (e) {
+                document.documentElement.setAttribute('data-theme', 'dark');
+            }
+        })();
+    </script>
+    <script src="./bip39.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <div id="container">
+
+        <header class="page-header">
+            <h1>DeFiChain Wallet Unlock</h1>
+            <p>Recovers the 6-digit passcode of a DeFiChain Light Wallet blob
+                (<code>@defichain/jellyfish-wallet-encrypted</code>) and extracts the seed phrase or root private
+                key. The whole 000000&ndash;999999 range is swept automatically &mdash; everything runs locally on
+                your computer.</p>
+        </header>
+
+        <!-- Steps 1 & 2 side by side -->
+        <div class="panel-row">
+
+            <!-- Step 1: encrypted data -->
+            <div class="panel">
+                <div class="panel-head">
+                    <span class="step-num">1</span>
+                    <span class="panel-title">Paste encrypted data</span>
+                </div>
+                <p class="hint">Paste EITHER the raw <code>encode()</code> hex string (mnemonic scheme) OR the whole
+                    wallet JSON (<code>{ raw: { encryptedPrivKey … } }</code>). The shape is auto-detected.</p>
+                <div class="file-row">
+                    <button type="button" class="secondary" id="file-btn">Load file…</button>
+                    <span class="file-name" id="file-name"></span>
+                </div>
+                <input type="file" id="file-input" accept=".txt,.json,application/json,text/plain" hidden>
+                <textarea id="data-input" spellcheck="false" autocomplete="off"
+                    placeholder="0000002f287b4d49…&#10;— or —&#10;{&quot;version&quot;:1,&quot;type&quot;:&quot;MNEMONIC_ENCRYPTED&quot;,&quot;raw&quot;:{&quot;encryptedPrivKey&quot;:&quot;…&quot;}}"></textarea>
+                <span class="detect-tag" id="detect-tag"></span>
+            </div>
+
+            <!-- Step 2: options -->
+            <div class="panel">
+                <div class="panel-head">
+                    <span class="step-num">2</span>
+                    <span class="panel-title">Options</span>
+                </div>
+                <p class="hint">The defaults are fine for a normal DeFiChain Light Wallet. Use <b>Both</b> if you
+                    pasted a bare wallet key as raw hex and auto-detection guesses wrong.</p>
+                <div class="opt-row">
+                    <span class="opt-label">Scheme</span>
+                    <select id="profile-select">
+                        <option value="auto" selected>Auto-detect</option>
+                        <option value="mnemonic">Mnemonic (N=16384)</option>
+                        <option value="wallet">Wallet key (N=512)</option>
+                        <option value="both">Both</option>
+                    </select>
+                </div>
+                <div class="opt-row">
+                    <span class="opt-label">Passcode length</span>
+                    <input type="number" id="digits-input" min="1" max="9" step="1" value="6">
+                </div>
+                <p class="hint" id="range-hint" style="margin-top:14px;margin-bottom:0;">Will sweep
+                    <code>000000</code> … <code>999999</code> (1 000 000 codes).</p>
+            </div>
+
+        </div><!-- /panel-row -->
+
+        <!-- Progress -->
+        <div class="progress-wrap display-none" id="progress-wrap">
+            <div class="progress-track">
+                <div class="progress-bar" id="progress-bar"></div>
+            </div>
+            <div class="progress-status" id="progress-status"></div>
+        </div>
+
+        <!-- Log / output (the result banner appears at the top of the same box) -->
+        <div class="output-wrap">
+            <div class="output-head">
+                <span>Output</span>
+                <div class="output-head-actions">
+                    <button id="run-btn">Run</button>
+                    <button id="stop-btn" class="danger display-none">Stop</button>
+                    <button type="button" class="clear-btn" id="clear-btn">Clear</button>
+                </div>
+            </div>
+            <div class="result-panel display-none" id="result-panel">
+                <div class="result-title" id="result-title"></div>
+                <div class="result-body" id="result-body"></div>
+            </div>
+            <pre id="output">Waiting to run…</pre>
+        </div>
+
+        <div id="toast" class="toast"></div>
+
+    </div>
+
+    <script src="script.js"></script>
+
+</body>
+
+</html>

@@ -194,7 +194,8 @@ body {
     margin-bottom: 8px;
 }
 
-#paste-input {
+#paste-input,
+#hex-input {
     width: 100%;
     height: 40px;
     padding: 0 12px;
@@ -208,17 +209,20 @@ body {
     transition: border-color .18s ease, box-shadow .18s ease;
 }
 
-#paste-input::placeholder {
+#paste-input::placeholder,
+#hex-input::placeholder {
     color: var(--text-muted);
     opacity: .5;
 }
 
-#paste-input:focus {
+#paste-input:focus,
+#hex-input:focus {
     border-color: var(--accent);
     box-shadow: 0 0 0 3px var(--accent-soft);
 }
 
-#paste-input.invalid {
+#paste-input.invalid,
+#hex-input.invalid {
     border-color: var(--error);
 }
 
