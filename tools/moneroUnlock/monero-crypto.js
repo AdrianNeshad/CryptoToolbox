@@ -191,6 +191,138 @@
     function strToBytes(s) { var a = new Uint8Array(s.length); for (var i = 0; i < s.length; i++) a[i] = s.charCodeAt(i) & 0xff; return a; }
     function eqB(a, b) { if (a.length !== b.length) return false; for (var i = 0; i < a.length; i++) if (a[i] !== b[i]) return false; return true; }
     function readLEB128(buf, off) { var sh = 0n, res = 0n, i = off; for (; ;) { var b = buf[i++]; res |= BigInt(b & 0x7f) << sh; if (!(b & 0x80)) break; sh += 7n; } return { value: Number(res), next: i }; }
+    function utf8ToBytes(str) {
+        if (typeof TextEncoder !== 'undefined') return new TextEncoder().encode(str);
+        var out = [], i, c;
+        for (i = 0; i < str.length; i++) {
+            c = str.charCodeAt(i);
+            if (c < 0x80) out.push(c);
+            else if (c < 0x800) out.push(0xc0 | (c >> 6), 0x80 | (c & 0x3f));
+            else out.push(0xe0 | (c >> 12), 0x80 | ((c >> 6) & 0x3f), 0x80 | (c & 0x3f));
+        }
+        return new Uint8Array(out);
+    }
+    function utf8Decode(bytes) {
+        if (typeof TextDecoder !== 'undefined') { try { return new TextDecoder('utf-8', { fatal: false }).decode(bytes); } catch (e) { /* fall through */ } }
+        return latin1(bytes);
+    }
+    function base64ToBytes(b64) {
+        var clean = String(b64).replace(/\s+/g, '');
+        var bin;
+        try {
+            if (typeof atob !== 'undefined') bin = atob(clean);
+            else bin = Buffer.from(clean, 'base64').toString('binary');
+        } catch (e) { throw new Error('Invalid base64 value.'); }
+        var out = new Uint8Array(bin.length);
+        for (var i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i) & 0xff;
+        return out;
+    }
+
+    /* ---------- AES-128/192/256 (encrypt only — used to build the CTR keystream) ----------
+       Cake Wallet stores the real .keys password AES-CTR-encrypted (PKCS#7-padded)
+       in the keychain. The CTR key is (short_key + wallet_salt); nonce/IV = 16 zero
+       bytes, counter incremented big-endian — matching PyCryptodome
+       AES.MODE_CTR(nonce=b'\\x00'*8, initial_value=b'\\x00'*8) and OpenSSL aes-*-ctr. */
+    var AES_SBOX = (function () {
+        var p = 1, q = 1, sbox = new Uint8Array(256);
+        do {
+            p = (p ^ (p << 1) ^ ((p & 0x80) ? 0x11b : 0)) & 0xff;
+            q ^= (q << 1) & 0xff; q ^= (q << 2) & 0xff; q ^= (q << 4) & 0xff; q &= 0xff; if (q & 0x80) q ^= 0x09; q &= 0xff;
+            var xf = q ^ ((q << 1) | (q >> 7)) ^ ((q << 2) | (q >> 6)) ^ ((q << 3) | (q >> 5)) ^ ((q << 4) | (q >> 4));
+            sbox[p] = (xf ^ 0x63) & 0xff;
+        } while (p !== 1);
+        sbox[0] = 0x63;
+        return sbox;
+    })();
+    var AES_RCON = [0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80, 0x1b, 0x36, 0x6c, 0xd8, 0xab, 0x4d];
+    function aesKeyExpansion(key) {
+        var Nk = key.length / 4, Nr = Nk + 6, total = 16 * (Nr + 1);
+        var w = new Uint8Array(total); w.set(key, 0);
+        var t = new Uint8Array(4), rcon = 0, i = key.length;
+        while (i < total) {
+            for (var k = 0; k < 4; k++) t[k] = w[i - 4 + k];
+            if (i % key.length === 0) {
+                var tmp = t[0]; t[0] = AES_SBOX[t[1]]; t[1] = AES_SBOX[t[2]]; t[2] = AES_SBOX[t[3]]; t[3] = AES_SBOX[tmp];
+                t[0] ^= AES_RCON[rcon++];
+            } else if (key.length > 24 && (i % key.length) === 16) {
+                for (var k2 = 0; k2 < 4; k2++) t[k2] = AES_SBOX[t[k2]];
+            }
+            for (var k3 = 0; k3 < 4; k3++) { w[i] = w[i - key.length] ^ t[k3]; i++; }
+        }
+        return { w: w, Nr: Nr };
+    }
+    function aesXtime(a) { return ((a << 1) ^ ((a & 0x80) ? 0x1b : 0)) & 0xff; }
+    function aesEncryptBlock(inBlk, ks) {
+        var Nr = ks.Nr, w = ks.w, s = new Uint8Array(16), i, r, c;
+        for (i = 0; i < 16; i++) s[i] = inBlk[i] ^ w[i];
+        for (r = 1; r < Nr; r++) {
+            for (i = 0; i < 16; i++) s[i] = AES_SBOX[s[i]];               // SubBytes
+            var tmp = new Uint8Array(16);                                  // ShiftRows (state is column-major: s[row + 4*col])
+            for (var row = 0; row < 4; row++) for (c = 0; c < 4; c++) tmp[row + 4 * c] = s[row + 4 * ((c + row) % 4)];
+            for (c = 0; c < 4; c++) {                                      // MixColumns
+                var a0 = tmp[4 * c], a1 = tmp[4 * c + 1], a2 = tmp[4 * c + 2], a3 = tmp[4 * c + 3];
+                s[4 * c] = aesXtime(a0) ^ (aesXtime(a1) ^ a1) ^ a2 ^ a3;
+                s[4 * c + 1] = a0 ^ aesXtime(a1) ^ (aesXtime(a2) ^ a2) ^ a3;
+                s[4 * c + 2] = a0 ^ a1 ^ aesXtime(a2) ^ (aesXtime(a3) ^ a3);
+                s[4 * c + 3] = (aesXtime(a0) ^ a0) ^ a1 ^ a2 ^ aesXtime(a3);
+            }
+            for (i = 0; i < 16; i++) s[i] ^= w[16 * r + i];                // AddRoundKey
+        }
+        for (i = 0; i < 16; i++) s[i] = AES_SBOX[s[i]];                    // final SubBytes
+        var tmp2 = new Uint8Array(16);                                     // final ShiftRows
+        for (var row2 = 0; row2 < 4; row2++) for (c = 0; c < 4; c++) tmp2[row2 + 4 * c] = s[row2 + 4 * ((c + row2) % 4)];
+        for (i = 0; i < 16; i++) s[i] = tmp2[i] ^ w[16 * Nr + i];          // final AddRoundKey
+        return s;
+    }
+    // AES-CTR with an all-zero 16-byte initial counter (big-endian increment). Symmetric: decrypt == encrypt.
+    function aesCtrXor(data, keyBytes) {
+        var ks = aesKeyExpansion(keyBytes), out = new Uint8Array(data.length), counter = new Uint8Array(16);
+        for (var off = 0; off < data.length; off += 16) {
+            var block = aesEncryptBlock(counter, ks), n = Math.min(16, data.length - off);
+            for (var i = 0; i < n; i++) out[off + i] = data[off + i] ^ block[i];
+            for (var j = 15; j >= 0; j--) { counter[j] = (counter[j] + 1) & 0xff; if (counter[j] !== 0) break; }
+        }
+        return out;
+    }
+    function pkcs7Unpad(data) {
+        if (data.length === 0 || data.length % 16 !== 0) throw new Error('Decrypted data has an invalid block length.');
+        var pad = data[data.length - 1];
+        if (pad < 1 || pad > 16 || pad > data.length) throw new Error('Invalid PKCS#7 padding (wrong decryption key).');
+        for (var i = data.length - pad; i < data.length; i++) if (data[i] !== pad) throw new Error('Invalid PKCS#7 padding (wrong decryption key).');
+        return data.slice(0, data.length - pad);
+    }
+    function aesKeyLenGuard(keyBytes, label) {
+        if (keyBytes.length !== 16 && keyBytes.length !== 24 && keyBytes.length !== 32)
+            throw new Error(label + ' must be 16, 24 or 32 bytes for AES (got ' + keyBytes.length + ' bytes).');
+    }
+
+    /* ---------- Cake Wallet: derive the real .keys password ----------
+       key = utf8(short_key + wallet_salt); plaintext = pkcs7_unpad(AES-CTR(enc_password)).
+       Returns the raw password bytes to feed into deriveChachaKey (same pipeline as Monero GUI). */
+    function cakeDerivePassword(encPasswordB64, shortKey, walletSalt) {
+        var keyBytes = utf8ToBytes(String(shortKey) + String(walletSalt));
+        aesKeyLenGuard(keyBytes, 'short key + wallet salt');
+        var ct = base64ToBytes(encPasswordB64);
+        if (ct.length === 0) throw new Error('The encrypted wallet password is empty.');
+        if (ct.length % 16 !== 0) throw new Error('The encrypted wallet password is not a multiple of the AES block size — check the value.');
+        try { return pkcs7Unpad(aesCtrXor(ct, keyBytes)); }
+        catch (e) { throw new Error('Could not derive the wallet password — check the short key and wallet salt. (' + e.message + ')'); }
+    }
+
+    /* ---------- Cake Wallet: decode the wallet PIN (optional) ----------
+       key = utf8(pin_secret); plaintext = pkcs7_unpad(AES-CTR(enc_pin)); the plaintext is
+       (pin_secret || pin) so the PIN is the tail after the pin_secret prefix. */
+    function cakeDecryptPin(pinCodeB64, pinSecret) {
+        var keyBytes = utf8ToBytes(String(pinSecret));
+        aesKeyLenGuard(keyBytes, 'PIN secret');
+        var ct = base64ToBytes(pinCodeB64);
+        if (ct.length === 0) throw new Error('The encrypted PIN password is empty.');
+        if (ct.length % 16 !== 0) throw new Error('The encrypted PIN password is not a multiple of the AES block size — check the value.');
+        var plain;
+        try { plain = pkcs7Unpad(aesCtrXor(ct, keyBytes)); }
+        catch (e) { throw new Error('Could not decode the PIN — check the PIN secret. (' + e.message + ')'); }
+        return utf8Decode(plain.slice(keyBytes.length));
+    }
 
     // nettype (0=main,1=test,2=stage) -> the standard address's network byte
     var NET_BYTE = { 0: 18, 1: 53, 2: 24 };
@@ -245,13 +377,31 @@
         var viewSec = mk.m_view_secret_key ? mk.m_view_secret_key.slice() : new Uint8Array(32);
         var encIv = mk.m_encryption_iv;
         var encrypted = Number(obj.encrypted_secret_keys || 0) === 1;
+        var polyseed = null, passphrase = null;   // Cake Wallet extras (absent in Monero GUI files)
 
         if (encrypted) {
             var ivb = (encIv && encIv.length === 8) ? encIv : new Uint8Array(8);
             var dd = new Uint8Array(33); dd.set(key, 0); dd[32] = 0x6b; // config::HASH_KEY_MEMORY = 'k'
             var derived = cnHash(dd);
-            var ks = chacha20(new Uint8Array(64), derived, ivb);
+            // Cake Wallet appends m_polyseed and m_passphrase to the same continuous
+            // ChaCha20 keystream, in field order: [spend 32][view 32][polyseed][passphrase].
+            var encPoly = mk.m_polyseed, encPass = mk.m_passphrase;
+            var polyLen = encPoly ? encPoly.length : 0, passLen = encPass ? encPass.length : 0;
+            var ks = chacha20(new Uint8Array(64 + polyLen + passLen), derived, ivb);
             for (var i = 0; i < 32; i++) { spendSec[i] ^= ks[i]; viewSec[i] ^= ks[32 + i]; }
+            var so = 64;
+            if (polyLen) { var pb = new Uint8Array(polyLen); for (var pi = 0; pi < polyLen; pi++) pb[pi] = encPoly[pi] ^ ks[so + pi]; so += polyLen; if (!pb.every(function (x) { return x === 0; })) polyseed = pb; }
+            if (passLen) { var qb = new Uint8Array(passLen); for (var qi = 0; qi < passLen; qi++) qb[qi] = encPass[qi] ^ ks[so + qi]; so += passLen; if (!qb.every(function (x) { return x === 0; })) passphrase = qb; }
+        }
+
+        // polyseed is a printable phrase; a passphrase is user text. Show as text, hex as a fallback.
+        function decodeMaybeText(b) {
+            if (!b || b.length === 0) return null;
+            var end = b.length; while (end > 0 && b[end - 1] === 0) end--;   // trim trailing NULs
+            if (end === 0) return null;
+            var trimmed = b.slice(0, end), txt = utf8Decode(trimmed), ok = txt.indexOf(String.fromCharCode(0xFFFD)) === -1;
+            if (ok) for (var i = 0; i < txt.length; i++) { var c = txt.charCodeAt(i); if (c < 0x20 && c !== 9 && c !== 10 && c !== 13) { ok = false; break; } }
+            return ok ? txt : bytesToHex(trimmed);
         }
 
         var nettype = Number(obj.nettype || 0);
@@ -275,7 +425,9 @@
             viewPublicKey: bytesToHex(viewPub),
             spendSecretKey: spendZero ? null : bytesToHex(spendSec),
             viewSecretKey: bytesToHex(viewSec),
-            mnemonic: (watchOnly || spendZero) ? null : bytesToMnemonic(spendSec, words, 3)
+            mnemonic: (watchOnly || spendZero) ? null : bytesToMnemonic(spendSec, words, 3),
+            polyseed: decodeMaybeText(polyseed),
+            passphrase: decodeMaybeText(passphrase)
         };
     }
 
@@ -291,6 +443,12 @@
         inspectContainer: inspectContainer,
         decryptOuter: decryptOuter,
         extractKeys: extractKeys,
+        aesCtrXor: aesCtrXor,
+        pkcs7Unpad: pkcs7Unpad,
+        base64ToBytes: base64ToBytes,
+        utf8ToBytes: utf8ToBytes,
+        cakeDerivePassword: cakeDerivePassword,
+        cakeDecryptPin: cakeDecryptPin,
         NET_BYTE: NET_BYTE, NET_NAME: NET_NAME
     };
 })(typeof window !== 'undefined' ? window : this);

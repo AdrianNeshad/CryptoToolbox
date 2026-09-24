@@ -531,3 +531,138 @@ select:focus { border-color: var(--accent); }
     0%   { margin-left: -40%; }
     100% { margin-left: 100%; }
 }
+
+/* ============ Cake Wallet mode ============ */
+.cake-toggle {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 0 8px;
+    margin-top: 6px;
+    border-top: 1px solid var(--border);
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+    cursor: pointer;
+    user-select: none;
+}
+/* iOS-style toggle switch */
+.cake-toggle input[type="checkbox"] {
+    position: absolute;
+    opacity: 0;
+    width: 1px;
+    height: 1px;
+    margin: 0;
+    pointer-events: none;
+}
+.cake-toggle .switch {
+    flex: none;
+    position: relative;
+    width: 44px;
+    height: 26px;
+    border-radius: 13px;
+    background: var(--border-hover);
+    transition: background 0.2s ease;
+}
+.cake-toggle .switch::after {
+    content: "";
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+    transition: transform 0.2s ease;
+}
+.cake-toggle input:checked ~ .switch { background: var(--success); }
+.cake-toggle input:checked ~ .switch::after { transform: translateX(18px); }
+.cake-toggle input:focus-visible ~ .switch {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+}
+.cake-toggle:hover .switch { filter: brightness(1.08); }
+.cake-toggle-text { flex: 1 1 auto; }
+.cake-toggle code { font-weight: 600; }
+
+.cake-panel {
+    padding: 6px 0 12px;
+}
+.cake-field { margin-bottom: 12px; }
+.cake-field label {
+    display: block;
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+    font-weight: 600;
+}
+.cake-textarea {
+    width: 100%;
+    min-height: 66px;
+    margin-top: 0;
+    padding: 10px 12px;
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    outline: none;
+    color: var(--text);
+    font-family: Consolas, Monaco, monospace;
+    font-size: 12.5px;
+    line-height: 1.5;
+    resize: vertical;
+    word-break: break-all;
+}
+.cake-textarea:focus { border-color: var(--accent); }
+
+.req {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--accent);
+    margin-left: 4px;
+}
+
+.cake-pin {
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 14px 4px;
+    margin-top: 4px;
+}
+.cake-pin-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 4px;
+}
+.cake-pin .advanced-grid { padding: 0 0 10px; }
+
+.cake-pin-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin: 4px 0 10px;
+}
+#cake-pin-btn { flex: none; min-width: 0; }
+.cake-pin-result {
+    font-family: Consolas, Monaco, monospace;
+    font-size: 13px;
+    font-weight: 600;
+    word-break: break-all;
+}
+.cake-pin-result.ok { color: var(--success); }
+.cake-pin-result.err { color: var(--error); }
+
+/* Step 2 dimmed while Cake mode is on */
+.panel.pw-disabled {
+    opacity: 0.5;
+    pointer-events: none;
+}
+.cake-note {
+    font-size: 12px;
+    color: var(--accent);
+    font-weight: 600;
+    margin-top: 8px;
+}

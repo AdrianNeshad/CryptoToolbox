@@ -24,6 +24,18 @@
     var pwList = $('pw-list');
     var kdfInput = $('kdf-rounds');
     var netSelect = $('net');
+    var cakeToggle = $('cake-toggle');
+    var cakePanel = $('cake-panel');
+    var cakeSalt = $('cake-salt');
+    var cakeShortKey = $('cake-shortkey');
+    var cakeEncPw = $('cake-encpw');
+    var cakePwBtn = $('cake-pw-btn');
+    var cakePwResult = $('cake-pw-result');
+    var cakePinSecret = $('cake-pinsecret');
+    var cakeEncPin = $('cake-encpin');
+    var cakePinBtn = $('cake-pin-btn');
+    var cakePinResult = $('cake-pin-result');
+    var pwPanel = pwList.closest('.panel');
     var runBtn = $('run-btn');
     var stopBtn = $('stop-btn');
     var clearBtn = $('clear-btn');
@@ -124,6 +136,66 @@
     }
     pwList.addEventListener('input', updatePwCount);
 
+    /* ---------- Cake Wallet mode toggle ---------- */
+    function cakeMode() { return cakeToggle && cakeToggle.checked; }
+    var cakeNote = null;
+    function applyCakeMode() {
+        var on = cakeMode();
+        cakePanel.classList.toggle('display-none', !on);
+        if (pwPanel) {
+            pwPanel.classList.toggle('pw-disabled', on);
+            if (on) {
+                if (!cakeNote) {
+                    cakeNote = document.createElement('div');
+                    cakeNote.className = 'cake-note';
+                    cakeNote.textContent = 'Ignored in Cake Wallet mode.';
+                    pwPanel.appendChild(cakeNote);
+                }
+            } else if (cakeNote) {
+                cakeNote.remove(); cakeNote = null;
+            }
+        }
+    }
+    if (cakeToggle) cakeToggle.addEventListener('change', applyCakeMode);
+
+    // Standalone PIN decode — only needs the PIN secret + encrypted PIN (AES-CTR, no
+    // CryptoNight and no .keys file). Independent of the full unlock flow.
+    function decodePin() {
+        var ps = cakePinSecret.value;
+        var ep = cakeEncPin.value.trim();
+        if (!ps || !ep) { showToast('Enter both the PIN secret and encrypted PIN'); return; }
+        try {
+            var pin = MK.cakeDecryptPin(ep, ps);
+            cakePinResult.textContent = 'PIN: ' + pin;
+            cakePinResult.className = 'cake-pin-result ok';
+        } catch (e) {
+            cakePinResult.textContent = e.message;
+            cakePinResult.className = 'cake-pin-result err';
+        }
+    }
+    if (cakePinBtn) cakePinBtn.addEventListener('click', decodePin);
+
+    // Standalone password derivation — turns the encrypted wallet password into the
+    // plaintext password with only short key + wallet salt (AES-CTR, no CryptoNight,
+    // no .keys file). The same derivation runs inside the full unlock.
+    function derivePasswordStandalone() {
+        var salt = cakeSalt.value, shortKey = cakeShortKey.value, encPw = cakeEncPw.value.trim();
+        if (!salt || !shortKey) { showToast('Enter both the wallet salt and short key'); return; }
+        if (!encPw) { showToast('Paste the encrypted wallet password'); return; }
+        try {
+            var pwBytes = MK.cakeDerivePassword(encPw, shortKey, salt);
+            var pw;
+            try { pw = new TextDecoder('utf-8', { fatal: false }).decode(pwBytes); }
+            catch (e) { pw = String.fromCharCode.apply(null, pwBytes); }
+            cakePwResult.textContent = 'Password: ' + pw;
+            cakePwResult.className = 'cake-pin-result ok';
+        } catch (e) {
+            cakePwResult.textContent = e.message;
+            cakePwResult.className = 'cake-pin-result err';
+        }
+    }
+    if (cakePwBtn) cakePwBtn.addEventListener('click', derivePasswordStandalone);
+
     /* ---------- file selection ---------- */
     function setKeysName(text, state, title) {
         keysName.textContent = text;
@@ -192,11 +264,16 @@
 
         var pwDisplay = password === '' ? '(empty password)' : password;
         var pwOpts = password === '' ? { copy: false } : {};
-        if (index > 0 && total > 1) {
+        if (r.cake) {
+            html += field('Wallet password (derived)', pwDisplay, pwOpts);
+        } else if (index > 0 && total > 1) {
             html += field('Password (match #' + index + ' of ' + total + ')', pwDisplay, pwOpts);
         } else {
             html += field('Password', pwDisplay, pwOpts);
         }
+
+        if (r.pin) html += field('Wallet PIN', r.pin);
+        else if (r.pinError) html += '<div class="info-box" style="margin:0 0 12px">PIN not decoded: ' + esc(r.pinError) + '</div>';
 
         html += field('Primary address', r.address);
 
@@ -207,6 +284,9 @@
         } else {
             html += '<div class="info-box" style="margin:0 0 12px">The wallet is <strong>non-deterministic</strong> — a 25-word phrase would not recreate the same view key, so no seed is shown. Use the keys below to import the wallet.</div>';
         }
+
+        if (r.polyseed) html += field('Polyseed', r.polyseed, { seed: true });
+        if (r.passphrase) html += field('Seed passphrase', r.passphrase);
 
         if (r.spendSecretKey) html += field('Private spend key', r.spendSecretKey);
         html += field('Private view key', r.viewSecretKey);
@@ -247,6 +327,8 @@
         pwList.disabled = state;
         kdfInput.disabled = state;
         netSelect.disabled = state;
+        if (cakeToggle) cakeToggle.disabled = state;
+        [cakeSalt, cakeShortKey, cakeEncPw, cakePinSecret, cakeEncPin, cakePinBtn, cakePwBtn].forEach(function (el) { if (el) el.disabled = state; });
         if (state) { progressWrap.classList.remove('display-none'); progressBar.classList.remove('indet'); }
     }
 
@@ -268,6 +350,7 @@
     async function run() {
         if (running) return;
         if (!fileBytes) { showToast('Choose a .keys file first'); return; }
+        if (cakeMode()) { return runCake(); }
 
         var passwords = parsePasswords();
         var total = passwords.length;
@@ -359,6 +442,87 @@
             progressStatus.textContent = 'Done — no matching password (' + fmtTime(secs) + ')';
             log('\n✗ None of the ' + total + ' passwords matched.', 'log-err');
             renderFail('Tested ' + total + (total === 1 ? ' password' : ' passwords') + ' with no match. Check the password/list, KDF rounds, and that the file is correct.');
+        }
+
+        setRunning(false);
+    }
+
+    /* ---------- run: Cake Wallet mode ----------
+       No dictionary attack — the password is derived deterministically from the
+       encrypted keychain blob + the two secret constants, then fed into the same
+       CryptoNight → ChaCha20 → epee pipeline as a Monero GUI wallet. */
+    async function runCake() {
+        var salt = cakeSalt.value;
+        var shortKey = cakeShortKey.value;
+        var encPw = cakeEncPw.value.trim();
+        var pinSecret = cakePinSecret.value;
+        var encPin = cakeEncPin.value.trim();
+
+        if (!salt || !shortKey) { showToast('Enter both the wallet salt and short key'); return; }
+        if (!encPw) { showToast('Paste the encrypted wallet password'); return; }
+
+        var kdf = parseInt(kdfInput.value, 10);
+        if (!(kdf >= 1) || kdf > 1000) kdf = 1;
+        var netVal = netSelect.value;
+        var netOverride = (netVal === 'auto') ? null : parseInt(netVal, 10);
+
+        stopRequested = false;
+        setRunning(true);
+        resultPanel.classList.add('display-none');
+        resultPanel.innerHTML = '';
+        progressBar.style.width = '0%';
+        clearOutput();
+        log('Cake Wallet mode — deriving the wallet password…', 'log-muted');
+
+        var t0 = performance.now();
+        try {
+            // 1) derive the real .keys password from the encrypted keychain blob
+            var pwBytes = MK.cakeDerivePassword(encPw, shortKey, salt);
+            progressStatus.textContent = 'Password derived. Deriving key via CryptoNight…';
+            progressBar.style.width = '25%';
+            await yieldToUI();
+
+            // 2) same pipeline as Monero GUI: cn_slow_hash(password) → ChaCha20 → JSON
+            var key = MK.deriveChachaKey(pwBytes, kdf, cnHash);
+            progressBar.style.width = '55%';
+            var outer = MK.decryptOuter(fileBytes, key);
+            progressStatus.textContent = 'Match! Unmasking secret keys (CryptoNight)…';
+            progressBar.style.width = '70%';
+            await yieldToUI();
+
+            // 3) extract keys / address / seed / polyseed / passphrase
+            var res = MK.extractKeys(outer.obj, key, cnHash, netOverride, WORDS);
+            res.cipher = outer.cipher;
+            res.cake = true;
+            try { res.derivedPassword = new TextDecoder('utf-8', { fatal: false }).decode(pwBytes); }
+            catch (e) { res.derivedPassword = String.fromCharCode.apply(null, pwBytes); }
+
+            // 4) optional PIN
+            if (encPin || pinSecret) {
+                if (encPin && pinSecret) {
+                    try { res.pin = MK.cakeDecryptPin(encPin, pinSecret); }
+                    catch (e) { res.pinError = e.message; }
+                } else {
+                    res.pinError = 'Provide both the PIN secret and the encrypted PIN password to decode the PIN.';
+                }
+            }
+
+            progressBar.style.width = '100%';
+            var secs = (performance.now() - t0) / 1000;
+            progressStatus.textContent = 'Done — wallet unlocked (' + fmtTime(secs) + ')';
+            log('\n✓ Wallet unlocked', 'log-hit');
+            log('Derived password: ' + res.derivedPassword, 'log-ok');
+            if (res.mnemonic) log('Seed: ' + res.mnemonic, 'log-ok');
+            if (res.polyseed) log('Polyseed: ' + res.polyseed, 'log-ok');
+            log('Address: ' + res.address, 'log-ok');
+            if (res.pin) log('PIN: ' + res.pin, 'log-ok');
+            renderResult(res, res.derivedPassword, 1, 1);
+        } catch (e) {
+            progressBar.style.width = '100%';
+            var secs2 = (performance.now() - t0) / 1000;
+            progressStatus.textContent = 'Failed (' + fmtTime(secs2) + ')';
+            log('\n✗ ' + e.message, 'log-err');
+            renderFail(e.message + '  Check the wallet salt, short key and encrypted password — and that the .keys file is a Cake Wallet file.');
         }
 
         setRunning(false);
