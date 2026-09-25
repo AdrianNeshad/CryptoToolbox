@@ -252,10 +252,22 @@ main {
 
 #file-name {
     font-size: 12.5px;
-    color: var(--text-muted);
+    color: var(--success);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+}
+
+#file-hint {
+    font-size: 12px;
+    color: var(--text-muted);
+    opacity: 0.7;
+    white-space: nowrap;
+}
+
+/* Hide the hint once a file is loaded (a name is shown instead) */
+.toolbar-left.has-file #file-hint {
+    display: none;
 }
 
 #file-name.error {
@@ -330,6 +342,10 @@ main {
     background: var(--surface);
     border: 1px dashed var(--border);
     border-radius: 12px;
+}
+
+.empty-state.not-found p {
+    color: var(--error);
 }
 
 /* ---------- results ---------- */
@@ -559,6 +575,7 @@ main {
                 <div class="input-toolbar">
                     <div class="toolbar-left">
                         <button id="file-button" type="button">Load file…</button>
+                        <span id="file-hint">Only non-binary file types supported</span>
                         <span id="file-name"></span>
                         <input type="file" id="file-input" hidden>
                     </div>
@@ -4296,6 +4313,7 @@ function render(findings, text) {
 
     if (!text || !text.trim()) {
         emptyStateText.textContent = emptyStateDefaultText;
+        emptyState.classList.remove("not-found");
         emptyState.classList.remove("display-none");
         resultsEl.classList.add("display-none");
         resultCount.textContent = "";
@@ -4304,12 +4322,14 @@ function render(findings, text) {
 
     if (findings.length === 0) {
         emptyStateText.textContent = "No crypto-related content found";
+        emptyState.classList.add("not-found");
         emptyState.classList.remove("display-none");
         resultsEl.classList.add("display-none");
         resultCount.textContent = "0 matches";
         return;
     }
 
+    emptyState.classList.remove("not-found");
     emptyState.classList.add("display-none");
     resultsEl.classList.remove("display-none");
 
@@ -4391,6 +4411,8 @@ function setFileName(text, isError) {
     fileNameEl.textContent = text;
     fileNameEl.classList.toggle("error", !!isError);
     fileNameEl.title = text;
+    var toolbarLeft = fileNameEl.parentNode;
+    if (toolbarLeft) toolbarLeft.classList.toggle("has-file", !!text);
 }
 
 function hasNulByte(sample) {
