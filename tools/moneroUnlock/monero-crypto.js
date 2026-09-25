@@ -219,7 +219,7 @@
     }
 
     /* ---------- AES-128/192/256 (encrypt only — used to build the CTR keystream) ----------
-       Cake Wallet stores the real .keys password AES-CTR-encrypted (PKCS#7-padded)
+       Custom-mode wallets store the real .keys password AES-CTR-encrypted (PKCS#7-padded)
        in the keychain. The CTR key is (short_key + wallet_salt); nonce/IV = 16 zero
        bytes, counter incremented big-endian — matching PyCryptodome
        AES.MODE_CTR(nonce=b'\\x00'*8, initial_value=b'\\x00'*8) and OpenSSL aes-*-ctr. */
@@ -296,10 +296,10 @@
             throw new Error(label + ' must be 16, 24 or 32 bytes for AES (got ' + keyBytes.length + ' bytes).');
     }
 
-    /* ---------- Cake Wallet: derive the real .keys password ----------
+    /* ---------- Custom mode: derive the real .keys password ----------
        key = utf8(short_key + wallet_salt); plaintext = pkcs7_unpad(AES-CTR(enc_password)).
        Returns the raw password bytes to feed into deriveChachaKey (same pipeline as Monero GUI). */
-    function cakeDerivePassword(encPasswordB64, shortKey, walletSalt) {
+    function customDerivePassword(encPasswordB64, shortKey, walletSalt) {
         var keyBytes = utf8ToBytes(String(shortKey) + String(walletSalt));
         aesKeyLenGuard(keyBytes, 'short key + wallet salt');
         var ct = base64ToBytes(encPasswordB64);
@@ -309,10 +309,10 @@
         catch (e) { throw new Error('Could not derive the wallet password — check the short key and wallet salt. (' + e.message + ')'); }
     }
 
-    /* ---------- Cake Wallet: decode the wallet PIN (optional) ----------
+    /* ---------- Custom mode: decode the wallet PIN (optional) ----------
        key = utf8(pin_secret); plaintext = pkcs7_unpad(AES-CTR(enc_pin)); the plaintext is
        (pin_secret || pin) so the PIN is the tail after the pin_secret prefix. */
-    function cakeDecryptPin(pinCodeB64, pinSecret) {
+    function customDecryptPin(pinCodeB64, pinSecret) {
         var keyBytes = utf8ToBytes(String(pinSecret));
         aesKeyLenGuard(keyBytes, 'PIN secret');
         var ct = base64ToBytes(pinCodeB64);
@@ -377,13 +377,13 @@
         var viewSec = mk.m_view_secret_key ? mk.m_view_secret_key.slice() : new Uint8Array(32);
         var encIv = mk.m_encryption_iv;
         var encrypted = Number(obj.encrypted_secret_keys || 0) === 1;
-        var polyseed = null, passphrase = null;   // Cake Wallet extras (absent in Monero GUI files)
+        var polyseed = null, passphrase = null;   // Custom-mode wallet extras (absent in Monero GUI files)
 
         if (encrypted) {
             var ivb = (encIv && encIv.length === 8) ? encIv : new Uint8Array(8);
             var dd = new Uint8Array(33); dd.set(key, 0); dd[32] = 0x6b; // config::HASH_KEY_MEMORY = 'k'
             var derived = cnHash(dd);
-            // Cake Wallet appends m_polyseed and m_passphrase to the same continuous
+            // Custom-mode wallets append m_polyseed and m_passphrase to the same continuous
             // ChaCha20 keystream, in field order: [spend 32][view 32][polyseed][passphrase].
             var encPoly = mk.m_polyseed, encPass = mk.m_passphrase;
             var polyLen = encPoly ? encPoly.length : 0, passLen = encPass ? encPass.length : 0;
@@ -447,8 +447,8 @@
         pkcs7Unpad: pkcs7Unpad,
         base64ToBytes: base64ToBytes,
         utf8ToBytes: utf8ToBytes,
-        cakeDerivePassword: cakeDerivePassword,
-        cakeDecryptPin: cakeDecryptPin,
+        customDerivePassword: customDerivePassword,
+        customDecryptPin: customDecryptPin,
         NET_BYTE: NET_BYTE, NET_NAME: NET_NAME
     };
 })(typeof window !== 'undefined' ? window : this);

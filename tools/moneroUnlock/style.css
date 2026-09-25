@@ -424,25 +424,14 @@ input[type="number"]:focus { border-color: var(--accent); }
 }
 .pw-toggle:hover { background: var(--border); }
 
-/* Advanced collapsible */
-details.advanced {
+/* Custom section (toggle + options) */
+.custom-section {
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: 12px;
     padding: 4px 16px;
     margin-bottom: 16px;
 }
-details.advanced summary {
-    cursor: pointer;
-    padding: 12px 0;
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--text);
-    list-style: none;
-}
-details.advanced summary::-webkit-details-marker { display: none; }
-details.advanced summary::before { content: "▸ "; color: var(--text-muted); }
-details.advanced[open] summary::before { content: "▾ "; }
 .advanced-grid {
     display: flex;
     gap: 16px;
@@ -532,14 +521,12 @@ select:focus { border-color: var(--accent); }
     100% { margin-left: 100%; }
 }
 
-/* ============ Cake Wallet mode ============ */
-.cake-toggle {
+/* ============ Custom mode ============ */
+.custom-toggle {
     display: flex;
     align-items: center;
     gap: 10px;
-    padding: 12px 0 8px;
-    margin-top: 6px;
-    border-top: 1px solid var(--border);
+    padding: 12px 0;
     font-size: 14px;
     font-weight: 600;
     color: var(--text);
@@ -547,7 +534,7 @@ select:focus { border-color: var(--accent); }
     user-select: none;
 }
 /* iOS-style toggle switch */
-.cake-toggle input[type="checkbox"] {
+.custom-toggle input[type="checkbox"] {
     position: absolute;
     opacity: 0;
     width: 1px;
@@ -555,7 +542,7 @@ select:focus { border-color: var(--accent); }
     margin: 0;
     pointer-events: none;
 }
-.cake-toggle .switch {
+.custom-toggle .switch {
     flex: none;
     position: relative;
     width: 44px;
@@ -564,7 +551,7 @@ select:focus { border-color: var(--accent); }
     background: var(--border-hover);
     transition: background 0.2s ease;
 }
-.cake-toggle .switch::after {
+.custom-toggle .switch::after {
     content: "";
     position: absolute;
     top: 2px;
@@ -576,28 +563,29 @@ select:focus { border-color: var(--accent); }
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
     transition: transform 0.2s ease;
 }
-.cake-toggle input:checked ~ .switch { background: var(--success); }
-.cake-toggle input:checked ~ .switch::after { transform: translateX(18px); }
-.cake-toggle input:focus-visible ~ .switch {
+.custom-toggle input:checked ~ .switch { background: var(--accent); }
+.custom-toggle input:checked ~ .switch::after { transform: translateX(18px); }
+.custom-toggle input:focus-visible ~ .switch {
     outline: 2px solid var(--accent);
     outline-offset: 2px;
 }
-.cake-toggle:hover .switch { filter: brightness(1.08); }
-.cake-toggle-text { flex: 1 1 auto; }
-.cake-toggle code { font-weight: 600; }
+.custom-toggle:hover .switch { filter: brightness(1.08); }
+.custom-toggle-text { flex: 1 1 auto; }
+.custom-toggle code { font-weight: 600; }
 
-.cake-panel {
-    padding: 6px 0 12px;
+.custom-panel {
+    padding: 12px 0;
+    border-top: 1px solid var(--border);
 }
-.cake-field { margin-bottom: 12px; }
-.cake-field label {
+.custom-field { margin-bottom: 12px; }
+.custom-field label {
     display: block;
     font-size: 12px;
     color: var(--text-muted);
     margin-bottom: 6px;
     font-weight: 600;
 }
-.cake-textarea {
+.custom-textarea {
     width: 100%;
     min-height: 66px;
     margin-top: 0;
@@ -613,7 +601,7 @@ select:focus { border-color: var(--accent); }
     resize: vertical;
     word-break: break-all;
 }
-.cake-textarea:focus { border-color: var(--accent); }
+.custom-textarea:focus { border-color: var(--accent); }
 
 .req {
     font-size: 10px;
@@ -624,43 +612,43 @@ select:focus { border-color: var(--accent); }
     margin-left: 4px;
 }
 
-.cake-pin {
+.custom-pin {
     border: 1px solid var(--border);
     border-radius: 10px;
     padding: 12px 14px 4px;
     margin-top: 4px;
 }
-.cake-pin-title {
+.custom-pin-title {
     font-size: 13px;
     font-weight: 600;
     color: var(--text);
     margin-bottom: 4px;
 }
-.cake-pin .advanced-grid { padding: 0 0 10px; }
+.custom-pin .advanced-grid { padding: 0 0 10px; }
 
-.cake-pin-actions {
+.custom-pin-actions {
     display: flex;
     align-items: center;
     gap: 12px;
     flex-wrap: wrap;
     margin: 4px 0 10px;
 }
-#cake-pin-btn { flex: none; min-width: 0; }
-.cake-pin-result {
+#custom-pin-btn { flex: none; min-width: 0; }
+.custom-pin-result {
     font-family: Consolas, Monaco, monospace;
     font-size: 13px;
     font-weight: 600;
     word-break: break-all;
 }
-.cake-pin-result.ok { color: var(--success); }
-.cake-pin-result.err { color: var(--error); }
+.custom-pin-result.ok { color: var(--success); }
+.custom-pin-result.err { color: var(--error); }
 
-/* Step 2 dimmed while Cake mode is on */
+/* Step 2 dimmed while Custom mode is on */
 .panel.pw-disabled {
     opacity: 0.5;
     pointer-events: none;
 }
-.cake-note {
+.custom-note {
     font-size: 12px;
     color: var(--accent);
     font-weight: 600;

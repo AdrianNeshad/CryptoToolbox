@@ -33,8 +33,6 @@
             <h1>Monero .keys Unlock</h1>
             <p>Dictionary attack that unlocks a Monero <code>.keys</code> file and extracts the seed phrase and keys &mdash;
                 everything runs locally on your computer.</p>
-            <p><code>.keys</code> files created by Cake Wallet are supported too &mdash; enable <strong>Cake Wallet</strong>
-                under <em>Advanced</em> and supply the wallet salt, short key and the encrypted wallet password.</p>
         </header>
 
         <div class="panel-row">
@@ -72,90 +70,90 @@
 
         </div><!-- /panel-row -->
 
-        <details class="advanced">
-            <summary>Advanced</summary>
-            <div class="advanced-grid">
-                <div class="advanced-field">
-                    <label for="kdf-rounds">KDF rounds</label>
-                    <input type="number" id="kdf-rounds" value="1" min="1" max="100" step="1" autocomplete="off">
-                    <p class="hint" style="margin-top:6px">Almost always <code>1</code>. Only change if the wallet was created
-                        with<code>--kdf-rounds N</code>.</p>
-                </div>
-                <div class="advanced-field">
-                    <label for="net">Network</label>
-                    <select id="net" autocomplete="off">
-                        <option value="auto">Auto (read from file)</option>
-                        <option value="18">Mainnet</option>
-                        <option value="53">Testnet</option>
-                        <option value="24">Stagenet</option>
-                    </select>
-                    <p class="hint" style="margin-top:6px">Controls the address prefix. Auto uses the field in the file.</p>
-                </div>
-            </div>
-
-            <!-- Cake Wallet mode -->
-            <label class="cake-toggle">
-                <input type="checkbox" id="cake-toggle" autocomplete="off">
+        <div class="custom-section">
+            <!-- Custom mode: one toggle opens all options and replaces the password list -->
+            <label class="custom-toggle">
+                <input type="checkbox" id="custom-toggle" autocomplete="off">
                 <span class="switch" aria-hidden="true"></span>
-                <span class="cake-toggle-text">Cake Wallet <code>.keys</code></span>
+                <span class="custom-toggle-text">Custom</span>
             </label>
-            <p class="hint" style="margin:0 0 10px">Cake Wallet does not use a typed password. Instead it stores a random
-                password, AES-encrypted, in the device keychain. Provide the two secret constants (wallet salt + short key)
-                and that wallet's encrypted password to unlock the file. All values stay on your computer.</p>
 
-            <div id="cake-panel" class="cake-panel display-none">
+            <div id="custom-panel" class="custom-panel display-none">
+                <p class="hint" style="margin:0 0 10px">Custom mode does not use a typed password. Instead the wallet stores
+                    a random password, AES-encrypted, in the device keychain. Provide the two secret constants (wallet salt +
+                    short key) and that wallet's encrypted password to unlock the file. All values stay on your computer.</p>
+
                 <div class="advanced-grid">
                     <div class="advanced-field">
-                        <label for="cake-salt">Wallet salt <span class="req">required</span></label>
-                        <input type="text" class="text-input" id="cake-salt" spellcheck="false" autocomplete="off"
+                        <label for="kdf-rounds">KDF rounds</label>
+                        <input type="number" id="kdf-rounds" value="1" min="1" max="100" step="1" autocomplete="off">
+                        <p class="hint" style="margin-top:6px">Almost always <code>1</code>. Only change if the wallet was created
+                            with <code>--kdf-rounds N</code>.</p>
+                    </div>
+                    <div class="advanced-field">
+                        <label for="net">Network</label>
+                        <select id="net" autocomplete="off">
+                            <option value="auto">Auto (read from file)</option>
+                            <option value="18">Mainnet</option>
+                            <option value="53">Testnet</option>
+                            <option value="24">Stagenet</option>
+                        </select>
+                        <p class="hint" style="margin-top:6px">Controls the address prefix. Auto uses the field in the file.</p>
+                    </div>
+                </div>
+
+                <div class="advanced-grid">
+                    <div class="advanced-field">
+                        <label for="custom-salt">Wallet salt <span class="req">required</span></label>
+                        <input type="text" class="text-input" id="custom-salt" spellcheck="false" autocomplete="off"
                             placeholder="secret wallet salt">
                     </div>
                     <div class="advanced-field">
-                        <label for="cake-shortkey">Short key <span class="req">required</span></label>
-                        <input type="text" class="text-input" id="cake-shortkey" spellcheck="false" autocomplete="off"
+                        <label for="custom-shortkey">Short key <span class="req">required</span></label>
+                        <input type="text" class="text-input" id="custom-shortkey" spellcheck="false" autocomplete="off"
                             placeholder="secret short key">
                     </div>
                 </div>
                 <p class="hint" style="margin:0 0 6px">Short key + wallet salt together form the AES key (must total 16, 24
                     or 32 characters).</p>
 
-                <div class="cake-field">
-                    <label for="cake-encpw">Encrypted wallet password <span class="req">required</span></label>
-                    <textarea id="cake-encpw" class="cake-textarea" spellcheck="false" autocomplete="off"
+                <div class="custom-field">
+                    <label for="custom-encpw">Encrypted wallet password <span class="req">required</span></label>
+                    <textarea id="custom-encpw" class="custom-textarea" spellcheck="false" autocomplete="off"
                         placeholder="base64 MONERO_WALLET_PASSWORD from the keychain dump"></textarea>
                 </div>
-                <div class="cake-pin-actions">
-                    <button type="button" class="secondary" id="cake-pw-btn">Derive password</button>
-                    <span id="cake-pw-result" class="cake-pin-result"></span>
+                <div class="custom-pin-actions">
+                    <button type="button" class="secondary" id="custom-pw-btn">Derive password</button>
+                    <span id="custom-pw-result" class="custom-pin-result"></span>
                 </div>
                 <p class="hint" style="margin:0 0 12px">Turns the encrypted password into the plaintext wallet password
                     using only the short key and wallet salt &mdash; no <code>.keys</code> file needed.</p>
 
-                <div class="cake-pin">
-                    <div class="cake-pin-title">PIN code (optional)</div>
+                <div class="custom-pin">
+                    <div class="custom-pin-title">PIN code (optional)</div>
                     <p class="hint" style="margin:8px 0">Recover the wallet PIN from the PIN secret and the encrypted PIN
                         password. This is standalone &mdash; click <em>Decode PIN</em> to decode it on its own, with no
                         <code>.keys</code> file or wallet unlock needed. It is also included automatically when you run a
                         full unlock.</p>
                     <div class="advanced-grid">
                         <div class="advanced-field">
-                            <label for="cake-pinsecret">PIN secret</label>
-                            <input type="text" class="text-input" id="cake-pinsecret" spellcheck="false"
+                            <label for="custom-pinsecret">PIN secret</label>
+                            <input type="text" class="text-input" id="custom-pinsecret" spellcheck="false"
                                 autocomplete="off" placeholder="secret pin constant">
                         </div>
                     </div>
-                    <div class="cake-field">
-                        <label for="cake-encpin">Encrypted PIN password</label>
-                        <textarea id="cake-encpin" class="cake-textarea" spellcheck="false" autocomplete="off"
+                    <div class="custom-field">
+                        <label for="custom-encpin">Encrypted PIN password</label>
+                        <textarea id="custom-encpin" class="custom-textarea" spellcheck="false" autocomplete="off"
                             placeholder="base64 PIN_CODE_PASSWORD from the keychain dump"></textarea>
                     </div>
-                    <div class="cake-pin-actions">
-                        <button type="button" class="secondary" id="cake-pin-btn">Decode PIN</button>
-                        <span id="cake-pin-result" class="cake-pin-result"></span>
+                    <div class="custom-pin-actions">
+                        <button type="button" class="secondary" id="custom-pin-btn">Decode PIN</button>
+                        <span id="custom-pin-result" class="custom-pin-result"></span>
                     </div>
                 </div>
             </div>
-        </details>
+        </div>
 
         <div class="info-box">
             Each password requires a <strong>CryptoNight</strong> computation (~0.5&ndash;1 s per password). Monero is
