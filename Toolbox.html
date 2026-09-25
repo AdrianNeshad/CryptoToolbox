@@ -32,7 +32,7 @@
                 <div class="sidebar-header-text">
                     <h1>Crypto Toolbox</h1>
                     <div class="version-row">
-                        <p>Version 3.3</p>
+                        <p>Version 3.4</p>
                         <div id="net-status" class="net-status">
                             <span id="net-status-text"></span>
                         </div>
@@ -128,7 +128,7 @@
                         </span>
                         <span class="nav-item-text">
                             <span class="nav-item-title">JSON Formatter</span>
-                            <span class="nav-item-desc">Compact JSON to Pretty Print</span>
+                            <span class="nav-item-desc">Format different JSON structures</span>
                         </span>
                     </button>
 
@@ -142,7 +142,7 @@
                         </span>
                         <span class="nav-item-text">
                             <span class="nav-item-title">Time Converter</span>
-                            <span class="nav-item-desc">Unix, Apple NSDate, WebKit, FILETIME, etc.</span>
+                            <span class="nav-item-desc">Convert timestamp formats</span>
                         </span>
                     </button>
 
@@ -392,15 +392,31 @@
 
                     <button class="nav-item" data-type="frame" data-src="documentation/bitcoin.pdf">
                         <span class="nav-item-icon nav-item-icon--doc">
-                            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M5 4.5C5 3.67 5.67 3 6.5 3H18a1 1 0 0 1 1 1v15.5a1 1 0 0 1-1 1H6.5A1.5 1.5 0 0 0 5 22V4.5ZM5 22h13"
-                                    stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
-                                <path d="M8 7h7M8 10h7M8 13h5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+                            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <text x="12" y="12.5" text-anchor="middle" dominant-baseline="central"
+                                    fill="currentColor"
+                                    font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-weight="700"
+                                    font-size="22">&#8383;</text>
                             </svg>
                         </span>
                         <span class="nav-item-text">
                             <span class="nav-item-title">Bitcoin (Satoshi Nakamoto)</span>
                             <span class="nav-item-desc">A Peer-to-Peer Electronic Cash System</span>
+                        </span>
+                    </button>
+                    
+                    <button class="nav-item" data-type="frame" data-src="documentation/ethereum.pdf">
+                        <span class="nav-item-icon nav-item-icon--doc">
+                            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12 2L5.5 12.2L12 16L18.5 12.2L12 2Z" stroke="currentColor" stroke-width="1.5"
+                                    stroke-linejoin="round" />
+                                <path d="M5.5 13.5L12 22L18.5 13.5L12 17.3L5.5 13.5Z" stroke="currentColor" stroke-width="1.5"
+                                    stroke-linejoin="round" />
+                            </svg>
+                        </span>
+                        <span class="nav-item-text">
+                            <span class="nav-item-title">Ethereum (Vitalik Buterin)</span>
+                            <span class="nav-item-desc">A Decentralized Application Platform</span>
                         </span>
                     </button>
                 
@@ -491,7 +507,7 @@
         <main class="content">
 
             <div id="content-placeholder" class="content-placeholder">
-                <h2>CryptoToolbox</h2>
+                <h2>Crypto Toolbox</h2>
                 <p>Click a tool in the list on the left to open it here</p>
 
                 <div class="good-to-know">

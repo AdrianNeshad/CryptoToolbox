@@ -19,13 +19,13 @@
 }
 
 [data-theme="light"] {
-    --bg: #dedee4;
-    --surface: #ffffff;
-    --surface-hover: #e8e8ed;
-    --border: #d2d2d7;
-    --border-hover: #b6b6bd;
+    --bg: #efeff2;
+    --surface: #fafafb;
+    --surface-hover: #ededf0;
+    --border: #dadade;
+    --border-hover: #c2c2c8;
     --text: #1d1d1f;
-    --text-muted: #6e6e73;
+    --text-muted: #66666c;
     --accent: #007aff;
     --accent-hover: #0066d6;
     --accent-soft: rgba(0, 122, 255, 0.12);
@@ -35,7 +35,7 @@
     --error: #ff3b30;
     --error-soft: rgba(255, 59, 48, 0.1);
     --warn: #9a6200;
-    --code-bg: #f2f2f6;
+    --code-bg: #f2f2f5;
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }

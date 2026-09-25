@@ -396,8 +396,6 @@ const fileName = $('file-name');
 const dataInput = $('data-input');
 const detectTag = $('detect-tag');
 const profileSelect = $('profile-select');
-const digitsInput = $('digits-input');
-const rangeHint = $('range-hint');
 const runBtn = $('run-btn');
 const stopBtn = $('stop-btn');
 const progressWrap = $('progress-wrap');
@@ -442,12 +440,8 @@ function showToast(text) {
 /* ---------- helpers ---------- */
 function pow10(n) { return Math.pow(10, n); }
 
-function readDigits() {
-    let d = parseInt(digitsInput.value, 10);
-    if (!Number.isInteger(d) || d < 1) d = 6;
-    if (d > 9) d = 9;
-    return d;
-}
+// The Light Wallet passcode is always 6 digits, so the sweep is fixed at 000000–999999.
+const PASSCODE_DIGITS = 6;
 
 function fmtDuration(sec) {
     if (!isFinite(sec) || sec < 0) return '?';
@@ -458,7 +452,7 @@ function fmtDuration(sec) {
     return (h ? h + 'h ' : '') + (h || m ? m + 'm ' : '') + s + 's';
 }
 
-/* ---------- live detection tag + range hint ---------- */
+/* ---------- live detection tag ---------- */
 function updateDetect() {
     const raw = dataInput.value.trim();
     detectTag.className = 'detect-tag';
@@ -481,18 +475,7 @@ function updateDetect() {
     }
 }
 
-function updateRangeHint() {
-    const d = readDigits();
-    const max = pow10(d) - 1;
-    const total = pow10(d);
-    const minStr = '0'.repeat(d);
-    const maxStr = String(max).padStart(d, '0');
-    rangeHint.innerHTML = 'Will sweep <code>' + minStr + '</code> … <code>' + maxStr + '</code> (' +
-        total.toLocaleString('en-US').replace(/,/g, ' ') + ' codes).';
-}
-
 dataInput.addEventListener('input', updateDetect);
-digitsInput.addEventListener('input', updateRangeHint);
 profileSelect.addEventListener('change', updateDetect);
 
 /* ---------- file load ---------- */
@@ -526,7 +509,6 @@ function setRunning(state) {
     fileBtn.disabled = state;
     dataInput.disabled = state;
     profileSelect.disabled = state;
-    digitsInput.disabled = state;
 }
 
 function showResult(success, titleText, fields) {
@@ -683,7 +665,7 @@ async function run() {
     }
 
     const profiles = resolveProfiles(profileSelect.value, target.detected);
-    const digits = readDigits();
+    const digits = PASSCODE_DIGITS;
     const min = 0;
     const max = pow10(digits) - 1;
     const pad = Math.max(digits, String(max).length);
@@ -777,8 +759,7 @@ async function run() {
             {
                 label: 'Result',
                 value: 'Swept ' + total.toLocaleString('en-US') + ' codes with no match. If you pasted a bare wallet ' +
-                    'key as raw hex, try scheme "Both"; if the passcode is not ' + digits + (digits === 1 ? ' digit' : ' digits') +
-                    ', change the length.',
+                    'key as raw hex, try scheme "Both".',
                 copy: false,
             },
         ]);
@@ -833,7 +814,6 @@ async function presentResult(found, walletMeta) {
 }
 
 /* ---------- init ---------- */
-updateRangeHint();
 
 /* ---------- theme sync with CryptoToolbox ---------- */
 window.addEventListener('message', function (event) {

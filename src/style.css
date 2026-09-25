@@ -1,6 +1,7 @@
 :root {
     --bg: #1e1e23;
     --surface: #26262b;
+    --sidebar: #26262b;
     --surface-hover: rgba(255, 255, 255, 0.06);
     --surface-active: rgba(255, 255, 255, 0.1);
     --border: rgba(255, 255, 255, 0.09);
@@ -22,14 +23,15 @@
 
 /* --- Light theme overrides (default is dark, see body below) --- */
 [data-theme="light"] {
-    --bg: #dedee4;
-    --surface: #ebebef;
+    --bg: #efeff2;
+    --surface: #fafafb;
+    --sidebar: #e6e6ea;
     --surface-hover: rgba(0, 0, 0, 0.045);
     --surface-active: rgba(0, 0, 0, 0.08);
     --border: rgba(0, 0, 0, 0.1);
     --border-hover: rgba(0, 0, 0, 0.18);
     --text: #1d1d1f;
-    --text-muted: #6e6e73;
+    --text-muted: #66666c;
     --accent: #007aff;
     --accent-hover: #0066d6;
     --accent-soft: rgba(0, 122, 255, 0.12);
@@ -72,7 +74,7 @@ body {
     display: flex;
     flex-direction: column;
     height: 100vh;
-    background: var(--surface);
+    background: var(--sidebar);
     border-right: 1px solid var(--border);
     overflow: hidden;
     transition: width 0.22s ease, opacity 0.18s ease;
