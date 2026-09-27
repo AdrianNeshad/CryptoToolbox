@@ -1,11 +1,19 @@
-// This file expects a global array `window.bipWords` from bip39_english.js
+// This file expects a global array `window.bipWords`. English (bip39_english.js)
+// is loaded up front in the page <head>; other languages are loaded on demand
+// when picked from the language dropdown.
 
 const grid = document.getElementById("word-grid");
 const emptyState = document.getElementById("empty-state");
 const resultCount = document.getElementById("result-count");
 const searchInput = document.getElementById("search-input");
+const languageSelect = document.getElementById("language-select");
 
-const wordlist = window.bipWords || [];
+let wordlist = window.bipWords || [];
+
+// Cache of already-loaded wordlists, keyed by language value. English is the
+// default and is available immediately.
+const wordlistCache = { english: wordlist };
+let currentLang = "english";
 
 function escapeHtml(str) {
     return str.replace(/[&<>"']/g, (c) => ({
@@ -17,13 +25,49 @@ function escapeHtml(str) {
     }[c]));
 }
 
+// Fold a single character for searching: decompose (NFD) and strip Latin
+// combining diacritics, then lowercase. The official BIP39 wordlists are stored
+// in decomposed (NFD) form and typed input is usually composed (NFC), so folding
+// both sides lets a query match regardless of normalization. It also makes
+// accents optional (e.g. "abaco" matches "ábaco"), which is what the BIP39 spec
+// recommends for languages like Spanish and French. Non-Latin combining marks
+// (e.g. Japanese dakuten, Hangul jamo) are left intact, so those scripts still
+// match exactly and consistently.
+function foldChar(ch) {
+    return ch.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+}
+
+function foldForSearch(str) {
+    return str.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+}
+
 function highlight(word, query) {
-    if (!query) return escapeHtml(word);
-    const idx = word.toLowerCase().indexOf(query.toLowerCase());
+    const foldedQuery = foldForSearch(query);
+    if (!foldedQuery) return escapeHtml(word);
+
+    // Build the folded form of the word plus a map from each folded position
+    // back to the index of the original character that produced it, so the
+    // highlight lands on the right (accented) characters.
+    let folded = "";
+    const map = [];
+    for (let i = 0; i < word.length; i++) {
+        const f = foldChar(word[i]);
+        for (let j = 0; j < f.length; j++) {
+            folded += f[j];
+            map.push(i);
+        }
+    }
+
+    const idx = folded.indexOf(foldedQuery);
     if (idx === -1) return escapeHtml(word);
-    const before = escapeHtml(word.slice(0, idx));
-    const match = escapeHtml(word.slice(idx, idx + query.length));
-    const after = escapeHtml(word.slice(idx + query.length));
+
+    const startOrig = map[idx];
+    const endFolded = idx + foldedQuery.length;
+    const endOrig = endFolded < map.length ? map[endFolded] : word.length;
+
+    const before = escapeHtml(word.slice(0, startOrig));
+    const match = escapeHtml(word.slice(startOrig, endOrig));
+    const after = escapeHtml(word.slice(endOrig));
     return `${before}<mark>${match}</mark>${after}`;
 }
 
@@ -47,12 +91,64 @@ function renderWords(words, query) {
 }
 
 function onSearchInput() {
-    const query = searchInput.value.trim().toLowerCase();
-    const filtered = query
-        ? wordlist.filter((w) => w.toLowerCase().includes(query))
+    const rawQuery = searchInput.value.trim();
+    const foldedQuery = foldForSearch(rawQuery);
+    const filtered = foldedQuery
+        ? wordlist.filter((w) => foldForSearch(w).includes(foldedQuery))
         : wordlist;
-    renderWords(filtered, query);
+    renderWords(filtered, rawQuery);
 }
+
+// Switch the active wordlist. Clears the current search so the full new list
+// is shown, then re-renders.
+function applyWordlist(words) {
+    wordlist = words;
+    searchInput.value = "";
+    if (wordlist.length === 0) {
+        resultCount.textContent = "Could not find the word list (window.bipWords is missing).";
+        grid.classList.add("display-none");
+        emptyState.classList.remove("display-none");
+    } else {
+        renderWords(wordlist, "");
+    }
+}
+
+// Load a language wordlist by injecting its script file. Script tags work over
+// the file:// protocol (unlike fetch), which keeps the tool fully offline.
+function loadLanguage(lang) {
+    currentLang = lang;
+
+    if (wordlistCache[lang]) {
+        applyWordlist(wordlistCache[lang]);
+        return;
+    }
+
+    resultCount.textContent = "Loading…";
+    const script = document.createElement("script");
+    script.src = "./bip39_" + lang + ".js";
+    script.onload = function () {
+        const words = window.bipWords || [];
+        wordlistCache[lang] = words;
+        // Only apply if this is still the language the user wants (guards
+        // against fast switching between languages).
+        if (currentLang === lang) applyWordlist(words);
+    };
+    script.onerror = function () {
+        if (currentLang !== lang) return;
+        resultCount.textContent = "Could not load the selected word list.";
+        grid.classList.add("display-none");
+        emptyState.classList.remove("display-none");
+    };
+    document.head.appendChild(script);
+}
+
+function onLanguageChange() {
+    loadLanguage(languageSelect.value);
+}
+
+// Always start on English, regardless of any option the browser may have
+// restored on reload.
+if (languageSelect) languageSelect.value = "english";
 
 if (wordlist.length === 0) {
     resultCount.textContent = "Could not find the word list (window.bipWords is missing).";

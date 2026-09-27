@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1.0">
-    <title>BIP39 - Word List</title>
+    <title>BIP39 - Wordlist</title>
     <script>
         (function () {
             try {
@@ -30,8 +30,8 @@
     <main>
 
         <header class="page-header">
-            <h1>BIP39 Word List</h1>
-            <p>Search and browse the BIP39 word list's 2048 words</p>
+            <h1>BIP39 Wordlist</h1>
+            <p>Search and browse all the 2048 words of the BIP39 standard</p>
         </header>
 
         <div class="search-bar">
@@ -42,7 +42,21 @@
             <input type="text" id="search-input" placeholder="Search words..." oninput="onSearchInput()" autocomplete="off">
         </div>
 
-        <div class="result-count" id="result-count"></div>
+        <div class="controls-bar">
+            <select id="language-select" class="language-select" onchange="onLanguageChange()">
+                <option value="english" selected>English</option>
+                <option value="chinese_simplified">Chinese (Simplified) · 简体中文</option>
+                <option value="chinese_traditional">Chinese (Traditional) · 繁體中文</option>
+                <option value="czech">Czech · Čeština</option>
+                <option value="french">French · Français</option>
+                <option value="italian">Italian · Italiano</option>
+                <option value="japanese">Japanese · 日本語</option>
+                <option value="korean">Korean · 한국어</option>
+                <option value="portuguese">Portuguese · Português</option>
+                <option value="spanish">Spanish · Español</option>
+            </select>
+            <div class="result-count" id="result-count"></div>
+        </div>
 
         <div class="word-grid" id="word-grid"></div>
 

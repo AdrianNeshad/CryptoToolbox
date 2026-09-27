@@ -629,6 +629,7 @@ main {
                 <ul>
                     <li>BIP39 mnemonic (checksum)</li>
                     <li>Electrum seed phrases (version prefix)</li>
+                    <li>Monero polyseed (16 words, checksum)</li>
                     <li>BIP32 derivation paths</li>
                     <li>Entropy (hex, decimal, JSON object)</li>
                 </ul>
@@ -852,6 +853,38 @@ main {
             witnessVersion: null,
             program: raw ? new Uint8Array(raw) : new Uint8Array(0)
         };
+    }
+
+    // Structural check for a Bitcoin-family segwit/taproot address, IGNORING the
+    // checksum. Returns {hrp, witnessVersion} when the string has a known segwit
+    // hrp, consistent case, a valid separator position, only bech32 charset
+    // characters, a plausible program length and a valid witness version (0-16) -
+    // otherwise null. This lets the caller flag addresses that look right but fail
+    // the bech32/bech32m checksum, the same way a bad EIP-55 casing is flagged.
+    function segwitAddressStructure(str) {
+        if (!str || str.length < 8 || str.length > 90) return null;
+        var lower = str.toLowerCase();
+        var upper = str.toUpperCase();
+        if (str !== lower && str !== upper) return null; // mixed case is never valid bech32
+        str = lower;
+
+        var pos = str.lastIndexOf("1");
+        if (pos < 1 || pos + 7 > str.length) return null;
+
+        var hrp = str.substring(0, pos);
+        if (!SEGWIT_HRPS[hrp]) return null;
+
+        var dataChars = str.substring(pos + 1);
+        for (var i = 0; i < dataChars.length; i++) {
+            if (CHARSET.indexOf(dataChars[i]) === -1) return null;
+        }
+
+        var witnessVersion = CHARSET.indexOf(dataChars[0]);
+        if (witnessVersion < 0 || witnessVersion > 16) return null;
+        // remaining data = witness program (>= 1 word) + 6-char checksum
+        if (dataChars.length - 1 - 6 < 1) return null;
+
+        return { hrp: hrp, witnessVersion: witnessVersion };
     }
 
     // ---------- Keccak-256 ----------
@@ -1193,6 +1226,7 @@ main {
         bech32Decode: bech32Decode,
         bech32mDecode: bech32mDecode,
         decodeBech32Address: decodeBech32Address,
+        segwitAddressStructure: segwitAddressStructure,
         convertBits: convertBits,
         keccak256: keccak256,
         checkEip55: checkEip55,
@@ -3461,6 +3495,22 @@ var BIP38_VERSIONS = {
 var BIP39_WORDLIST = (window.entropyWordlists && window.entropyWordlists.bip39) || [];
 var BIP39_LENGTHS = { 12: true, 15: true, 18: true, 21: true, 24: true };
 
+// A Monero polyseed is always 16 words (which is never a valid BIP39 length,
+// so the two formats never collide on word count).
+var POLYSEED_NUM_WORDS = 16;
+
+// A run that is exactly one word short of a valid BIP39 length is treated as a
+// phrase whose last word is missing: the value maps the short length to the
+// full length it is missing a word from.
+var BIP39_ONE_WORD_MISSING = { 11: 12, 14: 15, 17: 18, 20: 21, 23: 24 };
+
+// Word-run lengths worth collecting as mnemonic candidates: valid BIP39 lengths,
+// polyseed (16), and the "one word missing" lengths.
+var MNEMONIC_CANDIDATE_LENGTHS = {
+    11: true, 12: true, 14: true, 15: true, 16: true,
+    17: true, 18: true, 20: true, 21: true, 23: true, 24: true
+};
+
 // Electrum seed phrases are versioned with HMAC-SHA512("Seed version", phrase):
 // the hex prefix of the result indicates the wallet type. Most specific prefix first.
 var ELECTRUM_VERSIONS = [
@@ -3809,9 +3859,39 @@ async function checkElectrumVersion(words) {
     return null;
 }
 
+// Monero polyseed validation. A polyseed is 16 words; its English wordlist is the
+// BIP39 English wordlist unchanged, so a word's BIP39 index doubles as its GF(2048)
+// coefficient. Validity is a single Reed-Solomon check digit: the phrase is valid
+// when the coefficient polynomial evaluated at x = 2 over GF(2048) equals 0. The
+// two functions below are ported byte-for-byte from tevador/polyseed (gf.h) and
+// verified against its Monero test vector. Monero's coin id is 0, so the coin XOR
+// that polyseed_decode applies to coeff[1] is a no-op and is omitted here.
+var POLYSEED_MUL2_TABLE = [5, 7, 1, 3, 13, 15, 9, 11];
+
+function polyseedGfMul2(x) {
+    if (x < 1024) return 2 * x;
+    return POLYSEED_MUL2_TABLE[x % 8] + 16 * Math.floor((x - 1024) / 8);
+}
+
+// Horner's method at x = 2; returns 0 for a valid phrase.
+function polyseedPolyEval(coeff) {
+    var result = coeff[coeff.length - 1];
+    for (var i = coeff.length - 2; i >= 0; i--) {
+        result = polyseedGfMul2(result) ^ coeff[i];
+    }
+    return result;
+}
+
+function verifyPolyseedChecksum(words) {
+    if (words.length !== POLYSEED_NUM_WORDS) return false;
+    var coeff = words.map(function (w) { return BIP39_WORDLIST.indexOf(w); });
+    if (coeff.some(function (c) { return c < 0; })) return false;
+    return polyseedPolyEval(coeff) === 0;
+}
+
 // Collects runs of wordlist words in a text snippet. A run is broken by words not
-// in the BIP39 list; only runs with a valid phrase length (12/15/18/21/24) become
-// candidates.
+// in the BIP39 list; only runs with a candidate length (a valid BIP39 length, a
+// 16-word polyseed, or one word short of a BIP39 length) become candidates.
 function collectMnemonicCandidates(str, wordSet) {
     var candidates = [];
     var re = /[A-Za-z]+/g;
@@ -3821,7 +3901,7 @@ function collectMnemonicCandidates(str, wordSet) {
     var lastEnd = 0;
 
     function flushRun(endPos) {
-        if (run.length && BIP39_LENGTHS[run.length]) {
+        if (run.length && MNEMONIC_CANDIDATE_LENGTHS[run.length]) {
             candidates.push({ words: run.slice(), phrase: str.slice(runStart, endPos).trim() });
         }
         run = [];
@@ -3855,15 +3935,41 @@ async function scanMnemonicPhrases(text, addFinding) {
 
     for (var i = 0; i < candidates.length; i++) {
         var c = candidates[i];
+        var n = c.words.length;
+
+        // 16 words → Monero polyseed shape (never a valid BIP39 length).
+        if (n === POLYSEED_NUM_WORDS) {
+            if (verifyPolyseedChecksum(c.words)) {
+                addFinding(c.phrase, "Monero polyseed phrase (16 words) · checksum verified", "verified");
+                continue;
+            }
+            var electrum16 = await checkElectrumVersion(c.words);
+            if (electrum16) {
+                addFinding(c.phrase, "Electrum seed phrase (" + electrum16 + ", 16 words) · version prefix verified", "verified");
+            } else {
+                addFinding(c.phrase, "Monero polyseed phrase (16 words) — the checksum does NOT match", "invalid");
+            }
+            continue;
+        }
+
+        // One word short of a valid BIP39 length → the last word is probably missing,
+        // so the checksum cannot be recomputed. Flagged, not treated as an error.
+        if (BIP39_ONE_WORD_MISSING[n]) {
+            var target = BIP39_ONE_WORD_MISSING[n];
+            addFinding(c.phrase, n + " words from the BIP39 list — one word missing (looks like a " + target + "-word phrase); the checksum cannot be verified until the last word is added", "unknown");
+            continue;
+        }
+
+        // A valid BIP39 length: 12/15/18/21/24 words.
         if (await verifyBip39Checksum(c.words)) {
-            addFinding(c.phrase, "BIP39 mnemonic phrase (" + c.words.length + " words) · checksum verified", "verified");
+            addFinding(c.phrase, "BIP39 mnemonic phrase (" + n + " words) · checksum verified", "verified");
             continue;
         }
         var electrumType = await checkElectrumVersion(c.words);
         if (electrumType) {
-            addFinding(c.phrase, "Electrum seed phrase (" + electrumType + ", " + c.words.length + " words) · version prefix verified", "verified");
+            addFinding(c.phrase, "Electrum seed phrase (" + electrumType + ", " + n + " words) · version prefix verified", "verified");
         } else {
-            addFinding(c.phrase, c.words.length + " words from the BIP39 list — no valid BIP39/Electrum checksum", "likely");
+            addFinding(c.phrase, n + " words from the BIP39 list — the checksum does NOT match (BIP39/Electrum)", "invalid");
         }
     }
 
@@ -3874,13 +3980,21 @@ async function scanMnemonicPhrases(text, addFinding) {
     for (var j = 0; j < crossCandidates.length; j++) {
         var cc = crossCandidates[j];
         if (cc.phrase.indexOf("\n") === -1) continue; // already covered by pass 1
+        var m = cc.words.length;
+        if (m === POLYSEED_NUM_WORDS) {
+            if (verifyPolyseedChecksum(cc.words)) {
+                addFinding(cc.phrase, "Monero polyseed phrase (16 words, multi-line) · checksum verified", "verified");
+            }
+            continue;
+        }
+        if (BIP39_ONE_WORD_MISSING[m]) continue; // don't flag unverifiable runs across line breaks
         if (await verifyBip39Checksum(cc.words)) {
-            addFinding(cc.phrase, "BIP39 mnemonic phrase (" + cc.words.length + " words, multi-line) · checksum verified", "verified");
+            addFinding(cc.phrase, "BIP39 mnemonic phrase (" + m + " words, multi-line) · checksum verified", "verified");
             continue;
         }
         var crossElectrum = await checkElectrumVersion(cc.words);
         if (crossElectrum) {
-            addFinding(cc.phrase, "Electrum seed phrase (" + crossElectrum + ", " + cc.words.length + " words, multi-line) · version prefix verified", "verified");
+            addFinding(cc.phrase, "Electrum seed phrase (" + crossElectrum + ", " + m + " words, multi-line) · version prefix verified", "verified");
         }
     }
 }
@@ -3926,6 +4040,16 @@ function describeBech32(decoded) {
         return chainName + " address (SegWit v" + decoded.witnessVersion + ")";
     }
     return "Bech32 address (" + chainName + ", " + decoded.program.length + " bytes)";
+}
+
+// Label for a segwit-shaped address whose checksum did not verify. The witness
+// program bytes can't be trusted here, so it names only the chain and address
+// type from the hrp and the witness version.
+function describeBech32Invalid(info) {
+    var chainName = BECH32_HRP_NAMES[info.hrp] || info.hrp;
+    if (info.witnessVersion === 0) return chainName + " address (Native SegWit)";
+    if (info.witnessVersion === 1) return chainName + " address (Taproot)";
+    return chainName + " address (SegWit v" + info.witnessVersion + ")";
 }
 
 // Public keys in hex. Uncompressed (04 + x + y) can be strongly verified:
@@ -4074,7 +4198,7 @@ async function classifyToken(token, addFinding) {
         var uuidVersion = parseInt(um[1], 16);
         var variantNibble = parseInt(um[2], 16);
         if (uuidVersion >= 1 && uuidVersion <= 8 && variantNibble >= 8 && variantNibble <= 11) {
-            addFinding(token, "UUID v" + uuidVersion + " (RFC 4122) · structure verified", "verified");
+            addFinding(token, "UUID v" + uuidVersion + " (RFC 4122) · structure verified (however, not crypto related)", "verified");
         } else {
             addFinding(token, "UUID-like format (invalid version/variant bits)", "likely");
         }
@@ -4127,6 +4251,14 @@ async function classifyToken(token, addFinding) {
             addFinding(token, describeBech32(decoded) + " · checksum verified", "verified");
             return;
         }
+        // Looks like a Bitcoin-family segwit/taproot address (bc1q…, bc1p…) but the
+        // checksum does not verify — flag it red instead of staying silent, the same
+        // way a bad EIP-55 casing is flagged for EVM addresses.
+        var segwitLike = CH.segwitAddressStructure(token);
+        if (segwitLike) {
+            addFinding(token, describeBech32Invalid(segwitLike) + " — the checksum does NOT match (mistyped address?)", "invalid");
+            return;
+        }
     }
 
     // 5. Base58check (Bitcoin-family addresses/keys, Tron, Zcash, Ripple)
@@ -4143,6 +4275,18 @@ async function classifyToken(token, addFinding) {
             var rResult = await CH.base58CheckDecode(token, CH.RIPPLE_ALPHABET);
             if (rResult && rResult.payload.length === 21 && rResult.payload[0] === 0x00) {
                 addFinding(token, "Ripple address (XRP) · checksum verified", "verified");
+                return;
+            }
+        }
+        // Looks like a legacy base58check address (bc1-era "1…"/"3…" and the other
+        // chains in ADDRESS_VERSIONS decode to a 25-byte payload whose first byte is a
+        // known version) but the double-SHA256 checksum failed → flag it red instead
+        // of the generic yellow "unknown base58", the same way segwit/EIP-55 mismatches
+        // are flagged. Runs only when base58check failed; Ripple "r…" is handled above.
+        if (!result && token[0] !== "r") {
+            var rawLegacy = CH.base58Decode(token, CH.BASE58_ALPHABET);
+            if (rawLegacy && rawLegacy.length === 25 && ADDRESS_VERSIONS[rawLegacy[0]]) {
+                addFinding(token, ADDRESS_VERSIONS[rawLegacy[0]] + " — the checksum does NOT match (mistyped address?)", "invalid");
                 return;
             }
         }
@@ -4361,35 +4505,32 @@ var TEST_DATA = [
     "L4ToPMbLRVxUAT5eixyDS1or4aFndPXsBFpgZkLhcZhYoQUVZ512",
     "xpub67eAM7jRBcMpoEEv19tD94ZiW5kbvyquZKjgwc8s8KSakiWztUK52s8ngnVD3uv9kpb2fd5Whn7NDig6pAFthq25sptyGAEJWFf1HU88Hck",
     "THgxGZ645zJD3EHzmhSjRp1PJM57t12SLM",
-    "rLbiba1Tp77oG1Qb2je8nQEmDKNbk71UUc",
-    "DAhZgttE5Tg2pAKAM4WvQL8Zg69UFppyC9",
     "bc1qqlkgeswcfcytjqvvufl5afjmzxgj7phpf4eagp",
     "bc1pnnpxg5trvpng5s6rvxkuudjrzejhnn67nw2dy05ymwj73y6nz08qua60ar",
-    "bitcoincash:qpm2qsznhks23z7629mms6s4cwef74vcwvy22gdx6a",
-    "cosmos14lg4my6a77w4st4vr40ss4xsq4uzdkzn7dufxr",
+    "mask solution glory route degree near mirror vessel coast rain fee basic detail asthma course idle",
     "7YUg9r6ttwAB7p1uYX2CyCbNpv3X1ERSxS2yyM1eFw3o",
     "44AFFq5kSiGBoZ4NMDwYtN18obc8AemS33DBLWs3H7otXft3XjrpDtQGv7SqSsaBYBb98uNbr2VBBEt7f2wfn3RVGQBEP3A",
-    "EQCD39VS5jcptHL8vMjEXrzGaRcCVYto7HUn4bpAOg8xqB2N",
+    "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon zoo",
     "0x5aAeb6053F3E94C9b9A09f33669435E7Ef1BeAed",
     "0xFB6916095ca1df60bB79Ce92cE3Ea74c37c5d359",
     "34,83,38,148,136,254,124,59,160,186,149,60,155,68,241,6",
-    '{"version":1,"identifier":"7aec91735f7e125dde475e982aae316c88f336e361593f70a4e51c2e1c7c1dd7","name":"Account 1","entropy":{"0":34,"1":83,"2":38,"3":148,"4":136,"5":254,"6":124,"7":59,"8":160,"9":186,"10":149,"11":60,"12":155,"13":68,"14":241,"15":6}}',
-    'Wallet dump: {"crypto":{"cipher":"aes-128-ctr","kdf":"scrypt","kdfparams":{"n":4096},"ciphertext":"9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a0"}} end of the dump',
+    '{"0":34,"1":83,"2":38,"3":148,"4":136,"5":254,"6":124,"7":59,"8":160,"9":186,"10":149,"11":60,"12":155,"13":68,"14":241,"15":6}}',
     "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about",
     "leave flee turkey only common behind sausage stamp make opinion notice sample",
     "fd01247b947310a65f45a88a350a2be833570fea82bbcb6d4d32d6e3c89d6ebc0f1922b4815fefd1d4f5ea309de4be48b1ee2c7dae63b69eeca0c7d4d5214ef2",
     "6PYQU2sX9f9JJEJwZo8S6bZcZHyVtecXPR7v6t9Zph4tCBUbwkAQ5Y1dqz",
-    'Keystore: {"version":3,"id":"e0fe53d0-7a3d-4f65-88b1-9bb4e245a169","crypto":{"ciphertext":"64b5b416bb2bef882eb7cc63ed92c064e53c818ec46351e07ac140e5ba871596f1595fe6cad8333147fe68c031ba001b79b64dd1edd513043134217b7ffe1903ca23b1fbe823671827e3b2dff69bbd448d9cb79a3321ec8801f2a995","cipherparams":{"iv":"7aaf7eb6f4b0e7d995e8eac67e4d52eb"},"kdf":"scrypt","kdfparams":{"r":8,"p":6,"n":4096,"dklen":32,"salt":"80132842c6cde8f9d04582932ef92c3cad3ba6b41e1296ef681692372886db86"},"mac":"01816d0a5c31cd03b644f2d756ac8167c2498808040cbace8c35c46dcf06b7a1","cipher":"aes-128-ctr"},"address":"32dd55E0BCF509a35A3F5eEb8593fbEb244796b1"}',
+    "mask solution glory route degree near mirror vessel coast rain fee basic detail asthma course idle",
     "Derivation path: m/44'/0'/0'/0/0",
     "333f226d7631860d3020432d497b4333a74edbb4709e3fdf75be0e0bea34475a",
-    "23d74c7c36b814a23ea337739da22de5",
-    "fb67a6394c139ae6a87ff257804157c7f5414ce9",
     "029cee1dbe6982065696889570737e2b40a4aff459736268946c6fb4b4efef3438",
     "049cee1dbe6982065696889570737e2b40a4aff459736268946c6fb4b4efef3438b36314c27d71a3228a045afcbe03fd94e6e021b2b958cffcd618c70c25410838",
     "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c",
-    "eyJrZGYiOiJhcmdvbjJpZCIsImNpcGhlciI6InhjaGFjaGEyMC1wb2x5MTMwNSIsIml0ZXJhdGlvbnMiOjN9",
     "550e8400-e29b-41d4-a716-446655440000",
     "Gt0LbTeSg9EFVayQ/H1YC/GwV+4pq95JnPA0s/D8QkI=",
+    "bc1qqlkgeswcfcytjqvvufl5afjmzxgj7phpf4eagg",
+    "bc1pnnpxg5trvpng5s6rvxkuudjrzejhnn67nw2dy05ymwj73y6nz08qua60aa",
+    "3QXr5x7NXYX7AjTJSq5H9E47tGCgCVeNCc",
+    "1EzGmAEnsDHqFhU9A7mXzS2n7kJ8b1oomm"
 ].join("\n");
 
 // ---------- File reading ----------
