@@ -20,9 +20,8 @@ Because this app decrypts and displays secrets:
 
 - **Run it offline.** The app never needs the internet. When working with real keys,
   use it on an offline / air-gapped machine and confirm it makes no network requests.
-- **Keep it local.** Only paste real seed phrases or private keys into the Electron app,
-  the Chrome extension, or a local copy of `Toolbox.html` — never into an online/hosted
-  copy.
+- **Keep it local.** Only paste real seed phrases or private keys into the Electron app
+  or a local copy of `Toolbox.html` — never into an online/hosted copy.
 - **Nothing is uploaded.** All decryption and brute-forcing runs on your machine, in your
   browser or Electron; no keys or files are sent anywhere.
 - **Clear your clipboard.** The copy buttons place secrets on your clipboard. After you're done, clear your clipboard history so keys and seeds aren't left behind.

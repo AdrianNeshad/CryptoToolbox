@@ -10,7 +10,6 @@
   "scripts": {
     "start": "electron .",
     "sync-version": "node scripts/sync-version.js",
-    "build:extension": "node scripts/build-extension.js",
     "build:zips": "node scripts/build-release-zips.js",
     "dist": "npm run sync-version && electron-builder --win && node scripts/finalize-artifacts.js",
     "dist:installer": "npm run sync-version && electron-builder --win nsis && node scripts/finalize-artifacts.js",

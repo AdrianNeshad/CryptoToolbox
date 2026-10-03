@@ -1,14 +1,13 @@
 # <img src="build/icon-preview.png" width="32" alt="CryptoToolbox logo" align="top"> Crypto Toolbox
 
-Local toolbox for **cryptography and crypto forensics**. Runs fully offline via .exe electron-app, as a Chrome extension, or by downloading the source and opening `Toolbox.html` in your browser.
+Local toolbox for **cryptography and crypto forensics**. Runs fully offline via .exe-app or by downloading the source and opening `Toolbox.html` in your browser.
 
-## Download (v3.5 - latest release)
+## Download (v3.6 - latest release)
 
 <p align="center">
-  <a href="https://github.com/AdrianNeshad/CryptoToolbox/releases/download/v3.5/CryptoToolbox3.5.zip"><img alt="Download source code (v2.8.zip)" height="28" src="https://img.shields.io/badge/Source-CryptoToolbox.zip-0a84ff?style=plastic&logo=data%3Aimage%2Fsvg%2Bxml%3Bbase64%2CPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI%2BPHBhdGggZmlsbD0iI0U4OTcxRSIgZD0iTTMgNi41QzMgNS42NyAzLjY3IDUgNC41IDVIOS4yTDExLjIgN0gxOS41QzIwLjMzIDcgMjEgNy42NyAyMSA4LjVWMTBIM1Y2LjVaIi8%2BPHBhdGggZmlsbD0iI0ZCQkYyNCIgZD0iTTMgOUgyMVYxNy41QzIxIDE4LjMzIDIwLjMzIDE5IDE5LjUgMTlINC41QzMuNjcgMTkgMyAxOC4zMyAzIDE3LjVWOVoiLz48L3N2Zz4%3D"></a>
-  <a href="https://github.com/AdrianNeshad/CryptoToolbox/releases/download/v3.5/magic.html"><img alt="Download standalone Magic Tool (magic.html)" height="28" src="https://img.shields.io/badge/Standalone-magic.html-0a84ff?style=plastic&logo=data%3Aimage%2Fsvg%2Bxml%3Bbase64%2CPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI%2BPHJlY3QgeD0iMSIgeT0iMSIgd2lkdGg9IjIyIiBoZWlnaHQ9IjIyIiByeD0iNiIgZmlsbD0iIzMwZDE1OCIvPjxnIHRyYW5zZm9ybT0idHJhbnNsYXRlKDUuMzMgNS4zMykgc2NhbGUoMC41NTYpIiBmaWxsPSJub25lIiBzdHJva2U9IiNmZmYiIHN0cm9rZS13aWR0aD0iMi40IiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cGF0aCBkPSJNMTUgMkwxNi42IDcuNEwyMiA5TDE2LjYgMTAuNkwxNSAxNkwxMy40IDEwLjZMOCA5TDEzLjQgNy40TDE1IDJaIi8%2BPHBhdGggZD0iTTYgMTJMNyAxNUwxMCAxNkw3IDE3TDYgMjBMNSAxN0wyIDE2TDUgMTVMNiAxMloiLz48L2c%2BPC9zdmc%2B"></a>
-  <a href="https://github.com/AdrianNeshad/CryptoToolbox/releases/download/v3.5/CryptoToolbox3.5.exe"><img alt="Download Windows app (CryptoToolbox.exe)" height="28" src="https://img.shields.io/badge/Windows-CryptoToolbox.exe-0a84ff?style=plastic&logo=data%3Aimage%2Fsvg%2Bxml%3Bbase64%2CPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI%2BPHBhdGggZmlsbD0iIzAwQTRFRiIgZD0iTTMgNC41TDExLjIgMy4zNVYxMS4zNUgzVjQuNVoiLz48cGF0aCBmaWxsPSIjMDBBNEVGIiBkPSJNMTIuMyAzLjJMMjEgMlYxMS4zNUgxMi4zVjMuMloiLz48cGF0aCBmaWxsPSIjMDBBNEVGIiBkPSJNMyAxMi41NUgxMS4yVjIwLjY1TDMgMTkuNVYxMi41NVoiLz48cGF0aCBmaWxsPSIjMDBBNEVGIiBkPSJNMTIuMyAxMi41NUgyMVYyMkwxMi4zIDIwLjhWMTIuNTVaIi8%2BPC9zdmc%2B"></a>
-  <a href="https://github.com/AdrianNeshad/CryptoToolbox/releases/download/v3.5/CryptoToolbox3.5-Chrome-Extension.zip"><img alt="Download Chrome extension (CryptoToolbox-Chrome-Extension.zip)" height="28" src="https://img.shields.io/badge/Chrome-Extension.zip-0a84ff?style=plastic&logo=data%3Aimage%2Fsvg%2Bxml%3Bbase64%2CPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA0OCA0OCI%2BPHBhdGggZmlsbD0iI0VBNDMzNSIgZD0iTTI0IDI0IEw0Ljk1IDEzIEEyMiAyMiAwIDAgMSA0My4wNSAxMyBaIi8%2BPHBhdGggZmlsbD0iI0ZCQkMwNSIgZD0iTTI0IDI0IEw0My4wNSAxMyBBMjIgMjIgMCAwIDEgMjQgNDYgWiIvPjxwYXRoIGZpbGw9IiMzNEE4NTMiIGQ9Ik0yNCAyNCBMMjQgNDYgQTIyIDIyIDAgMCAxIDQuOTUgMTMgWiIvPjxwYXRoIHN0cm9rZT0iI2ZmZiIgc3Ryb2tlLXdpZHRoPSIxLjYiIGQ9Ik0yNCAyNCBMMjQgNDYgTTI0IDI0IEw0Ljk1IDEzIE0yNCAyNCBMNDMuMDUgMTMiLz48Y2lyY2xlIGN4PSIyNCIgY3k9IjI0IiByPSIxMCIgZmlsbD0iI2ZmZiIvPjxjaXJjbGUgY3g9IjI0IiBjeT0iMjQiIHI9IjgiIGZpbGw9IiM0Mjg1RjQiLz48L3N2Zz4%3D"></a>
+  <a href="https://github.com/AdrianNeshad/CryptoToolbox/releases/download/v3.6/CryptoToolbox3.6.zip"><img alt="Download source code (v2.8.zip)" height="28" src="https://img.shields.io/badge/Source-CryptoToolbox.zip-0a84ff?style=plastic&logo=data%3Aimage%2Fsvg%2Bxml%3Bbase64%2CPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI%2BPHBhdGggZmlsbD0iI0U4OTcxRSIgZD0iTTMgNi41QzMgNS42NyAzLjY3IDUgNC41IDVIOS4yTDExLjIgN0gxOS41QzIwLjMzIDcgMjEgNy42NyAyMSA4LjVWMTBIM1Y2LjVaIi8%2BPHBhdGggZmlsbD0iI0ZCQkYyNCIgZD0iTTMgOUgyMVYxNy41QzIxIDE4LjMzIDIwLjMzIDE5IDE5LjUgMTlINC41QzMuNjcgMTkgMyAxOC4zMyAzIDE3LjVWOVoiLz48L3N2Zz4%3D"></a>
+  <a href="https://github.com/AdrianNeshad/CryptoToolbox/releases/download/v3.6/CryptoToolbox3.6.exe"><img alt="Download Windows app (CryptoToolbox.exe)" height="28" src="https://img.shields.io/badge/Windows-CryptoToolbox.exe-0a84ff?style=plastic&logo=data%3Aimage%2Fsvg%2Bxml%3Bbase64%2CPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI%2BPHBhdGggZmlsbD0iIzAwQTRFRiIgZD0iTTMgNC41TDExLjIgMy4zNVYxMS4zNUgzVjQuNVoiLz48cGF0aCBmaWxsPSIjMDBBNEVGIiBkPSJNMTIuMyAzLjJMMjEgMlYxMS4zNUgxMi4zVjMuMloiLz48cGF0aCBmaWxsPSIjMDBBNEVGIiBkPSJNMyAxMi41NUgxMS4yVjIwLjY1TDMgMTkuNVYxMi41NVoiLz48cGF0aCBmaWxsPSIjMDBBNEVGIiBkPSJNMTIuMyAxMi41NUgyMVYyMkwxMi4zIDIwLjhWMTIuNTVaIi8%2BPC9zdmc%2B"></a>
+  <a href="https://github.com/AdrianNeshad/CryptoToolbox/releases/download/v3.6/magic.html"><img alt="Download standalone Magic Tool (magic.html)" height="28" src="https://img.shields.io/badge/Standalone-magic.html-0a84ff?style=plastic&logo=data%3Aimage%2Fsvg%2Bxml%3Bbase64%2CPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI%2BPHJlY3QgeD0iMSIgeT0iMSIgd2lkdGg9IjIyIiBoZWlnaHQ9IjIyIiByeD0iNiIgZmlsbD0iIzMwZDE1OCIvPjxnIHRyYW5zZm9ybT0idHJhbnNsYXRlKDUuMzMgNS4zMykgc2NhbGUoMC41NTYpIiBmaWxsPSJub25lIiBzdHJva2U9IiNmZmYiIHN0cm9rZS13aWR0aD0iMi40IiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cGF0aCBkPSJNMTUgMkwxNi42IDcuNEwyMiA5TDE2LjYgMTAuNkwxNSAxNkwxMy40IDEwLjZMOCA5TDEzLjQgNy40TDE1IDJaIi8%2BPHBhdGggZD0iTTYgMTJMNyAxNUwxMCAxNkw3IDE3TDYgMjBMNSAxN0wyIDE2TDUgMTVMNiAxMloiLz48L2c%2BPC9zdmc%2B"></a>
 </p>
 
 ## Tools
@@ -27,7 +26,6 @@ Local toolbox for **cryptography and crypto forensics**. Runs fully offline via 
 | BIP38 Key Compression | Compress/decompress Bitcoin keys |
 | QR Code Decoder | Decode QR codes from images |
 | JSON Formatter | Compact JSON → pretty print / minify, also decodes JWT |
-| Time Converter | Convert timestamps (Unix, Apple NSDate, WebKit, FILETIME, etc.) |
 
 ### BIP39 & Seed
 
@@ -56,6 +54,14 @@ Local toolbox for **cryptography and crypto forensics**. Runs fully offline via 
 | MetaMask Vault Decryptor | Brute-force MetaMask vault (dictionary attack) |
 | Ethereum Keystore Unlock | Brute-force Ethereum keystore (dictionary attack) |
 | DeFiChain Wallet Unlock | Brute-force DeFiChain Light Wallet passcode (6-digit sweep) |
+
+### Forensic Tools
+
+| Tool | Description |
+|---------|-------------|
+| iOS Keychain Viewer | View and analyze iOS keychain data from local backups |
+| Time Converter | Convert timestamps (Unix, Apple NSDate, WebKit, FILETIME, etc.) |
+| Hahs Calculator | Calculate and compare different hash values of data |
 
 ## Getting started
 
@@ -114,7 +120,7 @@ touch `.md` files do not trigger a new build.
 
 ## Attribution
 
-- Time Converter: [Overwatched/Forensics-Toolbox](https://github.com/Overwatched/Forensics-Toolbox)
+- Forensic Tools: [Overwatched/Forensics-Toolbox](https://github.com/Overwatched/Forensics-Toolbox)
 - CyberChef: [GCHQ/CyberChef](https://github.com/gchq/CyberChef)
 - QR decoding: [cozmo/jsQR](https://github.com/cozmo/jsQR)
 - BIP39: [iancoleman/bip39](https://github.com/iancoleman/bip39)

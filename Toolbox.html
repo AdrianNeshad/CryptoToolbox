@@ -32,7 +32,7 @@
                 <div class="sidebar-header-text">
                     <h1>Crypto Toolbox</h1>
                     <div class="version-row">
-                        <p>Version 3.5</p>
+                        <p>Version 3.6</p>
                         <div id="net-status" class="net-status">
                             <span id="net-status-text"></span>
                         </div>
@@ -88,19 +88,6 @@
                         </span>
                     </button>
 
-                    <button class="nav-item" data-type="frame" data-src="tools/BIP38-keycompression/BIP38.html">
-                        <span class="nav-item-icon nav-item-icon--local">
-                            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M14.7 6.3A4 4 0 0 0 9.3 11.7L4 17a2 2 0 1 0 2.8 2.8l5.3-5.3a4 4 0 0 0 5.4-5.4l-2.2 2.2-2.2-2.2 2.4-2.4z"
-                                    stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
-                            </svg>
-                        </span>
-                        <span class="nav-item-text">
-                            <span class="nav-item-title">BIP38 Key Compression</span>
-                            <span class="nav-item-desc">Compress/decompress Bitcoin keys</span>
-                        </span>
-                    </button>
-
                     <button class="nav-item" data-type="frame" data-src="tools/QR2URL/QR2URL.html">
                         <span class="nav-item-icon nav-item-icon--local">
                             <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -132,17 +119,17 @@
                         </span>
                     </button>
 
-                    <button class="nav-item" data-type="frame" data-src="tools/time-converter/time.html">
+                    <button class="nav-item" data-type="frame" data-src="tools/BIP38-keycompression/BIP38.html">
                         <span class="nav-item-icon nav-item-icon--local">
                             <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6" />
-                                <path d="M12 7V12L15.5 14.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"
+                                <circle cx="7" cy="12" r="4" stroke="currentColor" stroke-width="1.8" />
+                                <path d="M11 12H21M17.5 12V15.5M21 12V15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
                                     stroke-linejoin="round" />
                             </svg>
                         </span>
                         <span class="nav-item-text">
-                            <span class="nav-item-title">Time Converter</span>
-                            <span class="nav-item-desc">Convert timestamp formats</span>
+                            <span class="nav-item-title">BIP38 Key Compression</span>
+                            <span class="nav-item-desc">Compress/decompress Bitcoin keys</span>
                         </span>
                     </button>
 
@@ -150,6 +137,20 @@
 
                     <div class="nav-subgroup">
                         <div class="nav-subgroup-title">BIP39 &amp; Seed</div>
+
+                    <button class="nav-item" data-type="frame" data-src="tools/BIP39/bip39-standalone.html">
+                        <span class="nav-item-icon nav-item-icon--local">
+                            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path
+                                    d="M14.7 6.3A4 4 0 0 0 9.3 11.7L4 17a2 2 0 1 0 2.8 2.8l5.3-5.3a4 4 0 0 0 5.4-5.4l-2.2 2.2-2.2-2.2 2.4-2.4z"
+                                    stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+                            </svg>
+                        </span>
+                        <span class="nav-item-text">
+                            <span class="nav-item-title">BIP39 Tool</span>
+                            <span class="nav-item-desc">Complete BIP39 tool</span>
+                        </span>
+                    </button>
 
                     <button class="nav-item" data-type="frame" data-src="tools/Entropy2Mnemonic/Entropy2Mnemonic.html">
                         <span class="nav-item-icon nav-item-icon--local">
@@ -163,19 +164,6 @@
                         <span class="nav-item-text">
                             <span class="nav-item-title">Entropy to Mnemonic</span>
                             <span class="nav-item-desc">Convert entropy bytes to a BIP39 phrase</span>
-                        </span>
-                    </button>
-
-                    <button class="nav-item" data-type="frame" data-src="tools/BIP39/bip39-standalone.html">
-                        <span class="nav-item-icon nav-item-icon--local">
-                            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M14.7 6.3A4 4 0 0 0 9.3 11.7L4 17a2 2 0 1 0 2.8 2.8l5.3-5.3a4 4 0 0 0 5.4-5.4l-2.2 2.2-2.2-2.2 2.4-2.4z"
-                                    stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
-                            </svg>
-                        </span>
-                        <span class="nav-item-text">
-                            <span class="nav-item-title">BIP39 Tool</span>
-                            <span class="nav-item-desc">Complete BIP39 tool</span>
                         </span>
                     </button>
 
@@ -354,6 +342,51 @@
                             <span class="nav-item-desc">Brute-force DeFiChain wallet</span>
                         </span>
                     </button>
+                    </div>
+
+                    <div class="nav-subgroup nav-subgroup--forensic">
+                        <div class="nav-subgroup-title">Forensic Tools</div>
+
+                        <button class="nav-item" data-type="frame" data-src="tools/iOS-keychain/iOS-keychain.html">
+                            <span class="nav-item-icon nav-item-icon--forensic">
+                                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <circle cx="7" cy="12" r="4" stroke="currentColor" stroke-width="1.8" />
+                                    <path d="M11 12H21M17.5 12V15.5M21 12V15" stroke="currentColor" stroke-width="1.8"
+                                        stroke-linecap="round" stroke-linejoin="round" />
+                                </svg>
+                            </span>
+                            <span class="nav-item-text">
+                                <span class="nav-item-title">iOS Keychain Viewer</span>
+                                <span class="nav-item-desc">View and analyze iOS keychain data</span>
+                            </span>
+                        </button>
+                        
+                        <button class="nav-item" data-type="frame" data-src="tools/time-converter/time.html">
+                            <span class="nav-item-icon nav-item-icon--forensic">
+                                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6" />
+                                    <path d="M12 7V12L15.5 14.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"
+                                        stroke-linejoin="round" />
+                                </svg>
+                            </span>
+                            <span class="nav-item-text">
+                                <span class="nav-item-title">Time Converter</span>
+                                <span class="nav-item-desc">Convert timestamp formats</span>
+                            </span>
+                        </button>
+
+                        <button class="nav-item" data-type="frame" data-src="tools/hash-calculator/hash.html">
+                            <span class="nav-item-icon nav-item-icon--forensic">
+                                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M14.7 6.3A4 4 0 0 0 9.3 11.7L4 17a2 2 0 1 0 2.8 2.8l5.3-5.3a4 4 0 0 0 5.4-5.4l-2.2 2.2-2.2-2.2 2.4-2.4z"
+                                        stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+                                </svg>
+                            </span>
+                            <span class="nav-item-text">
+                                <span class="nav-item-title">Hash Calculator</span>
+                                <span class="nav-item-desc">Calculate hashes for files and strings</span>
+                            </span>
+                        </button>
                     </div>
 
                 </div>

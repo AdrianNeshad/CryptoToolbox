@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iOS Keychain Viewer</title>
+    <script>
+        (function () {
+            try {
+                var params = new URLSearchParams(location.search);
+                var fromParent = params.get('theme');
+                var saved = localStorage.getItem('theme');
+                var theme = (fromParent === 'light' || fromParent === 'dark') ? fromParent
+                    : (saved === 'light' || saved === 'dark') ? saved : 'dark';
+                document.documentElement.setAttribute('data-theme', theme);
+                if (fromParent === 'light' || fromParent === 'dark') {
+                    localStorage.setItem('theme', fromParent);
+                }
+            } catch (e) {
+                document.documentElement.setAttribute('data-theme', 'dark');
+            }
+        })();
+    </script>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <div id="container">
+
+        <header class="page-header">
+            <h1>iOS Keychain Viewer</h1>
+            <p>Open a local <strong>encrypted</strong> iPhone/iPad backup and browse every keychain entry it
+                contains &mdash; accounts, passwords, tokens and certificates. Everything is decrypted locally in
+                this window; nothing is uploaded or saved.</p>
+        </header>
+
+        <div class="panel-row">
+
+            <!-- Step 1: backup folder -->
+            <div class="panel">
+                <div class="panel-head">
+                    <span class="step-num">1</span>
+                    <span class="panel-title">Choose backup folder</span>
+                </div>
+                <p class="hint">The folder that directly contains <code>Manifest.plist</code> and
+                    <code>Manifest.db</code>. On macOS these live in
+                    <code>~/Library/Application Support/MobileSync/Backup/&lt;UDID&gt;/</code>.</p>
+                <div class="file-row">
+                    <button type="button" class="secondary" id="folder-btn">Choose folder…</button>
+                    <span class="file-name" id="folder-name">No folder selected</span>
+                </div>
+                <input type="file" id="folder-input" webkitdirectory directory multiple hidden>
+                <div class="device-info display-none" id="device-info"></div>
+            </div>
+
+            <!-- Step 2: password -->
+            <div class="panel">
+                <div class="panel-head">
+                    <span class="step-num">2</span>
+                    <span class="panel-title">Backup password</span>
+                </div>
+                <p class="hint">The password set when you turned on <em>Encrypt local backup</em>. Required &mdash;
+                    iOS only stores the keychain inside encrypted backups.</p>
+                <div class="file-row">
+                    <input type="password" id="pw-input" class="text-input" spellcheck="false"
+                        autocomplete="off" placeholder="Backup password">
+                    <button type="button" class="secondary" id="pw-toggle" title="Show / hide">Show</button>
+                </div>
+            </div>
+
+        </div><!-- /panel-row -->
+
+        <!-- Progress -->
+        <div class="progress-wrap display-none" id="progress-wrap">
+            <div class="progress-track">
+                <div class="progress-bar" id="progress-bar"></div>
+            </div>
+            <div class="progress-status" id="progress-status"></div>
+        </div>
+
+        <!-- Output -->
+        <div class="output-wrap">
+            <div class="output-head">
+                <span>Keychain</span>
+                <div class="output-head-actions">
+                    <button id="run-btn">Open keychain</button>
+                    <button id="export-btn" class="secondary display-none">Export JSON</button>
+                    <button type="button" class="clear-btn" id="clear-btn">Clear</button>
+                </div>
+            </div>
+
+            <div class="result-panel display-none" id="result-panel">
+                <div class="result-title" id="result-title"></div>
+                <div class="result-body" id="result-body"></div>
+            </div>
+
+            <!-- Toolbar for the entry list -->
+            <div class="kc-toolbar display-none" id="kc-toolbar">
+                <input type="search" id="kc-search" class="text-input kc-search" spellcheck="false"
+                    autocomplete="off" placeholder="Search account, service, server…">
+                <div class="kc-tabs" id="kc-tabs"></div>
+            </div>
+
+            <div class="kc-list" id="kc-list"></div>
+
+            <pre id="output">Waiting to run…</pre>
+        </div>
+
+        <div id="toast" class="toast"></div>
+
+    </div>
+
+    <!-- Local crypto + parsers (pure JS, no network) -->
+    <script src="lib/aes.js"></script>
+    <script src="lib/bplist.js"></script>
+    <script src="lib/nskeyed.js"></script>
+    <script src="lib/keybag.js"></script>
+    <script src="lib/asn1.js"></script>
+    <script src="lib/backup.js"></script>
+    <!-- Vendored sql.js (SQLite in WebAssembly, binary inlined so no fetch under file://) -->
+    <script src="vendor/sqljs/sql-wasm-binary.js"></script>
+    <script src="vendor/sqljs/sql-wasm.js"></script>
+    <script src="script.js"></script>
+
+</body>
+
+</html>

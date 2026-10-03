@@ -648,7 +648,7 @@ main {
             <section>
                 <h3>Format &amp; encoding</h3>
                 <ul>
-                    <li>JSON (syntax verified)</li>
+                    <li>JSON (scanned for keys &amp; wallet fields)</li>
                     <li>JWT (header decoded)</li>
                     <li>Base64 / Base64url, Base58, Hex</li>
                     <li>Hashes - MD5, SHA-1/256/512, RIPEMD-160</li>
@@ -3652,8 +3652,9 @@ function findMatchingBracket(text, start) {
     return -1;
 }
 
-// Parses each found JSON block: valid syntax is reported as a verified
-// finding, and the content is searched recursively for wallet fields/entropy.
+// Parses each found JSON block only to search its content recursively for
+// crypto-relevant data (wallet fields, keystores, entropy). JSON validity
+// itself is not reported — Magic does not act as a JSON syntax checker.
 function scanJsonBlocks(text, addFinding) {
     findJsonBlocks(text).forEach(function (block) {
         var parsed;
@@ -3665,14 +3666,6 @@ function scanJsonBlocks(text, addFinding) {
             return;
         }
         if (!parsed || typeof parsed !== "object") return;
-
-        var count = Array.isArray(parsed) ? parsed.length : Object.keys(parsed).length;
-        if (count > 0 && block.length >= 20) {
-            var desc = Array.isArray(parsed)
-                ? "Valid JSON array (" + count + " elements)"
-                : "Valid JSON object (" + count + (count === 1 ? " key" : " keys") + ")";
-            addFinding(block.trim(), desc + " · syntax verified", "verified");
-        }
         walkJson(parsed, addFinding);
     });
 }
@@ -4198,7 +4191,7 @@ async function classifyToken(token, addFinding) {
         var uuidVersion = parseInt(um[1], 16);
         var variantNibble = parseInt(um[2], 16);
         if (uuidVersion >= 1 && uuidVersion <= 8 && variantNibble >= 8 && variantNibble <= 11) {
-            addFinding(token, "UUID v" + uuidVersion + " (RFC 4122) · structure verified (however, not crypto related)", "verified");
+            addFinding(token, "UUID v" + uuidVersion + " (RFC 4122) · structure verified (however, not crypto related)", "verified", null, "chip-likely");
         } else {
             addFinding(token, "UUID-like format (invalid version/variant bits)", "likely");
         }
@@ -4336,11 +4329,13 @@ async function scanText(text) {
     // aren't double-reported as generic encoded data.
     var consumed = new Set();
 
-    function addFinding(value, label, confidence, alt) {
+    function addFinding(value, label, confidence, alt, chipClass) {
         if (!findings.has(value)) findings.set(value, { value: value, types: [] });
         var f = findings.get(value);
         if (!f.types.some(function (t) { return t.label === label; })) {
-            f.types.push({ label: label, confidence: confidence });
+            // chipClass is an optional per-finding colour override; the confidence
+            // (and therefore ranking/counting) is left untouched.
+            f.types.push({ label: label, confidence: confidence, chipClass: chipClass });
         }
         // Alternative representation of the same value (e.g. entropy in both hex
         // and decimal) — shown as an extra row in the card.
@@ -4394,7 +4389,7 @@ function renderCard(finding) {
     finding.types.forEach(function (t) {
         var chip = document.createElement("span");
         var meta = CONFIDENCE_META[t.confidence] || CONFIDENCE_META.likely;
-        chip.className = "chip " + meta.chipClass;
+        chip.className = "chip " + (t.chipClass || meta.chipClass);
         chip.textContent = t.label;
         chipRow.appendChild(chip);
     });

@@ -15,6 +15,7 @@
     --download: #ff9f0a;
     --link: #ff453a;
     --doc: #bf5af2;
+    --forensic: #0a78ff;
     --switch-track: rgba(120, 120, 128, 0.36);
     --overlay: rgba(0, 0, 0, 0.5);
     --control-fill: rgba(120, 120, 128, 0.24);
@@ -39,6 +40,7 @@
     --download: #ff9500;
     --link: #ff3b30;
     --doc: #af52de;
+    --forensic: #0066d6;
     --switch-track: rgba(120, 120, 128, 0.24);
     --overlay: rgba(0, 0, 0, 0.32);
     --control-fill: rgba(120, 120, 128, 0.16);
@@ -372,6 +374,10 @@ body {
 /* The brute-force tools get orange icons, like the scripts group */
 .nav-subgroup--brute .nav-item-icon {
     background: var(--download);
+}
+
+.nav-subgroup--forensic .nav-item-icon {
+    background: var(--forensic);
 }
 
 .nav-item-icon--link {

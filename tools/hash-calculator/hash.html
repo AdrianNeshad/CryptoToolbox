@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hash Calculator</title>
+    <script>
+        (function () {
+            try {
+                var params = new URLSearchParams(location.search);
+                var fromParent = params.get('theme');
+                var saved = localStorage.getItem('theme');
+                var theme = (fromParent === 'light' || fromParent === 'dark') ? fromParent
+                    : (saved === 'light' || saved === 'dark') ? saved : 'dark';
+                document.documentElement.setAttribute('data-theme', theme);
+                if (fromParent === 'light' || fromParent === 'dark') {
+                    localStorage.setItem('theme', fromParent);
+                }
+            } catch (e) {
+                document.documentElement.setAttribute('data-theme', 'dark');
+            }
+        })();
+    </script>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div id="container">
+        <header class="page-header">
+            <h1>Hash Calculator</h1>
+            <p>Compute hashes locally — MD5, SHA-1 and SHA-256 are selected by default.
+                Large files are read in chunks and can be compared against a known hash.</p>
+        </header>
+
+        <fieldset class="algo-picker">
+            <legend>Algorithms</legend>
+            <label><input type="checkbox" name="algo" value="md5" checked> MD5</label>
+            <label><input type="checkbox" name="algo" value="sha1" checked> SHA-1</label>
+            <label><input type="checkbox" name="algo" value="sha256" checked> SHA-256</label>
+            <label><input type="checkbox" name="algo" value="sha384"> SHA-384</label>
+            <label><input type="checkbox" name="algo" value="sha512"> SHA-512</label>
+            <label><input type="checkbox" name="algo" value="crc32"> CRC-32</label>
+        </fieldset>
+
+        <div class="tabs">
+            <button type="button" class="tab active" data-mode="text">Text</button>
+            <button type="button" class="tab" data-mode="file">File</button>
+        </div>
+
+        <div id="text-panel" class="panel">
+            <textarea id="text-input" spellcheck="false" placeholder="Paste text here..."></textarea>
+        </div>
+
+        <div id="file-panel" class="panel display-none">
+            <label class="file-drop" for="file-input" id="file-drop">
+                <span id="file-label">Choose a file or drag it here</span>
+                <input id="file-input" type="file">
+            </label>
+        </div>
+
+        <label class="verify-row">
+            <span>Compare with a known hash (optional)</span>
+            <input id="expected-input" type="text" autocomplete="off" spellcheck="false"
+                placeholder="Paste the expected hash — the algorithm is detected from its length">
+        </label>
+
+        <div class="button-row">
+            <button id="hash-button" type="button">Compute</button>
+            <button id="cancel-button" class="secondary display-none" type="button">Cancel</button>
+            <button id="clear-button" class="secondary" type="button">Clear</button>
+        </div>
+
+        <div id="progress" class="progress display-none">
+            <div id="progress-bar" class="progress-bar"></div>
+        </div>
+
+        <div id="status">No data loaded</div>
+
+        <div id="verdict" class="verdict display-none"></div>
+
+        <div id="results" class="results display-none"></div>
+    </div>
+
+    <div id="toast" class="toast">Copied</div>
+    <script src="hashing.js"></script>
+    <script src="script.js"></script>
+</body>
+
+</html>
