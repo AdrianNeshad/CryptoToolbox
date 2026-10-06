@@ -63,55 +63,6 @@ Local toolbox for **cryptography and crypto forensics**. Runs fully offline via 
 | Time Converter | Convert timestamps (Unix, Apple NSDate, WebKit, FILETIME, etc.) |
 | Hahs Calculator | Calculate and compare different hash values of data |
 
-## Getting started
-
-Node.js 20+ (incl. npm).
-
-```bash
-brew install node
-```
-
-## Run / test
-
-Fastest — no packaging:
-
-```bash
-npm install
-npm start          # Electron window (recommended for testing)
-```
-
-Or open `Toolbox.html` in your browser (most tools work that way).
-
-Quick “dir” pack without an installer:
-
-```bash
-npm run pack       # electron-builder --dir → release/win-unpacked/
-```
-
-## Build for Windows
-
-**Local Windows machine** (or CI):
-
-```bash
-npm install
-npm run dist            # NSIS-installer + portable .exe → release/
-# or individually:
-npm run dist:installer  # NSIS installer only
-npm run dist:portable   # portable .exe only
-```
-
-**CI (recommended):** GitHub Actions builds the Windows app and publishes a Release
-(`.github/workflows/build-windows-app.yml`) on push to `main`. Changes that only
-touch `.md` files do not trigger a new build.
-
-| Target | Command | Output |
-|-----|----------|--------|
-| Test now | `npm start` | Electron live |
-| Quick dir pack | `npm run pack` | `release/win-unpacked/` |
-| Windows installer | `npm run dist:installer` | `release/*.exe` (NSIS) |
-| Windows portable | `npm run dist:portable` | `release/CryptoToolbox-Portable-*.exe` |
-| Windows (both) | `npm run dist` | `release/*.exe` |
-
 ## Add your own tool
 
 1. Create `tools/<name>/` with HTML/JS/CSS
