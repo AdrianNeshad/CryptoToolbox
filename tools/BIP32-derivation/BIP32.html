@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BIP32 Derivation Preview</title>
+    <script>
+        (function () {
+            try {
+                var params = new URLSearchParams(location.search);
+                var fromParent = params.get('theme');
+                var saved = localStorage.getItem('theme');
+                var theme = (fromParent === 'light' || fromParent === 'dark') ? fromParent
+                    : (saved === 'light' || saved === 'dark') ? saved : 'dark';
+                document.documentElement.setAttribute('data-theme', theme);
+                if (fromParent === 'light' || fromParent === 'dark') {
+                    localStorage.setItem('theme', fromParent);
+                }
+            } catch (e) {
+                document.documentElement.setAttribute('data-theme', 'dark');
+            }
+        })();
+    </script>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <div id="container">
+
+        <header class="page-header">
+            <h1>BIP32 Derivation</h1>
+            <p>Paste an extended key (<code>xpub</code>, <code>ypub</code>, <code>zpub</code>&hellip;) and a derivation
+                path to preview the resulting Bitcoin addresses &mdash; Legacy, Nested SegWit and Native SegWit.
+                Everything is computed locally in this window; nothing is sent online. Handy for sanity-checking a key
+                after a successful unlock.</p>
+        </header>
+
+        <div class="panel">
+            <div class="panel-head">
+                <span class="step-num">1</span>
+                <span class="panel-title">Extended key</span>
+            </div>
+            <p class="hint">An extended <strong>public</strong> key (xpub/ypub/zpub, or tpub/upub/vpub for testnet)
+                or an extended <strong>private</strong> key (xprv/zprv&hellip;)</p>
+            <textarea id="key-input" class="text-area" spellcheck="false" autocomplete="off"
+                placeholder="xpub6CUGRUo…"></textarea>
+            <div class="key-meta display-none" id="key-meta"></div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-head">
+                <span class="step-num">2</span>
+                <span class="panel-title">Derivation path</span>
+            </div>
+            <p class="hint">Relative to the key you pasted, e.g. <code>0/0</code> for the first receive address. You can
+                also paste a full path like <code>m/44'/0'/0'/0/0</code> &mdash; the hardened account prefix is ignored,
+                since an extended <em>public</em> key can only derive non-hardened children. The last number is the
+                start index.</p>
+            <div class="field-row">
+                <label class="field">
+                    <span class="field-label">Path</span>
+                    <input type="text" id="path-input" class="text-input" spellcheck="false" autocomplete="off"
+                        value="m/0/0" placeholder="0/0">
+                </label>
+                <label class="field field--narrow">
+                    <span class="field-label">Addresses</span>
+                    <input type="number" id="count-input" class="text-input" min="1" max="100" value="5">
+                </label>
+            </div>
+            <div class="preset-row" id="preset-row">
+                <span class="preset-label">Common paths</span>
+                <button type="button" class="preset-btn" data-path="m/0/0">Receive <code>0/0</code></button>
+                <button type="button" class="preset-btn" data-path="m/1/0">Change <code>1/0</code></button>
+                <button type="button" class="preset-btn" data-path="m/44'/0'/0'/0/0">BIP44 Legacy</button>
+                <button type="button" class="preset-btn" data-path="m/49'/0'/0'/0/0">BIP49 Nested</button>
+                <button type="button" class="preset-btn" data-path="m/84'/0'/0'/0/0">BIP84 Native</button>
+            </div>
+            <div class="file-row">
+                <button type="button" id="derive-btn">Derive addresses</button>
+                <button type="button" class="secondary" id="sample-btn">Load sample xpub</button>
+                <button type="button" class="clear-btn" id="clear-btn">Clear</button>
+            </div>
+        </div>
+
+        <div class="result-panel display-none" id="error-panel">
+            <div class="result-title">Could not derive</div>
+            <div class="result-body" id="error-body"></div>
+        </div>
+
+        <div class="output-wrap display-none" id="output-wrap">
+            <div class="output-head">
+                <span id="output-summary">Addresses</span>
+                <div class="output-head-actions">
+                    <button type="button" class="clear-btn" id="copy-all-btn">Copy all</button>
+                </div>
+            </div>
+            <div class="table-scroll">
+                <table class="addr-table">
+                    <thead>
+                        <tr>
+                            <th>Path</th>
+                            <th>Legacy <span class="th-sub">P2PKH</span></th>
+                            <th>Nested SegWit <span class="th-sub">P2SH-P2WPKH</span></th>
+                            <th>Native SegWit <span class="th-sub">P2WPKH / bech32</span></th>
+                        </tr>
+                    </thead>
+                    <tbody id="addr-body"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="toast" class="toast"></div>
+
+    </div>
+
+    <!-- Vendored bitcoinjs-lib 3.3.0 + bech32 helper (shared with the BIP38 tool, pure JS, no network) -->
+    <script src="../BIP38-keycompression/bitcoinjs-3.3.0.js"></script>
+    <script src="../BIP38-keycompression/segwit-addr.js"></script>
+    <script src="script.js"></script>
+
+</body>
+
+</html>

@@ -32,13 +32,20 @@
                 <div class="sidebar-header-text">
                     <h1>Crypto Toolbox</h1>
                     <div class="version-row">
-                        <p>Version 3.6</p>
+                        <p>Version 3.7</p>
                         <div id="net-status" class="net-status">
                             <span id="net-status-text"></span>
                         </div>
                     </div>
                 </div>
                 <div class="sidebar-header-actions">
+                    <button id="search-toggle" class="search-toggle" type="button" aria-expanded="false"
+                        aria-controls="tool-search" title="Search tools" aria-label="Search tools">
+                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <circle cx="11" cy="11" r="6.5" stroke="currentColor" stroke-width="1.8" />
+                            <path d="M16 16L20 20" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+                        </svg>
+                    </button>
                     <button id="theme-toggle" class="theme-toggle" type="button" role="switch" aria-checked="false"
                         aria-label="Light mode" title="Toggle between dark and light mode">
                         <span class="theme-toggle-track">
@@ -65,7 +72,23 @@
                 </div>
             </div>
 
+            <div class="sidebar-search">
+                <svg class="sidebar-search-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="11" cy="11" r="6.5" stroke="currentColor" stroke-width="1.8" />
+                    <path d="M16 16L20 20" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+                </svg>
+                <input type="search" id="tool-search" class="sidebar-search-input" spellcheck="false"
+                    autocomplete="off" placeholder="Search tools…" aria-label="Search tools">
+                <button type="button" id="tool-search-clear" class="sidebar-search-clear" aria-label="Clear search"
+                    title="Clear search">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M6 6L18 18M18 6L6 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+                    </svg>
+                </button>
+            </div>
+
             <nav class="tool-nav">
+                <div class="nav-empty display-none" id="nav-empty">No tools match your search</div>
 
                 <div class="nav-group">
                     <div class="nav-group-title">Local tools</div>
@@ -130,6 +153,23 @@
                         <span class="nav-item-text">
                             <span class="nav-item-title">BIP38 Key Compression</span>
                             <span class="nav-item-desc">Compress/decompress Bitcoin keys</span>
+                        </span>
+                    </button>
+
+                    <button class="nav-item" data-type="frame" data-src="tools/BIP32-derivation/BIP32.html">
+                        <span class="nav-item-icon nav-item-icon--local">
+                            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <circle cx="6" cy="6" r="2.4" stroke="currentColor" stroke-width="1.6" />
+                                <circle cx="18" cy="5" r="2.4" stroke="currentColor" stroke-width="1.6" />
+                                <circle cx="18" cy="13" r="2.4" stroke="currentColor" stroke-width="1.6" />
+                                <circle cx="13" cy="19" r="2.4" stroke="currentColor" stroke-width="1.6" />
+                                <path d="M8 6.5C12 7 14.2 6 15.8 5.4M8.4 7C12 8.5 13.8 11 15.6 12.4M7.2 8C10 11 11 15.5 12 16.8"
+                                    stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+                            </svg>
+                        </span>
+                        <span class="nav-item-text">
+                            <span class="nav-item-title">BIP32 Derivation</span>
+                            <span class="nav-item-desc">xpub + path &rarr; addresses</span>
                         </span>
                     </button>
 
@@ -244,6 +284,52 @@
                     
                     </div>
 
+                    <div class="nav-subgroup nav-subgroup--forensic">
+                        <div class="nav-subgroup-title">Forensic Tools</div>
+                    
+                        <button class="nav-item" data-type="frame" data-src="tools/time-converter/time.html">
+                            <span class="nav-item-icon nav-item-icon--forensic">
+                                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6" />
+                                    <path d="M12 7V12L15.5 14.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"
+                                        stroke-linejoin="round" />
+                                </svg>
+                            </span>
+                            <span class="nav-item-text">
+                                <span class="nav-item-title">Time Converter</span>
+                                <span class="nav-item-desc">Convert timestamp formats</span>
+                            </span>
+                        </button>
+                    
+                        <button class="nav-item" data-type="frame" data-src="tools/hash-calculator/hash.html">
+                            <span class="nav-item-icon nav-item-icon--forensic">
+                                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path
+                                        d="M14.7 6.3A4 4 0 0 0 9.3 11.7L4 17a2 2 0 1 0 2.8 2.8l5.3-5.3a4 4 0 0 0 5.4-5.4l-2.2 2.2-2.2-2.2 2.4-2.4z"
+                                        stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+                                </svg>
+                            </span>
+                            <span class="nav-item-text">
+                                <span class="nav-item-title">Hash Calculator</span>
+                                <span class="nav-item-desc">Calculate hashes for files and strings</span>
+                            </span>
+                        </button>
+
+                        <button class="nav-item" data-type="frame" data-src="tools/iOS-keychain/iOS-keychain.html">
+                            <span class="nav-item-icon nav-item-icon--forensic">
+                                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <circle cx="7" cy="12" r="4" stroke="currentColor" stroke-width="1.8" />
+                                    <path d="M11 12H21M17.5 12V15.5M21 12V15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
+                                        stroke-linejoin="round" />
+                                </svg>
+                            </span>
+                            <span class="nav-item-text">
+                                <span class="nav-item-title">iOS Keychain Viewer</span>
+                                <span class="nav-item-desc">View and analyze iOS keychain data</span>
+                            </span>
+                        </button>
+                    </div>
+
                     <div class="nav-subgroup nav-subgroup--brute">
                         <div class="nav-subgroup-title">Brute Force</div>
 
@@ -342,51 +428,6 @@
                             <span class="nav-item-desc">Brute-force DeFiChain wallet</span>
                         </span>
                     </button>
-                    </div>
-
-                    <div class="nav-subgroup nav-subgroup--forensic">
-                        <div class="nav-subgroup-title">Forensic Tools</div>
-
-                        <button class="nav-item" data-type="frame" data-src="tools/iOS-keychain/iOS-keychain.html">
-                            <span class="nav-item-icon nav-item-icon--forensic">
-                                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <circle cx="7" cy="12" r="4" stroke="currentColor" stroke-width="1.8" />
-                                    <path d="M11 12H21M17.5 12V15.5M21 12V15" stroke="currentColor" stroke-width="1.8"
-                                        stroke-linecap="round" stroke-linejoin="round" />
-                                </svg>
-                            </span>
-                            <span class="nav-item-text">
-                                <span class="nav-item-title">iOS Keychain Viewer</span>
-                                <span class="nav-item-desc">View and analyze iOS keychain data</span>
-                            </span>
-                        </button>
-                        
-                        <button class="nav-item" data-type="frame" data-src="tools/time-converter/time.html">
-                            <span class="nav-item-icon nav-item-icon--forensic">
-                                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6" />
-                                    <path d="M12 7V12L15.5 14.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"
-                                        stroke-linejoin="round" />
-                                </svg>
-                            </span>
-                            <span class="nav-item-text">
-                                <span class="nav-item-title">Time Converter</span>
-                                <span class="nav-item-desc">Convert timestamp formats</span>
-                            </span>
-                        </button>
-
-                        <button class="nav-item" data-type="frame" data-src="tools/hash-calculator/hash.html">
-                            <span class="nav-item-icon nav-item-icon--forensic">
-                                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M14.7 6.3A4 4 0 0 0 9.3 11.7L4 17a2 2 0 1 0 2.8 2.8l5.3-5.3a4 4 0 0 0 5.4-5.4l-2.2 2.2-2.2-2.2 2.4-2.4z"
-                                        stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
-                                </svg>
-                            </span>
-                            <span class="nav-item-text">
-                                <span class="nav-item-title">Hash Calculator</span>
-                                <span class="nav-item-desc">Calculate hashes for files and strings</span>
-                            </span>
-                        </button>
                     </div>
 
                 </div>

@@ -177,6 +177,10 @@ main {
     .content {
         grid-template-columns: minmax(0, 760px);
         justify-content: center;
+        /* Stacked layout: the side column drops below the tool column as a second
+           grid row, so a row-gap is needed between results and the legend
+           (column-gap alone leaves 0px vertical spacing). */
+        row-gap: 20px;
     }
 
     .tool-column,
@@ -379,11 +383,13 @@ main {
 
 .chip {
     display: inline-block;
+    max-width: 100%;
     font-size: 11.5px;
     font-weight: 650;
     padding: 3px 9px;
-    border-radius: 999px;
-    white-space: nowrap;
+    border-radius: 12px;
+    white-space: normal;
+    overflow-wrap: anywhere;
 }
 
 .chip-verified {
@@ -561,7 +567,7 @@ main {
 
         <header class="page-header">
             <h1>Magic Tool</h1>
-            <p>Paste text or load a file - keys, addresses, entropy, and encryption metadata are detected automatically</p>
+            <p>Paste text or load a file to automatically detect keys, addresses, entropy, and other crypto-related content</p>
         </header>
 
         <div class="content">
@@ -4045,6 +4051,23 @@ function describeBech32Invalid(info) {
     return chainName + " address (SegWit v" + info.witnessVersion + ")";
 }
 
+// BIP-350: for a Bitcoin-family segwit address the checksum variant is fixed by
+// the witness version — v0 MUST use bech32, v1+ MUST use bech32m. A string that
+// decodes cleanly but against the WRONG variant for its version is an invalid
+// address (some naive decoders wrongly accept it). Returns an explanatory string
+// for such a mismatch, otherwise null. witnessVersion === null means a non-segwit
+// hrp (Cosmos etc.), where the rule does not apply.
+function bech32VariantError(decoded) {
+    if (decoded.witnessVersion === null) return null;
+    if (decoded.witnessVersion === 0 && decoded.encoding !== "bech32") {
+        return "SegWit v0 must use a Bech32 checksum, not Bech32m (invalid per BIP-350)";
+    }
+    if (decoded.witnessVersion >= 1 && decoded.encoding !== "bech32m") {
+        return "SegWit v" + decoded.witnessVersion + " must use a Bech32m checksum, not Bech32 (invalid per BIP-350)";
+    }
+    return null;
+}
+
 // Public keys in hex. Uncompressed (04 + x + y) can be strongly verified:
 // the point must lie on the secp256k1 curve (a random string passes it with
 // ~2^-256 probability). Compressed (02/03 + x) can only be partially checked —
@@ -4241,6 +4264,14 @@ async function classifyToken(token, addFinding) {
     if (onePos > 0 && onePos < token.length - 6) {
         var decoded = CH.decodeBech32Address(token);
         if (decoded) {
+            // A clean decode is not enough: the checksum variant must match the
+            // witness version (BIP-350). A wrong-variant address is invalid — flag
+            // it red instead of green, the same way a bad EIP-55 casing is flagged.
+            var variantErr = bech32VariantError(decoded);
+            if (variantErr) {
+                addFinding(token, describeBech32Invalid(decoded) + " — " + variantErr, "invalid");
+                return;
+            }
             addFinding(token, describeBech32(decoded) + " · checksum verified", "verified");
             return;
         }
@@ -4271,16 +4302,24 @@ async function classifyToken(token, addFinding) {
                 return;
             }
         }
-        // Looks like a legacy base58check address (bc1-era "1…"/"3…" and the other
-        // chains in ADDRESS_VERSIONS decode to a 25-byte payload whose first byte is a
-        // known version) but the double-SHA256 checksum failed → flag it red instead
-        // of the generic yellow "unknown base58", the same way segwit/EIP-55 mismatches
-        // are flagged. Runs only when base58check failed; Ripple "r…" is handled above.
+        // The string decodes as base58 and its payload matches a KNOWN format
+        // (legacy address, WIF key, extended key, Zcash transparent, BIP38) but the
+        // double-SHA256 checksum failed → flag it red instead of the generic yellow
+        // "unknown base58", the same way segwit/EIP-55 mismatches are flagged. The
+        // payload is classified with the exact same table used for the green path
+        // (classifyBase58Payload), so recognition stays consistent. Runs only when
+        // base58check failed; Ripple "r…" is handled above.
         if (!result && token[0] !== "r") {
             var rawLegacy = CH.base58Decode(token, CH.BASE58_ALPHABET);
-            if (rawLegacy && rawLegacy.length === 25 && ADDRESS_VERSIONS[rawLegacy[0]]) {
-                addFinding(token, ADDRESS_VERSIONS[rawLegacy[0]] + " — the checksum does NOT match (mistyped address?)", "invalid");
-                return;
+            if (rawLegacy && rawLegacy.length >= 5) {
+                var badPayload = rawLegacy.slice(0, rawLegacy.length - 4);
+                var badLabels = classifyBase58Payload(badPayload);
+                if (badLabels.length) {
+                    badLabels.forEach(function (label) {
+                        addFinding(token, label + " — the checksum does NOT match (mistyped address?)", "invalid");
+                    });
+                    return;
+                }
             }
         }
     }
@@ -4498,7 +4537,7 @@ function showToast(text) {
 
 var TEST_DATA = [
     "L4ToPMbLRVxUAT5eixyDS1or4aFndPXsBFpgZkLhcZhYoQUVZ512",
-    "xpub67eAM7jRBcMpoEEv19tD94ZiW5kbvyquZKjgwc8s8KSakiWztUK52s8ngnVD3uv9kpb2fd5Whn7NDig6pAFthq25sptyGAEJWFf1HU88Hck",
+    "xpub6BosfCnifzxcFwrSzQiqu2DBVTshkCXacvNsWGYJVVhhawA7d4R5WSWGFNbi8Aw6ZRc1brxMyWMzG3DSSSSoekkudhUd9yLb6qx39T9nMdj",
     "THgxGZ645zJD3EHzmhSjRp1PJM57t12SLM",
     "bc1qqlkgeswcfcytjqvvufl5afjmzxgj7phpf4eagp",
     "bc1pnnpxg5trvpng5s6rvxkuudjrzejhnn67nw2dy05ymwj73y6nz08qua60ar",

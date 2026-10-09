@@ -18,27 +18,124 @@ window.addEventListener('online', updateNetStatus);
 window.addEventListener('offline', updateNetStatus);
 updateNetStatus();
 
-function initToolNav() {
+function loadTool(item) {
     const frame = document.getElementById('tool-frame');
     const placeholder = document.getElementById('content-placeholder');
-    if (!frame || !placeholder) return;
+    if (!frame || !placeholder || !item) return;
 
+    document.querySelectorAll('.nav-item.active').forEach((el) => el.classList.remove('active'));
+    item.classList.add('active');
+
+    const theme = document.documentElement.getAttribute('data-theme') || 'dark';
+    const src = item.dataset.src;
+    const separator = src.indexOf('?') === -1 ? '?' : '&';
+    frame.src = src + separator + 'theme=' + theme;
+    frame.style.display = 'block';
+    placeholder.style.display = 'none';
+}
+
+function initToolNav() {
     document.querySelectorAll('.nav-item[data-type="frame"]').forEach((item) => {
-        item.addEventListener('click', () => {
-            document.querySelectorAll('.nav-item.active').forEach((el) => el.classList.remove('active'));
-            item.classList.add('active');
-
-            const theme = document.documentElement.getAttribute('data-theme') || 'dark';
-            const src = item.dataset.src;
-            const separator = src.indexOf('?') === -1 ? '?' : '&';
-            frame.src = src + separator + 'theme=' + theme;
-            frame.style.display = 'block';
-            placeholder.style.display = 'none';
-        });
+        item.addEventListener('click', () => loadTool(item));
     });
 }
 
 initToolNav();
+
+function initToolSearch() {
+    const app = document.querySelector('.app');
+    const search = document.getElementById('tool-search');
+    const wrap = document.querySelector('.sidebar-search');
+    const searchToggle = document.getElementById('search-toggle');
+    const clearButton = document.getElementById('tool-search-clear');
+    const emptyMessage = document.getElementById('nav-empty');
+    if (!search || !wrap) return;
+
+    const items = Array.from(document.querySelectorAll('.nav-item'));
+
+    function itemText(item) {
+        const title = item.querySelector('.nav-item-title');
+        const desc = item.querySelector('.nav-item-desc');
+        return ((title ? title.textContent : '') + ' ' + (desc ? desc.textContent : '')).toLowerCase();
+    }
+
+    function applyFilter(query) {
+        const q = query.trim().toLowerCase();
+        wrap.classList.toggle('has-value', q.length > 0);
+
+        if (!q) {
+            items.forEach((item) => item.classList.remove('search-hidden'));
+            document.querySelectorAll('.nav-subgroup, .nav-group').forEach(
+                (el) => el.classList.remove('search-hidden'));
+            if (emptyMessage) emptyMessage.classList.add('display-none');
+            return;
+        }
+
+        let anyVisible = false;
+        items.forEach((item) => {
+            const match = itemText(item).indexOf(q) !== -1;
+            item.classList.toggle('search-hidden', !match);
+            if (match) anyVisible = true;
+        });
+
+        // Collapse any subgroup / group that has no visible items left.
+        document.querySelectorAll('.nav-subgroup').forEach((group) => {
+            const hasVisible = group.querySelector('.nav-item:not(.search-hidden)');
+            group.classList.toggle('search-hidden', !hasVisible);
+        });
+        document.querySelectorAll('.nav-group').forEach((group) => {
+            const hasVisible = group.querySelector('.nav-item:not(.search-hidden)');
+            group.classList.toggle('search-hidden', !hasVisible);
+        });
+
+        if (emptyMessage) emptyMessage.classList.toggle('display-none', anyVisible);
+    }
+
+    function openSearch() {
+        if (app) app.classList.add('search-open');
+        if (searchToggle) searchToggle.setAttribute('aria-expanded', 'true');
+        // Wait for the expand transition to start before focusing so the
+        // field is visible when it receives focus.
+        setTimeout(() => search.focus(), 0);
+    }
+
+    function closeSearch() {
+        if (app) app.classList.remove('search-open');
+        if (searchToggle) searchToggle.setAttribute('aria-expanded', 'false');
+        search.value = '';
+        applyFilter('');
+        search.blur();
+    }
+
+    function toggleSearch() {
+        if (app && app.classList.contains('search-open')) {
+            closeSearch();
+        } else {
+            openSearch();
+        }
+    }
+
+    if (searchToggle) {
+        searchToggle.addEventListener('click', toggleSearch);
+    }
+
+    search.addEventListener('input', () => applyFilter(search.value));
+    search.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape') {
+            closeSearch();
+        }
+    });
+
+    if (clearButton) {
+        clearButton.addEventListener('click', () => {
+            search.value = '';
+            applyFilter('');
+            search.focus();
+        });
+    }
+}
+
+initToolSearch();
 
 function initSidebarToggle() {
     const app = document.querySelector('.app');
