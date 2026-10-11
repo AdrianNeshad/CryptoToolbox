@@ -114,18 +114,26 @@ code {
 }
 .text-input:focus { border-color: var(--accent); }
 
-.preset-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
-.preset-label { font-size: 12px; font-weight: 600; color: var(--text-muted); margin-right: 2px; }
+.preset-row { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
+.preset-label { font-size: 12px; font-weight: 600; color: var(--text-muted); margin-right: 4px; }
+
+/* Same pill style as the category tabs in the Magic tool; the preset that
+   matches the current path is shown as selected. */
 .preset-btn {
-    padding: 6px 11px; font-size: 12px; font-weight: 600;
-    background: var(--surface-hover); color: var(--text);
-    border: 1px solid var(--border); border-radius: 20px; cursor: pointer;
-    transition: border-color 0.15s, background 0.15s, color 0.15s;
+    padding: 6px 12px; font-family: inherit; font-size: 12.5px; font-weight: 650; white-space: nowrap;
+    background: none; color: var(--text-muted);
+    border: 1px solid var(--border); border-radius: 999px; cursor: pointer;
+    transition: border-color 0.15s ease, color 0.15s ease, background-color 0.15s ease;
 }
-.preset-btn:hover { border-color: var(--accent); color: var(--accent); }
+.preset-btn:hover { background: none; border-color: var(--border-hover); color: var(--text); }
+.preset-btn[aria-pressed="true"],
+.preset-btn[aria-pressed="true"]:hover {
+    background: var(--accent-soft); border-color: var(--accent); color: var(--accent);
+}
 .preset-btn code {
-    background: none; border: none; padding: 0; margin-left: 2px;
-    font-family: Consolas, Monaco, monospace; font-size: 0.95em; color: inherit;
+    background: none; border: none; padding: 0; margin-left: 6px;
+    font-family: inherit; font-size: inherit; font-weight: 500;
+    font-variant-numeric: tabular-nums; opacity: 0.8; color: inherit;
 }
 
 .file-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }

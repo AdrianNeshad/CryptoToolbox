@@ -40,6 +40,8 @@
     --warning-dot: #ffd60a;
     --error: #ff453a;
     --error-soft: rgba(255, 69, 58, 0.15);
+    --orange: #ff9f0a;
+    --orange-soft: rgba(255, 159, 10, 0.18);
     --glow-1: rgba(0, 0, 0, 0);
     --glow-2: rgba(0, 0, 0, 0);
 }
@@ -61,6 +63,8 @@
     --warning-dot: #f5c518;
     --error: #ff3b30;
     --error-soft: rgba(255, 59, 48, 0.12);
+    --orange: #b35400;
+    --orange-soft: rgba(179, 84, 0, 0.18);
     --glow-1: rgba(0, 0, 0, 0);
     --glow-2: rgba(0, 0, 0, 0);
 }
@@ -135,11 +139,41 @@ main {
     padding: 18px 20px;
 }
 
+.capabilities-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 14px;
+}
+
 .capabilities h2 {
-    margin: 0 0 14px;
+    margin: 0;
     font-size: 15px;
     font-weight: 650;
     letter-spacing: -0.01em;
+}
+
+.capabilities-head #capabilities-toggle {
+    flex-shrink: 0;
+    padding: 4px 11px;
+}
+
+/* Collapsed (the default): only the section headings are shown */
+.capabilities.collapsed ul {
+    display: none;
+}
+
+.capabilities.collapsed section {
+    margin-bottom: 8px;
+}
+
+.capabilities.collapsed section:last-child {
+    margin-bottom: 0;
+}
+
+.capabilities.collapsed h3 {
+    margin: 0;
 }
 
 .capabilities section {
@@ -254,14 +288,6 @@ main {
     min-width: 0;
 }
 
-#file-name {
-    font-size: 12.5px;
-    color: var(--success);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
 #file-hint {
     font-size: 12px;
     color: var(--text-muted);
@@ -269,13 +295,241 @@ main {
     white-space: nowrap;
 }
 
-/* Hide the hint once a file is loaded (a name is shown instead) */
-.toolbar-left.has-file #file-hint {
+/* ---------- attached file ---------- */
+
+.file-card {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 22px 18px;
+}
+
+.file-card.display-none {
     display: none;
 }
 
-#file-name.error {
+.file-icon {
+    width: 34px;
+    height: 34px;
+    flex-shrink: 0;
+    fill: none;
+    stroke: var(--text-muted);
+    stroke-width: 1.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.file-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.file-card-name {
+    font-size: 14px;
+    font-weight: 650;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.file-card-meta {
+    margin-top: 2px;
+    font-size: 12.5px;
+    color: var(--text-muted);
+}
+
+.file-card-meta.error {
     color: var(--error);
+}
+
+/* ---------- progress ---------- */
+
+.scan-progress {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 16px;
+}
+
+.scan-progress.display-none {
+    display: none;
+}
+
+.scan-progress-head {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 13px;
+}
+
+#scan-progress-label {
+    flex: 1;
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+#scan-progress-percent {
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+}
+
+.progress-track {
+    height: 6px;
+    background: var(--surface-hover);
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.progress-bar {
+    height: 100%;
+    width: 0;
+    background: var(--accent);
+    border-radius: 3px;
+    transition: width 0.15s ease;
+}
+
+/* ---------- notices (input that could not be read or analyzed) ---------- */
+
+#notices {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+#notices.display-none {
+    display: none;
+}
+
+.notice-card {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left-width: 3px;
+    border-radius: 10px;
+    padding: 12px 16px;
+}
+
+.notice-title {
+    font-size: 13.5px;
+    font-weight: 650;
+    overflow-wrap: anywhere;
+}
+
+.notice-detail {
+    font-size: 12.5px;
+    color: var(--text-muted);
+    overflow-wrap: anywhere;
+}
+
+.notice-error {
+    border-left-color: var(--error);
+}
+
+.notice-error .notice-title {
+    color: var(--error);
+}
+
+.notice-warning {
+    border-left-color: var(--warning-dot);
+}
+
+.notice-warning .notice-title {
+    color: var(--warning);
+}
+
+/* ---------- category tabs ---------- */
+
+/* The row scrolls sideways (wheel, trackpad, touch, keyboard focus) without a
+   visible scrollbar, which would otherwise be drawn over the tabs; the faded
+   edges below show that there is more. */
+.category-tabs {
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+
+.category-tabs::-webkit-scrollbar {
+    display: none;
+}
+
+.category-tabs.display-none {
+    display: none;
+}
+
+/* Faded edges show that the row continues when it does not fit */
+.category-tabs.fade-right {
+    -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 32px), transparent);
+    mask-image: linear-gradient(to right, #000 calc(100% - 32px), transparent);
+}
+
+.category-tabs.fade-left {
+    -webkit-mask-image: linear-gradient(to left, #000 calc(100% - 32px), transparent);
+    mask-image: linear-gradient(to left, #000 calc(100% - 32px), transparent);
+}
+
+.category-tabs.fade-left.fade-right {
+    -webkit-mask-image: linear-gradient(to right, transparent, #000 32px, #000 calc(100% - 32px), transparent);
+    mask-image: linear-gradient(to right, transparent, #000 32px, #000 calc(100% - 32px), transparent);
+}
+
+.category-tab {
+    flex-shrink: 0;
+    font-family: inherit;
+    font-size: 12.5px;
+    font-weight: 650;
+    white-space: nowrap;
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    padding: 6px 12px;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: border-color 0.15s ease, color 0.15s ease, background-color 0.15s ease;
+}
+
+.category-tab:hover {
+    border-color: var(--border-hover);
+    color: var(--text);
+}
+
+.category-tab[aria-selected="true"] {
+    background: var(--accent-soft);
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
+.tab-count {
+    margin-left: 6px;
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+    opacity: 0.8;
+}
+
+/* ---------- pager ---------- */
+
+.pager {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.pager.display-none {
+    display: none;
+}
+
+.pager-info {
+    padding: 0 6px;
+    font-size: 12.5px;
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
 }
 
 .toolbar-right {
@@ -301,7 +555,11 @@ main {
 
 #clear-button,
 #testdata-button,
-#file-button {
+#file-button,
+#file-remove-button,
+#scan-cancel-button,
+#capabilities-toggle,
+.pager-button {
     font-family: inherit;
     font-size: 12.5px;
     font-weight: 650;
@@ -314,10 +572,25 @@ main {
     transition: border-color 0.15s ease, color 0.15s ease;
 }
 
+#testdata-button:hover,
 #clear-button:hover,
-#file-button:hover {
+#file-remove-button:hover,
+#capabilities-toggle:hover,
+#scan-cancel-button:hover:enabled,
+.pager-button:hover:enabled {
     border-color: var(--border-hover);
     color: var(--text);
+}
+
+#file-remove-button,
+#scan-cancel-button {
+    flex-shrink: 0;
+}
+
+#scan-cancel-button:disabled,
+.pager-button:disabled {
+    opacity: 0.45;
+    cursor: default;
 }
 
 /* Dragover: the same visual state as focus on the input box */
@@ -326,14 +599,26 @@ main {
     box-shadow: 0 0 0 3px var(--accent-soft);
 }
 
-#testdata-button {
+/* Toolbar colours: Load file blue, Clear orange, Test data neutral grey */
+#file-button {
     border-color: var(--accent-soft);
     color: var(--accent);
 }
 
-#testdata-button:hover {
+#file-button:hover {
     border-color: var(--accent);
     color: var(--accent);
+}
+
+/* Clear turns orange only while there is input (text or a file) to clear */
+#clear-button.has-input {
+    border-color: var(--orange-soft);
+    color: var(--orange);
+}
+
+#clear-button.has-input:hover {
+    border-color: var(--orange);
+    color: var(--orange);
 }
 
 /* ---------- empty state ---------- */
@@ -576,13 +861,23 @@ main {
 
                 <div id="input-box">
                     <textarea id="input" spellcheck="false" placeholder="Paste text or drop a file here: wallet JSON, memory dump, logs, keys, addresses..."></textarea>
+                    <div id="file-card" class="file-card display-none">
+                        <svg class="file-icon" viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z" />
+                            <path d="M14 3v5h5M9 13h6M9 17h6" />
+                        </svg>
+                        <div class="file-info">
+                            <div id="file-card-name" class="file-card-name"></div>
+                            <div id="file-card-meta" class="file-card-meta"></div>
+                        </div>
+                        <button id="file-remove-button" type="button">Remove</button>
+                    </div>
                 </div>
 
                 <div class="input-toolbar">
                     <div class="toolbar-left">
                         <button id="file-button" type="button">Load file…</button>
-                        <span id="file-hint">Only non-binary file types supported</span>
-                        <span id="file-name"></span>
+                        <span id="file-hint">Non-binary files up to 100 MB</span>
                         <input type="file" id="file-input" hidden>
                     </div>
                     <div class="toolbar-right">
@@ -594,28 +889,45 @@ main {
                     </div>
                 </div>
 
+                <div id="scan-progress" class="scan-progress display-none" role="status" aria-live="polite">
+                    <div class="scan-progress-head">
+                        <span id="scan-progress-label"></span>
+                        <span id="scan-progress-percent"></span>
+                        <button id="scan-cancel-button" type="button">Cancel</button>
+                    </div>
+                    <div class="progress-track"><div id="scan-progress-bar" class="progress-bar"></div></div>
+                </div>
+
+                <div id="notices" class="display-none"></div>
+
                 <div class="empty-state" id="empty-state">
                     <p>Paste text or load a file above to identify crypto-related content</p>
                 </div>
 
+                <div id="category-tabs" class="category-tabs display-none" role="tablist" aria-label="Filter results by category"></div>
+                <div id="pager-top" class="pager display-none"></div>
                 <div id="results" class="display-none"></div>
+                <div id="pager-bottom" class="pager display-none"></div>
 
             </div>
 
             <aside class="side-column">
             <div id="legend" class="legend"></div>
-            <div class="capabilities">
-            <h2>Can identify &amp; verify</h2>
+            <div class="capabilities collapsed" id="capabilities">
+            <div class="capabilities-head">
+                <h2>Can identify &amp; verify</h2>
+                <button id="capabilities-toggle" type="button" aria-expanded="false" aria-controls="capabilities">Show all</button>
+            </div>
 
             <section>
                 <h3>Addresses</h3>
                 <ul>
-                    <li>Bitcoin - Legacy, P2SH, SegWit, Taproot</li>
-                    <li>Litecoin, Dogecoin, Dash, Zcash</li>
+                    <li>Bitcoin - Legacy, P2SH, SegWit, Taproot (mainnet &amp; testnet)</li>
+                    <li>Litecoin, Dogecoin, Dash, Zcash (transparent)</li>
                     <li>Ethereum / EVM (EIP-55 checksum)</li>
                     <li>Tron, XRP (Ripple), Bitcoin Cash</li>
                     <li>Monero (keccak), TON (CRC16)</li>
-                    <li>Solana, Cosmos chains (bech32)</li>
+                    <li>Cosmos chains (bech32), Solana (no checksum)</li>
                 </ul>
             </section>
 
@@ -626,18 +938,20 @@ main {
                     <li>Extended keys (xpub / xprv / zpub…)</li>
                     <li>BIP38-encrypted keys</li>
                     <li>Public keys (secp256k1, on the curve)</li>
-                    <li>PEM key blocks (EC / RSA, DER)</li>
+                    <li>Possible private keys (hex, secp256k1 range)</li>
+                    <li>PEM blocks - keys &amp; certificates (DER)</li>
                 </ul>
             </section>
 
             <section>
                 <h3>Seed &amp; entropy</h3>
                 <ul>
-                    <li>BIP39 mnemonic (checksum)</li>
-                    <li>Electrum seed phrases (version prefix)</li>
+                    <li>BIP39 mnemonic (English, checksum)</li>
+                    <li>Electrum seed phrases (standard, SegWit, 2FA)</li>
                     <li>Monero polyseed (16 words, checksum)</li>
+                    <li>Phrases one word per line or next to labels</li>
                     <li>BIP32 derivation paths</li>
-                    <li>Entropy (hex, decimal, JSON object)</li>
+                    <li>Entropy, 16/32 bytes (hex, decimal, JSON)</li>
                 </ul>
             </section>
 
@@ -645,7 +959,7 @@ main {
                 <h3>Crypto metadata</h3>
                 <ul>
                     <li>Ethereum Keystore V3</li>
-                    <li>JSON-Keystore (cipher, kdf, iv, salt, mac)</li>
+                    <li>JSON keystore fields (cipher, kdf, iv, salt, mac, ciphertext)</li>
                     <li>Algorithms - AES, ChaCha20, Argon2, scrypt,
                         PBKDF2, SHA, HMAC, Ed25519, and more.</li>
                 </ul>
@@ -654,10 +968,12 @@ main {
             <section>
                 <h3>Format &amp; encoding</h3>
                 <ul>
-                    <li>JSON (scanned for keys &amp; wallet fields)</li>
+                    <li>JSON, also inside logs and other text</li>
                     <li>JWT (header decoded)</li>
-                    <li>Base64 / Base64url, Base58, Hex</li>
-                    <li>Hashes - MD5, SHA-1/256/512, RIPEMD-160</li>
+                    <li>Base64 / Base64url (decoded), Base58, Hex</li>
+                    <li>Hashes by length - MD5, SHA-1/224/256/384/512, RIPEMD-160, tx hashes</li>
+                    <li>UUID (v1-v8, structure)</li>
+                    <li>Values inside URLs and key=value pairs</li>
                 </ul>
             </section>
             </div>
@@ -669,7 +985,7 @@ main {
 
     </main>
 
-    <script>
+    <script id="magic-crypto-helpers">
 // crypto-helpers.js
 // Standalone, dependency-free decode/checksum functions for Magic Tool.
 // No external library required: SHA-256 comes from Web Crypto (crypto.subtle),
@@ -1247,7 +1563,7 @@ main {
 })(window);
 
 </script>
-    <script>
+    <script id="magic-wordlists">
 window.entropyWordlists = {
     bip39: [
     "abandon",
@@ -3302,32 +3618,21 @@ window.entropyWordlists = {
 };
 
 </script>
-    <script>
-// script.js — Magic Tool
+    <script id="magic-engine">
+// engine.js — Magic Tool scan engine
 // Paste any text; the tool scans and classifies all
 // crypto-related content it finds (keys, addresses, entropy,
 // wallet encryption metadata, generic encodings).
+//
+// This script has no DOM access: the page runs it directly, and its source
+// (together with crypto-helpers and the wordlists) is also loaded into a Web
+// Worker so large inputs are scanned without freezing the page.
 //
 // Confidence levels (color-coded in the UI and explained in the legend):
 //   verified — checksum/structure cryptographically checked (green)
 //   invalid  — the format claims a checksum but it does not match (red)
 //   likely   — the format matches but cannot be verified (blue)
 //   unknown  — encoded data without a recognized format (yellow)
-
-var input = document.getElementById("input");
-var clearButton = document.getElementById("clear-button");
-var testdataButton = document.getElementById("testdata-button");
-var resultsEl = document.getElementById("results");
-var legendEl = document.getElementById("legend");
-var emptyState = document.getElementById("empty-state");
-var emptyStateText = emptyState.querySelector("p");
-var emptyStateDefaultText = emptyStateText.textContent;
-var resultCount = document.getElementById("result-count");
-var toast = document.getElementById("toast");
-var inputBox = document.getElementById("input-box");
-var fileButton = document.getElementById("file-button");
-var fileInput = document.getElementById("file-input");
-var fileNameEl = document.getElementById("file-name");
 
 var CH = window.CryptoHelpers;
 
@@ -3567,10 +3872,13 @@ function base64UrlToString(s) {
 
 // ---------- Full-text pass ----------
 
-function walkJson(node, addFinding) {
+// Walks a parsed JSON value depth-first with an explicit stack instead of
+// recursion, so deeply nested JSON cannot overflow the call stack. Findings
+// are reported in the same order a recursive pre-order walk would give.
+function walkJsonVisit(node, stack, addFinding) {
     if (node === null || node === undefined) return;
     if (Array.isArray(node)) {
-        node.forEach(function (item) { walkJson(item, addFinding); });
+        stack.push({ items: node, i: 0 });
         return;
     }
     if (typeof node === "object") {
@@ -3594,109 +3902,190 @@ function walkJson(node, addFinding) {
             addFinding(node.crypto.ciphertext, "Ethereum Keystore V3 (key file)", "verified");
         }
 
-        keys.forEach(function (key) {
-            var value = node[key];
-            var lowerKey = key.toLowerCase();
-
-            if ((lowerKey === "kdf" || lowerKey === "cipher") && typeof value === "string") {
-                addFinding(value, "Encryption field \"" + key + "\": " + value, "verified");
-            }
-            if (WALLET_JSON_FIELDS.indexOf(lowerKey) !== -1 && typeof value === "string" && value.length >= 8) {
-                addFinding(value, "Wallet field \"" + key + "\" (" + Math.floor(value.length / 2) + " bytes hex)", "verified");
-            }
-
-            walkJson(value, addFinding);
-        });
+        stack.push({ node: node, keys: keys, i: 0 });
     }
 }
 
-// Finds top-level {...}/[...] blocks anywhere in the text (not only if the ENTIRE
-// text is valid JSON) by matching up brackets and skipping over quoted
-// strings, so JSON pasted together with other text is still caught.
-function findJsonBlocks(text) {
-    var blocks = [];
-    for (var i = 0; i < text.length; i++) {
-        var ch = text[i];
-        if (ch === "{" || ch === "[") {
-            var end = findMatchingBracket(text, i);
-            if (end !== -1) {
-                blocks.push(text.slice(i, end + 1));
-                i = end;
-            }
-        }
-    }
-    return blocks;
-}
-
-function findMatchingBracket(text, start) {
-    var open = text[start];
-    var close = open === "{" ? "}" : "]";
-    var depth = 0;
-    var inString = false;
-    var stringChar = null;
-    var escape = false;
-
-    for (var i = start; i < text.length; i++) {
-        var ch = text[i];
-        if (inString) {
-            if (escape) escape = false;
-            else if (ch === "\\") escape = true;
-            else if (ch === stringChar) inString = false;
+// Advances the walk by at most `budget` steps; returns false once it is done.
+function walkJsonSteps(stack, addFinding, budget) {
+    while (stack.length && budget-- > 0) {
+        var frame = stack[stack.length - 1];
+        if (frame.items) {
+            if (frame.i >= frame.items.length) { stack.pop(); continue; }
+            walkJsonVisit(frame.items[frame.i++], stack, addFinding);
             continue;
         }
-        if (ch === '"' || ch === "'") {
-            inString = true;
-            stringChar = ch;
-            continue;
+        if (frame.i >= frame.keys.length) { stack.pop(); continue; }
+
+        var key = frame.keys[frame.i++];
+        var value = frame.node[key];
+        var lowerKey = key.toLowerCase();
+
+        if ((lowerKey === "kdf" || lowerKey === "cipher") && typeof value === "string") {
+            addFinding(value, "Encryption field \"" + key + "\": " + value, "verified");
         }
-        if (ch === open) depth++;
-        else if (ch === close) {
-            depth--;
-            if (depth === 0) return i;
+        if (WALLET_JSON_FIELDS.indexOf(lowerKey) !== -1 && typeof value === "string" && value.length >= 8) {
+            addFinding(value, "Wallet field \"" + key + "\" (" + Math.floor(value.length / 2) + " bytes hex)", "verified");
         }
+
+        walkJsonVisit(value, stack, addFinding);
     }
-    return -1;
+    return stack.length > 0;
 }
 
-// Parses each found JSON block only to search its content recursively for
+function walkJson(node, addFinding) {
+    var stack = [];
+    walkJsonVisit(node, stack, addFinding);
+    walkJsonSteps(stack, addFinding, Infinity);
+}
+
+async function walkJsonAsync(node, addFinding, tick) {
+    var stack = [];
+    walkJsonVisit(node, stack, addFinding);
+    while (walkJsonSteps(stack, addFinding, 4096)) {
+        if (tick) await tick();
+    }
+}
+
+// Characters JSON allows outside strings (whitespace, structure, numbers and
+// the letters of true/false/null).
+var JSON_OUTSIDE_STRING = (function () {
+    var ok = new Uint8Array(128);
+    " \t\n\r{}[]:,0123456789+-.eEtrufalsn".split("").forEach(function (c) { ok[c.charCodeAt(0)] = 1; });
+    return ok;
+})();
+
+// Where a JSON value starting with the bracket at `start` would end, or -1.
+// A cheap structural pre-check, not a validator: brackets must nest and match,
+// strings are "..." with backslash escapes, and the scan bails out at the
+// first character JSON cannot contain, so ordinary text costs almost nothing.
+// Every valid JSON value passes; JSON.parse makes the final call. On failure
+// the brackets still open after `start` are added to `failed`: a scan starting
+// at any of them would see exactly the same characters and fail at the same
+// spot, so the caller can skip them (this keeps unclosed brackets linear).
+function jsonCandidateEnd(text, start, failed) {
+    var stack = [];
+    var n = text.length;
+    var i = start;
+
+    function fail() {
+        if (failed.size + stack.length < 8000000) {
+            for (var k = 1; k < stack.length; k++) failed.add(stack[k]);
+        }
+        return -1;
+    }
+
+    while (i < n) {
+        var c = text.charCodeAt(i);
+        if (c === 34) {
+            i++;
+            while (i < n) {
+                var s = text.charCodeAt(i);
+                if (s === 92) { i += 2; continue; }
+                if (s === 34) break;
+                if (s < 32) return fail(); // raw control characters are not allowed in JSON strings
+                i++;
+            }
+            if (i >= n) return fail();
+            i++;
+            continue;
+        }
+        if (c === 123 || c === 91) {
+            stack.push(i);
+            i++;
+            continue;
+        }
+        if (c === 125 || c === 93) {
+            var open = stack.length ? text.charCodeAt(stack[stack.length - 1]) : 0;
+            if ((c === 125 && open !== 123) || (c === 93 && open !== 91)) return fail();
+            stack.pop();
+            if (stack.length === 0) return i;
+            i++;
+            continue;
+        }
+        if (c >= 128 || !JSON_OUTSIDE_STRING[c]) return fail();
+        i++;
+    }
+    return fail();
+}
+
+// Finds every {...}/[...] block that is valid JSON anywhere in the text, also
+// when it is pasted together with other text or sits inside non-JSON brackets
+// ("[INFO {...}]"). Each block is parsed only to search its content for
 // crypto-relevant data (wallet fields, keystores, entropy). JSON validity
 // itself is not reported — Magic does not act as a JSON syntax checker.
-function scanJsonBlocks(text, addFinding) {
-    findJsonBlocks(text).forEach(function (block) {
+async function scanJsonBlocks(text, addFinding, tick) {
+    var re = /[{[]/g;
+    var failed = new Set();
+    var m;
+    var n = 0;
+    while ((m = re.exec(text)) !== null) {
+        var start = m.index;
+        if (tick && (++n & 255) === 0) await tick(start / text.length);
+        if (failed.has(start)) continue;
+
+        var end = jsonCandidateEnd(text, start, failed);
+        if (end === -1) continue;
+
         var parsed;
         try {
-            parsed = JSON.parse(block);
+            parsed = JSON.parse(text.slice(start, end + 1));
         } catch (e) {
-            // the block was not valid JSON (e.g. just a code snippet with brackets) —
-            // the keyword and token passes still catch relevant content in it
-            return;
+            // not valid JSON (e.g. a code snippet with brackets) — keep looking
+            // inside it; the keyword and token passes still cover its content
+            continue;
         }
-        if (!parsed || typeof parsed !== "object") return;
-        walkJson(parsed, addFinding);
-    });
+        await walkJsonAsync(parsed, addFinding, tick ? function () { return tick(start / text.length); } : null);
+        re.lastIndex = end + 1;
+    }
 }
 
-function scanAlgorithmKeywords(text, addFinding, consumed) {
+// Replaces the given [start, end) ranges with spaces in one pass. Rebuilding
+// the whole string once per match made masking quadratic on large inputs.
+function maskRanges(text, ranges) {
+    if (!ranges.length) return text;
+    var parts = [];
+    var last = 0;
+    for (var i = 0; i < ranges.length; i++) {
+        parts.push(text.slice(last, ranges[i][0]), " ".repeat(ranges[i][1] - ranges[i][0]));
+        last = ranges[i][1];
+    }
+    parts.push(text.slice(last));
+    return parts.join("");
+}
+
+async function scanAlgorithmKeywords(text, addFinding, consumed, tick) {
     var work = text;
-    ALGO_KEYWORDS.forEach(function (kw) {
+    var n = 0;
+    for (var k = 0; k < ALGO_KEYWORDS.length; k++) {
+        var kw = ALGO_KEYWORDS[k];
+        var ranges = [];
         kw.re.lastIndex = 0;
         var m;
         while ((m = kw.re.exec(work)) !== null) {
             addFinding(m[0], kw.label, "likely");
             consumed.add(m[0]);
-            // mask the match so more general patterns don't match the same text again
-            work = work.slice(0, m.index) + " ".repeat(m[0].length) + work.slice(m.index + m[0].length);
+            ranges.push([m.index, m.index + m[0].length]);
+            if (tick && (++n & 255) === 0) await tick((k + kw.re.lastIndex / work.length) / ALGO_KEYWORDS.length);
         }
-    });
+        // Mask this keyword's matches so more general patterns don't match the
+        // same text again. Every pattern starts and ends at a \b next to a word
+        // character, so masking after the loop instead of after each match
+        // finds exactly the same matches.
+        work = maskRanges(work, ranges);
+        if (tick) await tick((k + 1) / ALGO_KEYWORDS.length);
+    }
 }
 
-function scanEntropyLists(text, addFinding) {
+async function scanEntropyLists(text, addFinding, tick) {
     // Negative lookbehind/lookahead so a number row doesn't "eat" an adjacent digit
     // that actually belongs to a hex/base58 word right before or after (e.g.
     // the last character in a 0x address that happens to end in a digit).
     var re = /(?<![0-9a-zA-Z])\[?\s*\d{1,3}(?:\s*[,\s]\s*\d{1,3})*\s*\]?(?![0-9a-zA-Z])/g;
     var m;
+    var n = 0;
     while ((m = re.exec(text)) !== null) {
+        if (tick && (++n & 1023) === 0) await tick(re.lastIndex / text.length);
         var raw = m[0];
         var nums = raw.replace(/[[\]]/g, "").trim().split(/[,\s]+/).filter(function (s) { return s.length > 0; }).map(Number);
         var validCount = nums.length === 16 || nums.length === 32;
@@ -3708,21 +4097,25 @@ function scanEntropyLists(text, addFinding) {
     }
 }
 
-function scanDerivationPaths(text, addFinding) {
+async function scanDerivationPaths(text, addFinding, tick) {
     // e.g. m/44'/0'/0'/0/0 or m/84h/0h/0h/0/0 (h/' marks a hardened index)
     var re = /\bm(?:\/\d+[h']?)+/g;
     var m;
+    var n = 0;
     while ((m = re.exec(text)) !== null) {
         addFinding(m[0], "BIP32 derivation path", "likely");
+        if (tick && (++n & 1023) === 0) await tick(re.lastIndex / text.length);
     }
 }
 
 // JWT: three base64url parts separated by dots. The header is decoded and parsed
 // as JSON — if that succeeds (and contains "alg") the identification is verified.
-function scanJwtTokens(text, addFinding, consumed) {
+async function scanJwtTokens(text, addFinding, consumed, tick) {
     var re = /\beyJ[A-Za-z0-9_-]{6,}\.[A-Za-z0-9_-]{6,}\.[A-Za-z0-9_-]{10,}\b/g;
     var m;
+    var n = 0;
     while ((m = re.exec(text)) !== null) {
+        if (tick && (++n & 255) === 0) await tick(re.lastIndex / text.length);
         var parts = m[0].split(".");
         var headerStr = base64UrlToString(parts[0]);
         if (!headerStr) continue;
@@ -3747,13 +4140,41 @@ function scanJwtTokens(text, addFinding, consumed) {
 // + valid base64 that decodes to DER (0x30 prefix) counts as verified
 // structure. Returns the text with found blocks masked out, so that
 // the keyword scan doesn't react to e.g. "RSA" in the header.
-function scanPemBlocks(text, addFinding, consumed) {
-    var masked = text;
-    var re = /-----BEGIN ([A-Z0-9 ]+)-----([\s\S]*?)-----END \1-----/g;
+//
+// Same result as /-----BEGIN ([A-Z0-9 ]+)-----([\s\S]*?)-----END \1-----/g,
+// but the END marker is looked up with indexOf and remembered per type: with
+// the regex, every BEGIN without a matching END re-read the rest of the text.
+async function scanPemBlocks(text, addFinding, consumed, tick) {
+    var ranges = [];
+    var re = /-----BEGIN ([A-Z0-9 ]+)-----/g;
+    var nextEnd = {}; // type → first END marker at or after `from` (-1 = none)
     var m;
+    var n = 0;
     while ((m = re.exec(text)) !== null) {
+        if (tick && (++n & 63) === 0) await tick(m.index / text.length);
         var type = m[1];
-        var body = m[2].replace(/\s/g, "");
+        var bodyStart = m.index + m[0].length;
+        var endMarker = "-----END " + type + "-----";
+        var cached = nextEnd[type];
+        var endPos;
+        if (cached && cached.from <= bodyStart && (cached.pos === -1 || cached.pos >= bodyStart)) {
+            endPos = cached.pos;
+        } else {
+            endPos = text.indexOf(endMarker, bodyStart);
+            nextEnd[type] = { from: bodyStart, pos: endPos };
+        }
+        if (endPos === -1) {
+            // no END for this BEGIN: the regex would retry one character later
+            re.lastIndex = m.index + 1;
+            continue;
+        }
+        var blockEnd = endPos + endMarker.length;
+        var block = text.slice(m.index, blockEnd);
+        var rawBody = text.slice(bodyStart, endPos);
+        ranges.push([m.index, blockEnd]);
+        re.lastIndex = blockEnd;
+
+        var body = rawBody.replace(/\s/g, "");
         var validB64 = body.length > 0 && body.length % 4 === 0 && /^[A-Za-z0-9+/]+={0,2}$/.test(body);
 
         if (validB64) {
@@ -3765,29 +4186,30 @@ function scanPemBlocks(text, addFinding, consumed) {
                 validB64 = false;
             }
             if (validB64) {
-                addFinding(m[0].trim(),
+                addFinding(block.trim(),
                     "PEM block: " + type + " (~" + Math.floor(body.length * 3 / 4) + " bytes" + derNote + ") · structure verified",
                     "verified");
-                m[2].split(/\s+/).forEach(function (line) {
+                rawBody.split(/\s+/).forEach(function (line) {
                     if (line.length >= 8) consumed.add(line);
                 });
             }
         }
         if (!validB64) {
-            addFinding(m[0].trim(), "PEM block: " + type + " (invalid/incomplete base64)", "likely");
+            addFinding(block.trim(), "PEM block: " + type + " (invalid/incomplete base64)", "likely");
         }
-        masked = masked.slice(0, m.index) + " ".repeat(m[0].length) + masked.slice(m.index + m[0].length);
     }
-    return masked;
+    return maskRanges(text, ranges);
 }
 
 // CashAddr with an explicit prefix ("bitcoincash:q..."). The prefix is part of
 // the polymod checksum, so a hit is fully verified — and an explicit
 // prefix with a wrong checksum is a clear error worth flagging.
-function scanCashAddr(text, addFinding, consumed) {
+async function scanCashAddr(text, addFinding, consumed, tick) {
     var re = /\b(bitcoincash|bchtest|bchreg):([qpzry9x8gf2tvdw0s3jn54khce6mua7l]{34,112})\b/gi;
     var m;
+    var n = 0;
     while ((m = re.exec(text)) !== null) {
+        if (tick && (++n & 255) === 0) await tick(re.lastIndex / text.length);
         var prefix = m[1].toLowerCase();
         var net = prefix === "bitcoincash" ? "mainnet" : (prefix === "bchtest" ? "testnet" : "regtest");
         var decoded = CH.decodeCashAddr(prefix, m[2]);
@@ -3889,64 +4311,233 @@ function verifyPolyseedChecksum(words) {
 }
 
 // Collects runs of wordlist words in a text snippet. A run is broken by words not
-// in the BIP39 list; only runs with a candidate length (a valid BIP39 length, a
-// 16-word polyseed, or one word short of a BIP39 length) become candidates.
-function collectMnemonicCandidates(str, wordSet) {
+// in the BIP39 list; runs with a candidate length (a valid BIP39 length, a
+// 16-word polyseed, or one word short of a BIP39 length) become candidates, and
+// so do other runs of up to MAX_SEGMENT_RUN words, which are searched for a
+// phrase inside them. Each candidate keeps where its words are in `str`.
+async function collectMnemonicCandidates(str, wordSet, tick) {
     var candidates = [];
     var re = /[A-Za-z]+/g;
     var m;
     var run = [];
-    var runStart = -1;
-    var lastEnd = 0;
+    var starts = [];
+    var ends = [];
+    var n = 0;
 
-    function flushRun(endPos) {
-        if (run.length && MNEMONIC_CANDIDATE_LENGTHS[run.length]) {
-            candidates.push({ words: run.slice(), phrase: str.slice(runStart, endPos).trim() });
+    function flushRun() {
+        var len = run.length;
+        if (len && (MNEMONIC_CANDIDATE_LENGTHS[len] || (len > 12 && len <= MAX_SEGMENT_RUN))) {
+            candidates.push({
+                words: run,
+                phrase: str.slice(starts[0], ends[len - 1]).trim(),
+                source: str,
+                starts: starts,
+                ends: ends
+            });
         }
         run = [];
-        runStart = -1;
+        starts = [];
+        ends = [];
     }
 
     while ((m = re.exec(str)) !== null) {
+        if (tick && (++n & 4095) === 0) await tick(re.lastIndex / str.length);
         var word = m[0].toLowerCase();
         if (wordSet.has(word)) {
-            if (run.length === 0) runStart = m.index;
             run.push(word);
-            lastEnd = re.lastIndex;
+            starts.push(m.index);
+            ends.push(re.lastIndex);
         } else {
-            flushRun(lastEnd);
+            flushRun();
         }
     }
-    flushRun(lastEnd);
+    flushRun();
     return candidates;
 }
 
-async function scanMnemonicPhrases(text, addFinding) {
+// ---------- Phrases inside longer runs ----------
+// A phrase next to other wordlist words merges with them into one run:
+// "seed phrase: abandon … about" is 14 wordlist words ("seed" and "phrase" are
+// in the list too), and two phrases written back to back make one long run.
+// When a run is not a valid phrase as a whole, it is explained as one phrase,
+// or two phrases in a row, that cover every word except at most
+// MAX_LEFT_OUT_WORDS. Each such phrase must pass its checksum on its own.
+//
+// A 12-word BIP39 checksum is only 4 bits, so a window would sometimes verify
+// by chance. A phrase is therefore only marked verified when the words left out
+// are typical labels (or nothing is left out); otherwise it is reported as a
+// possible phrase. Runs longer than MAX_SEGMENT_RUN words (two 24-word phrases
+// and two extra words) are not searched.
+var MAX_LEFT_OUT_WORDS = 2;
+var MAX_SEGMENT_RUN = 50;
+var PHRASE_WINDOW_LENGTHS = [24, 21, 18, 16, 15, 12];
+var PHRASE_LABEL_WORDS = new Set(("seed phrase key secret private word code pass list note old this account master " +
+    "main first second copy original real test example primary spare number one two three paper card safe").split(" "));
+
+// What a window of words is if its checksum verifies: a BIP39 phrase, a Monero
+// polyseed (16 words) or an Electrum seed (12 or 24 words); otherwise null.
+async function identifyPhrase(words) {
+    var n = words.length;
+    if (n === POLYSEED_NUM_WORDS) {
+        return verifyPolyseedChecksum(words) ? { name: "Monero polyseed phrase", proof: "checksum verified" } : null;
+    }
+    if (await verifyBip39Checksum(words)) return { name: "BIP39 mnemonic phrase", proof: "checksum verified" };
+    if (n === 12 || n === 24) {
+        var electrum = await checkElectrumVersion(words);
+        if (electrum) return { name: "Electrum seed phrase", type: electrum, proof: "version prefix verified" };
+    }
+    return null;
+}
+
+// Returns the phrases found inside a run, each as
+// { start, length, id, leftOut: [words], labelsOnly }.
+async function findPhrasesInRun(words) {
+    var n = words.length;
+    var cache = {};
+    var segmentations = [];
+
+    async function check(start, length) {
+        var key = start + ":" + length;
+        if (!(key in cache)) cache[key] = await identifyPhrase(words.slice(start, start + length));
+        return cache[key];
+    }
+
+    for (var a = 0; a < PHRASE_WINDOW_LENGTHS.length; a++) {
+        var len1 = PHRASE_WINDOW_LENGTHS[a];
+        // one phrase
+        if (len1 < n && n - len1 <= MAX_LEFT_OUT_WORDS) {
+            for (var s = 0; s + len1 <= n; s++) {
+                var id = await check(s, len1);
+                if (id) segmentations.push([{ start: s, length: len1, id: id }]);
+            }
+        }
+        // two phrases in a row (with at most MAX_LEFT_OUT_WORDS words around or between them)
+        for (var b = 0; b < PHRASE_WINDOW_LENGTHS.length; b++) {
+            var len2 = PHRASE_WINDOW_LENGTHS[b];
+            var spare = n - len1 - len2;
+            if (spare < 0 || spare > MAX_LEFT_OUT_WORDS) continue;
+            for (var s1 = 0; s1 <= spare; s1++) {
+                for (var s2 = s1 + len1; s2 + len2 <= n; s2++) {
+                    var first = await check(s1, len1);
+                    if (!first) break;
+                    var second = await check(s2, len2);
+                    if (second) segmentations.push([{ start: s1, length: len1, id: first }, { start: s2, length: len2, id: second }]);
+                }
+            }
+        }
+    }
+
+    // One entry per window; a window is "verified" if any explanation that
+    // contains it leaves out only label words.
+    var byWindow = {};
+    segmentations.forEach(function (seg) {
+        var covered = new Array(n).fill(false);
+        seg.forEach(function (w) { for (var k = w.start; k < w.start + w.length; k++) covered[k] = true; });
+        var leftOut = [];
+        for (var k = 0; k < n; k++) if (!covered[k]) leftOut.push(words[k]);
+        var labelsOnly = leftOut.every(function (word) { return PHRASE_LABEL_WORDS.has(word); });
+        seg.forEach(function (w) {
+            var key = w.start + ":" + w.length;
+            var prev = byWindow[key];
+            if (!prev || (labelsOnly && !prev.labelsOnly)) {
+                byWindow[key] = { start: w.start, length: w.length, id: w.id, leftOut: leftOut, labelsOnly: labelsOnly };
+            }
+        });
+    });
+
+    var found = Object.keys(byWindow).map(function (k) { return byWindow[k]; });
+    // a window inside a longer phrase that was found is the longer phrase's coincidence
+    return found.filter(function (w) {
+        return !found.some(function (o) {
+            return o.length > w.length && w.start >= o.start && w.start + w.length <= o.start + o.length;
+        });
+    }).sort(function (x, y) { return x.start - y.start; });
+}
+
+function windowPhraseLabel(w, multiLine) {
+    var size = " (" + (w.id.type ? w.id.type + ", " : "") + w.length + " words" + (multiLine ? ", multi-line" : "") + ")";
+    var quoted = "“" + w.leftOut.join(" ") + "”";
+    if (w.labelsOnly) {
+        return w.id.name + size + " · " + w.id.proof + " · " +
+            (w.leftOut.length ? "the label " + quoted + " next to it was left out" : "written right next to another phrase");
+    }
+    return "Possible " + w.id.name + size + " — " + (w.id.proof === "checksum verified" ? "the checksum matches" : "the version prefix matches") +
+        " when " + quoted + " next to it " + (w.leftOut.length === 1 ? "is" : "are") + " left out, which can also be chance";
+}
+
+// Progress runs 0–0.4 for collecting line candidates, 0.4–0.6 for checking
+// them, 0.6–0.9 for the cross-line run and 0.9–1 for checking those.
+async function scanMnemonicPhrases(text, addFinding, tick) {
     if (!BIP39_WORDLIST.length) return;
     var wordSet = new Set(BIP39_WORDLIST);
+    // Absolute positions of words in phrases verified line by line: a
+    // cross-line window must not reuse them (two labelled phrases on adjacent
+    // lines would otherwise offer windows that straddle the line break).
+    var verifiedWords = new Set();
+
+    function markVerified(c, from, to) {
+        for (var v = from; v <= to; v++) verifiedWords.add(c.base + c.starts[v]);
+    }
+
+    async function reportPhrasesInRun(c, multiLine) {
+        var windows = await findPhrasesInRun(c.words);
+        for (var k = 0; k < windows.length; k++) {
+            var w = windows[k];
+            var last = w.start + w.length - 1;
+            var phrase = c.source.slice(c.starts[w.start], c.ends[last]);
+            if (multiLine) {
+                if (phrase.indexOf("\n") === -1) continue; // pass 1 covers windows within a line
+                var reused = false;
+                for (var q = w.start; q <= last && !reused; q++) reused = verifiedWords.has(c.starts[q]);
+                if (reused) continue;
+            } else if (w.labelsOnly) {
+                markVerified(c, w.start, last);
+            }
+            addFinding(phrase, windowPhraseLabel(w, multiLine), w.labelsOnly ? "verified" : "likely");
+        }
+    }
 
     // Pass 1 — line by line: two phrases on adjacent lines must not merge
     // into a single invalid giant candidate.
     var candidates = [];
-    text.split("\n").forEach(function (line) {
-        collectMnemonicCandidates(line, wordSet).forEach(function (c) { candidates.push(c); });
-    });
+    var lines = text.split("\n");
+    var lineStart = 0;
+    for (var li = 0; li < lines.length; li++) {
+        if (tick && (li & 4095) === 4095) await tick(0.4 * li / lines.length);
+        var lineCandidates = await collectMnemonicCandidates(lines[li], wordSet);
+        for (var lc = 0; lc < lineCandidates.length; lc++) {
+            lineCandidates[lc].base = lineStart;
+            candidates.push(lineCandidates[lc]);
+        }
+        lineStart += lines[li].length + 1;
+    }
+    lines = null;
 
     for (var i = 0; i < candidates.length; i++) {
+        if (tick && (i & 63) === 63) await tick(0.4 + 0.2 * i / candidates.length);
         var c = candidates[i];
         var n = c.words.length;
+
+        // Not a phrase length on its own: only look for a phrase inside it.
+        if (!MNEMONIC_CANDIDATE_LENGTHS[n]) {
+            await reportPhrasesInRun(c, false);
+            continue;
+        }
 
         // 16 words → Monero polyseed shape (never a valid BIP39 length).
         if (n === POLYSEED_NUM_WORDS) {
             if (verifyPolyseedChecksum(c.words)) {
                 addFinding(c.phrase, "Monero polyseed phrase (16 words) · checksum verified", "verified");
+                markVerified(c, 0, n - 1);
                 continue;
             }
             var electrum16 = await checkElectrumVersion(c.words);
             if (electrum16) {
                 addFinding(c.phrase, "Electrum seed phrase (" + electrum16 + ", 16 words) · version prefix verified", "verified");
+                markVerified(c, 0, n - 1);
             } else {
                 addFinding(c.phrase, "Monero polyseed phrase (16 words) — the checksum does NOT match", "invalid");
+                await reportPhrasesInRun(c, false);
             }
             continue;
         }
@@ -3956,37 +4547,49 @@ async function scanMnemonicPhrases(text, addFinding) {
         if (BIP39_ONE_WORD_MISSING[n]) {
             var target = BIP39_ONE_WORD_MISSING[n];
             addFinding(c.phrase, n + " words from the BIP39 list — one word missing (looks like a " + target + "-word phrase); the checksum cannot be verified until the last word is added", "unknown");
+            await reportPhrasesInRun(c, false);
             continue;
         }
 
         // A valid BIP39 length: 12/15/18/21/24 words.
         if (await verifyBip39Checksum(c.words)) {
             addFinding(c.phrase, "BIP39 mnemonic phrase (" + n + " words) · checksum verified", "verified");
+            markVerified(c, 0, n - 1);
             continue;
         }
         var electrumType = await checkElectrumVersion(c.words);
         if (electrumType) {
             addFinding(c.phrase, "Electrum seed phrase (" + electrumType + ", " + n + " words) · version prefix verified", "verified");
+            markVerified(c, 0, n - 1);
         } else {
             addFinding(c.phrase, n + " words from the BIP39 list — the checksum does NOT match (BIP39/Electrum)", "invalid");
+            await reportPhrasesInRun(c, false);
         }
     }
 
     // Pass 2 — across line breaks (e.g. seed phrases written with one word per
     // line). To avoid noise from runs that happened to merge, cross-line
     // candidates are only reported when the phrase actually verifies.
-    var crossCandidates = collectMnemonicCandidates(text, wordSet);
+    var crossCandidates = await collectMnemonicCandidates(text, wordSet,
+        tick ? function (f) { return tick(0.6 + 0.3 * f); } : null);
     for (var j = 0; j < crossCandidates.length; j++) {
+        if (tick && (j & 63) === 63) await tick(0.9 + 0.1 * j / crossCandidates.length);
         var cc = crossCandidates[j];
         if (cc.phrase.indexOf("\n") === -1) continue; // already covered by pass 1
         var m = cc.words.length;
+        // don't flag unverifiable runs across line breaks; only look inside them
+        if (!MNEMONIC_CANDIDATE_LENGTHS[m] || BIP39_ONE_WORD_MISSING[m]) {
+            await reportPhrasesInRun(cc, true);
+            continue;
+        }
         if (m === POLYSEED_NUM_WORDS) {
             if (verifyPolyseedChecksum(cc.words)) {
                 addFinding(cc.phrase, "Monero polyseed phrase (16 words, multi-line) · checksum verified", "verified");
+            } else {
+                await reportPhrasesInRun(cc, true);
             }
             continue;
         }
-        if (BIP39_ONE_WORD_MISSING[m]) continue; // don't flag unverifiable runs across line breaks
         if (await verifyBip39Checksum(cc.words)) {
             addFinding(cc.phrase, "BIP39 mnemonic phrase (" + m + " words, multi-line) · checksum verified", "verified");
             continue;
@@ -3994,6 +4597,8 @@ async function scanMnemonicPhrases(text, addFinding) {
         var crossElectrum = await checkElectrumVersion(cc.words);
         if (crossElectrum) {
             addFinding(cc.phrase, "Electrum seed phrase (" + crossElectrum + ", " + m + " words, multi-line) · version prefix verified", "verified");
+        } else {
+            await reportPhrasesInRun(cc, true);
         }
     }
 }
@@ -4359,9 +4964,201 @@ async function classifyToken(token, addFinding) {
     }
 }
 
+// ---------- Sub-tokens ----------
+// '=', '/', '+', '_' and '-' belong to the token alphabet (base64/base64url),
+// so a value written as "from=1A1z…", "…/address/bc1q…" or "addr_0x…" stays
+// glued to its neighbours and is not recognized as a whole. Such tokens are
+// split and the parts classified on their own:
+// - The value of a key=value pair is treated exactly like a standalone token.
+// - Pieces split at '/', '+', '_' or '-' (characters base64 data also
+//   contains) keep only checksum-verified results, 0x-prefixed values and
+//   segwit-shaped addresses with a bad checksum; random base64 pieces would
+//   otherwise turn up as "possible Solana keys" or base58 strings with a bad
+//   checksum.
+var KEY_VALUE_TOKEN = /[^=]=+[^=]/;
+var PIECE_SEPARATORS = /[/+_-]+/;
+var BECH32_SHAPE = /^[a-z]{1,83}1[qpzry9x8gf2tvdw0s3jn54khce6mua7l]{6,}$/;
+
+async function classifySubTokens(token, tokens, consumed, addFinding) {
+    // a part that also occurs on its own is classified as its own token
+    function usable(part) {
+        return part.length >= 8 && part !== token && !tokens.has(part) && !consumed.has(part);
+    }
+
+    async function classifyPart(part, standalone, generic) {
+        var hits = [];
+        function collect(value, label, confidence, alt, chipClass) {
+            hits.push([value, label, confidence, alt, chipClass]);
+        }
+        if (generic) genericFallback(part, collect);
+        else await classifyToken(part, collect);
+
+        var kept = false;
+        for (var h = 0; h < hits.length; h++) {
+            var confidence = hits[h][2];
+            if (!standalone && confidence !== "verified" && part.indexOf("0x") !== 0 &&
+                !(confidence === "invalid" && BECH32_SHAPE.test(part))) continue;
+            addFinding(hits[h][0], hits[h][1], confidence, hits[h][3], hits[h][4]);
+            kept = true;
+        }
+        return kept;
+    }
+
+    async function classifyPieces(str) {
+        var pieces = str.split(PIECE_SEPARATORS);
+        var kept = false;
+        if (pieces.length < 2) return false;
+        for (var i = 0; i < pieces.length; i++) {
+            if (usable(pieces[i]) && await classifyPart(pieces[i], false)) kept = true;
+        }
+        return kept;
+    }
+
+    if (!KEY_VALUE_TOKEN.test(token)) return classifyPieces(token);
+
+    // Same order as for a whole token: specific formats, then pieces, and
+    // generic cataloguing only when nothing else claimed the value
+    var found = false;
+    // split at '=' between a key and a value, keeping trailing base64 padding
+    var values = token.split(/=+(?=[^=])/);
+    for (var i = 0; i < values.length; i++) {
+        var part = values[i];
+        if (!usable(part)) continue;
+        if (await classifyPart(part, true, false) || await classifyPieces(part) ||
+            await classifyPart(part, true, true)) found = true;
+    }
+    return found;
+}
+
 // ---------- Scan orchestration ----------
 
-async function scanText(text) {
+// The stages of a scan in order, with their approximate cost (nanoseconds per
+// character of text, or per unique token for the last stage, measured in
+// Chrome) that turns per-stage progress into one overall percentage.
+var SCAN_STAGES = [
+    { label: "Indexing tokens", perChar: 7 },
+    { label: "JSON blocks", perChar: 4 },
+    { label: "PEM blocks", perChar: 1 },
+    { label: "JWT tokens", perChar: 1 },
+    { label: "Bitcoin Cash addresses", perChar: 1 },
+    { label: "Algorithm names", perChar: 8 },
+    { label: "Entropy lists", perChar: 8 },
+    { label: "Derivation paths", perChar: 1 },
+    { label: "Seed phrases", perChar: 20 },
+    { label: "Addresses, keys & encoded data", perToken: 3000 }
+];
+
+// Thrown by a controller's tick() to cancel a scan.
+var SCAN_STOPPED = { stopped: true };
+
+async function indexTokens(text, tick) {
+    var re = /[A-Za-z0-9+/=_-]{8,}/g;
+    var tokens = new Set();
+    var m;
+    var n = 0;
+    while ((m = re.exec(text)) !== null) {
+        tokens.add(m[0]);
+        if (tick && (++n & 4095) === 0) await tick(re.lastIndex / text.length);
+    }
+    return tokens;
+}
+
+async function classifyTokens(tokens, consumed, findings, addFinding, tick) {
+    var total = tokens.size;
+    var i = 0;
+    for (var token of tokens) {
+        if (tick && (++i & 255) === 0) await tick(i / total);
+        if (consumed.has(token)) continue;
+        await classifyToken(token, addFinding);
+        if (findings.has(token)) continue;
+        if (await classifySubTokens(token, tokens, consumed, addFinding)) continue;
+        // Generic cataloguing only if no pass claimed the value
+        genericFallback(token, addFinding);
+    }
+}
+
+// ---------- Result categories ----------
+// Every label belongs to one category; a finding with several labels (a 64-char
+// hex value is a possible key, hash and entropy at once) is in all of them.
+// Findings carry their categories as a bit mask (`cat`), and the page shows a
+// filter tab for each category that has findings.
+// The tabs appear in this order (after "All").
+var RESULT_CATEGORIES = [
+    { id: "seeds", label: "Seed phrases" },
+    { id: "keys", label: "Keys" },
+    { id: "entropy", label: "Entropy" },
+    { id: "wallet", label: "Wallet data" },
+    { id: "hashes", label: "Hashes" },
+    { id: "uuid", label: "UUIDs" },
+    { id: "encoded", label: "Encoded data" },
+    { id: "addresses", label: "Addresses" },
+    { id: "algorithms", label: "Algorithms" },
+    { id: "other", label: "Other" }
+];
+var CATEGORY_BITS = {};
+RESULT_CATEGORIES.forEach(function (c, i) { CATEGORY_BITS[c.id] = 1 << i; });
+var ALGO_LABELS = new Set(ALGO_KEYWORDS.map(function (k) { return k.label; }));
+var labelCategoryCache = new Map();
+
+// Rules in order; the first that matches decides.
+function categoryOfLabel(label) {
+    if (ALGO_LABELS.has(label)) return "algorithms";
+    if (/^UUID/.test(label)) return "uuid";
+    if (/^(Ethereum Keystore V3|Wallet field|Encryption field|BIP32 derivation path)/.test(label)) return "wallet";
+    if (/^(JWT|Base64|Base58|Hex data)/.test(label)) return "encoded";
+    if (/mnemonic phrase|seed phrase|polyseed phrase|words from the BIP39 list/.test(label)) return "seeds";
+    if (/^Entropy \(/.test(label)) return "entropy";
+    if (/^Possible .*hash$/.test(label)) return "hashes";
+    if (/\baddress\b/.test(label)) return "addresses";
+    if (/\bkey\b|^PEM block|BIP39 seed/.test(label)) return "keys";
+    return "other";
+}
+
+function categoryMask(finding) {
+    var mask = 0;
+    for (var i = 0; i < finding.types.length; i++) {
+        var label = finding.types[i].label;
+        var id = labelCategoryCache.get(label);
+        if (!id) {
+            id = categoryOfLabel(label);
+            labelCategoryCache.set(label, id);
+        }
+        mask |= CATEGORY_BITS[id];
+    }
+    return mask;
+}
+
+// The findings of one category ("all" = every finding), cached per category.
+function findingsInCategory(list, category, cache) {
+    if (!category || category === "all") return list;
+    if (!cache[category]) {
+        var bit = CATEGORY_BITS[category] || 0;
+        cache[category] = list.filter(function (f) { return f.cat & bit; });
+    }
+    return cache[category];
+}
+
+// Sort chips within each card and the cards among themselves: verified first,
+// then wrong checksum, possible matches, and unknown last.
+function sortFindings(findings) {
+    var list = Array.from(findings.values());
+    function rank(confidence) { return CONFIDENCE_META[confidence].rank; }
+    list.forEach(function (f) {
+        f.types.sort(function (a, b) { return rank(a.confidence) - rank(b.confidence); });
+        f.cat = categoryMask(f);
+    });
+    list.sort(function (a, b) {
+        return rank(a.types[0].confidence) - rank(b.types[0].confidence);
+    });
+    return list;
+}
+
+// Scans `text` and returns { findings, incomplete }. `ctl` is optional:
+// ctl.tick(overall, stageIndex) is called regularly while the scan runs; it
+// may return a promise (to report progress and yield) or throw SCAN_STOPPED
+// to cancel. If the scan is cancelled or fails, the findings collected so far
+// are still returned and `incomplete` says where and why it stopped.
+async function scanTextDetailed(text, ctl) {
     var findings = new Map();
     // Sub-tokens already explained by a text pass (JWT parts, PEM lines,
     // algorithm keywords, cashaddr payloads) are skipped in the token pass so they
@@ -4381,43 +5178,408 @@ async function scanText(text) {
         if (alt && !f.alt) f.alt = alt;
     }
 
-    if (!text || !text.trim()) return [];
+    var result = { findings: [], incomplete: null };
+    if (!text || !text.trim()) return result;
 
-    scanJsonBlocks(text, addFinding);
-    var keywordText = scanPemBlocks(text, addFinding, consumed);
-    scanJwtTokens(text, addFinding, consumed);
-    scanCashAddr(text, addFinding, consumed);
-    scanAlgorithmKeywords(keywordText, addFinding, consumed);
-    scanEntropyLists(text, addFinding);
-    scanDerivationPaths(text, addFinding);
-    await scanMnemonicPhrases(text, addFinding);
+    var costs = SCAN_STAGES.map(function (s) { return (s.perChar || 0) * text.length; });
+    var stage = 0;
+    var stageFraction = 0;
 
-    var tokens = text.match(/[A-Za-z0-9+/=_-]{8,}/g) || [];
-    var uniqueTokens = Array.from(new Set(tokens)).slice(0, 3000);
-    for (var i = 0; i < uniqueTokens.length; i++) {
-        var token = uniqueTokens[i];
-        if (consumed.has(token)) continue;
-        await classifyToken(token, addFinding);
-        // Generic cataloguing only if no pass claimed the value
-        if (!findings.has(token)) genericFallback(token, addFinding);
+    function overall() {
+        var total = 0;
+        var done = 0;
+        for (var k = 0; k < costs.length; k++) {
+            total += costs[k];
+            if (k < stage) done += costs[k];
+        }
+        done += costs[stage] * stageFraction;
+        return total ? Math.min(1, done / total) : 0;
     }
 
-    var list = Array.from(findings.values());
+    function enter(index) {
+        stage = index;
+        stageFraction = 0;
+        return ctl ? function (fraction) {
+            if (typeof fraction === "number") stageFraction = Math.min(1, fraction);
+            return ctl.tick(overall(), stage);
+        } : null;
+    }
 
-    // Sort chips within each card and the cards among themselves: verified first,
-    // then wrong checksum, possible matches, and unknown last.
-    function rank(confidence) { return CONFIDENCE_META[confidence].rank; }
-    list.forEach(function (f) {
-        f.types.sort(function (a, b) { return rank(a.confidence) - rank(b.confidence); });
-    });
-    list.sort(function (a, b) {
-        return rank(a.types[0].confidence) - rank(b.types[0].confidence);
-    });
+    try {
+        var tokens = await indexTokens(text, enter(0));
+        costs[9] = SCAN_STAGES[9].perToken * tokens.size;
 
-    return list;
+        await scanJsonBlocks(text, addFinding, enter(1));
+        var keywordText = await scanPemBlocks(text, addFinding, consumed, enter(2));
+        await scanJwtTokens(text, addFinding, consumed, enter(3));
+        await scanCashAddr(text, addFinding, consumed, enter(4));
+        await scanAlgorithmKeywords(keywordText, addFinding, consumed, enter(5));
+        keywordText = null;
+        await scanEntropyLists(text, addFinding, enter(6));
+        await scanDerivationPaths(text, addFinding, enter(7));
+        await scanMnemonicPhrases(text, addFinding, enter(8));
+        await classifyTokens(tokens, consumed, findings, addFinding, enter(9));
+    } catch (e) {
+        result.incomplete = {
+            reason: e === SCAN_STOPPED ? "cancelled" : "error",
+            message: e === SCAN_STOPPED ? "" : String((e && e.message) || e),
+            stage: stage,
+            stageFraction: stageFraction,
+            overall: overall()
+        };
+    }
+
+    result.findings = sortFindings(findings);
+    return result;
 }
 
+async function scanText(text) {
+    var r = await scanTextDetailed(text);
+    if (r.incomplete) throw new Error(r.incomplete.message);
+    return r.findings;
+}
+
+// ---------- File decoding ----------
+// The extension determines nothing: the content is sniffed, so files without
+// an extension (e.g. Geth keystores, "UTC--2024-...") work too.
+
+var SNIFF_BYTES = 4096;
+
+function hasNulByte(sample) {
+    for (var i = 0; i < sample.length; i++) {
+        if (sample[i] === 0) return true;
+    }
+    return false;
+}
+
+// BOM-less UTF-16 is recognized by every other byte being NUL in normal text.
+// offset 1 = little endian ("a\0b\0"), offset 0 = big endian ("\0a\0b").
+function looksLikeUtf16(sample, offset) {
+    var nuls = 0;
+    var total = 0;
+
+    for (var i = offset; i < sample.length; i += 2) {
+        total++;
+        if (sample[i] === 0) nuls++;
+    }
+
+    return total > 8 && nuls / total > 0.6;
+}
+
+// A file is treated as binary when its first 4 KB contain NUL bytes and it
+// has neither a BOM nor the NUL pattern of UTF-16 text. Only the start of the
+// file is needed, so the page can reject a binary file before reading it all.
+function looksBinary(bytes) {
+    if (bytes.length >= 2 && ((bytes[0] === 0xff && bytes[1] === 0xfe) || (bytes[0] === 0xfe && bytes[1] === 0xff))) return false;
+    if (bytes.length >= 3 && bytes[0] === 0xef && bytes[1] === 0xbb && bytes[2] === 0xbf) return false;
+    var sample = bytes.subarray(0, SNIFF_BYTES);
+    return hasNulByte(sample) && !looksLikeUtf16(sample, 1) && !looksLikeUtf16(sample, 0);
+}
+
+// Many replacement characters after UTF-8 decoding usually mean Latin-1/Windows-1252.
+// U+FFFD characters that are really in the file are not decoding errors.
+function decodeUtf8(bytes) {
+    var text = new TextDecoder("utf-8").decode(bytes);
+    var broken = countChar(text, "�");
+    if (broken > 0) broken -= countEncodedReplacementChars(bytes, "UTF-8");
+
+    if (broken > 0 && broken / Math.max(text.length, 1) > 0.002) {
+        return {
+            text: new TextDecoder("windows-1252").decode(bytes),
+            encoding: "Windows-1252",
+            utf8Broken: broken,
+            utf8Length: text.length
+        };
+    }
+
+    return { text: text, encoding: "UTF-8" };
+}
+
+// Returns {text, encoding} for text files, null for binary files
+function decodeFileBytes(buffer) {
+    var bytes = new Uint8Array(buffer);
+
+    if (bytes.length >= 2 && bytes[0] === 0xff && bytes[1] === 0xfe) {
+        return { text: new TextDecoder("utf-16le").decode(bytes.subarray(2)), encoding: "UTF-16LE" };
+    }
+
+    if (bytes.length >= 2 && bytes[0] === 0xfe && bytes[1] === 0xff) {
+        return { text: new TextDecoder("utf-16be").decode(bytes.subarray(2)), encoding: "UTF-16BE" };
+    }
+
+    if (bytes.length >= 3 && bytes[0] === 0xef && bytes[1] === 0xbb && bytes[2] === 0xbf) {
+        return { text: new TextDecoder("utf-8").decode(bytes.subarray(3)), encoding: "UTF-8" };
+    }
+
+    if (looksBinary(bytes)) return null;
+
+    var sample = bytes.subarray(0, SNIFF_BYTES);
+    if (hasNulByte(sample)) {
+        if (looksLikeUtf16(sample, 1)) {
+            return { text: new TextDecoder("utf-16le").decode(bytes), encoding: "UTF-16LE" };
+        }
+        return { text: new TextDecoder("utf-16be").decode(bytes), encoding: "UTF-16BE" };
+    }
+
+    return decodeUtf8(bytes);
+}
+
+// A textarea reports CRLF and lone CR line breaks as LF; file text is
+// normalized the same way so a file scans exactly like pasted text.
+function normalizeNewlines(text) {
+    return text.indexOf("\r") === -1 ? text : text.replace(/\r\n?/g, "\n");
+}
+
+function countChar(text, ch) {
+    var count = 0;
+    var i = text.indexOf(ch);
+    while (i !== -1) {
+        count++;
+        i = text.indexOf(ch, i + 1);
+    }
+    return count;
+}
+
+// 1-based line numbers of the first `max` occurrences of `ch`.
+function lineNumbersOf(text, ch, max) {
+    var lines = [];
+    var line = 1;
+    var pos = 0;
+    var i = text.indexOf(ch);
+    while (i !== -1 && lines.length < max) {
+        var nl = text.indexOf("\n", pos);
+        while (nl !== -1 && nl < i) {
+            line++;
+            nl = text.indexOf("\n", nl + 1);
+        }
+        pos = i;
+        if (lines[lines.length - 1] !== line) lines.push(line);
+        i = text.indexOf(ch, i + 1);
+    }
+    return lines;
+}
+
+// U+FFFD characters that were really in the file (not decoding errors).
+function countEncodedReplacementChars(bytes, encoding) {
+    var count = 0;
+    var i;
+    if (encoding === "UTF-8") {
+        for (i = 0; i + 2 < bytes.length; i++) {
+            if (bytes[i] === 0xef && bytes[i + 1] === 0xbf && bytes[i + 2] === 0xbd) count++;
+        }
+    } else if (encoding === "UTF-16LE" || encoding === "UTF-16BE") {
+        var le = encoding === "UTF-16LE";
+        var start = bytes.length >= 2 && (bytes[0] === 0xff || bytes[0] === 0xfe) && (bytes[1] === 0xfe || bytes[1] === 0xff) ? 2 : 0;
+        for (i = start; i + 1 < bytes.length; i += 2) {
+            if (le ? (bytes[i] === 0xfd && bytes[i + 1] === 0xff) : (bytes[i] === 0xff && bytes[i + 1] === 0xfd)) count++;
+        }
+    }
+    return count;
+}
+
+// Everything about the decoding the reader should know: bytes that could not
+// be decoded (they show up as U+FFFD), NUL characters, and a Windows-1252
+// fallback. `text` is the decoded, newline-normalized text.
+function decodingNotices(bytes, decoded, text) {
+    var notices = [];
+
+    if (decoded.encoding === "Windows-1252" && decoded.utf8Broken) {
+        notices.push({
+            level: "warning",
+            title: "Read as Windows-1252 instead of UTF-8",
+            detail: decoded.utf8Broken.toLocaleString("en-US") + " of " + decoded.utf8Length.toLocaleString("en-US") +
+                " characters (" + (100 * decoded.utf8Broken / Math.max(decoded.utf8Length, 1)).toFixed(2) +
+                "%) were not valid UTF-8, so the file was decoded as Windows-1252. Addresses, keys and seed words (plain ASCII) are unaffected; other characters may be shown incorrectly."
+        });
+    }
+
+    var replacement = countChar(text, "�");
+    var undecodable = replacement - countEncodedReplacementChars(bytes, decoded.encoding);
+    if (undecodable > 0) {
+        notices.push({
+            level: "warning",
+            title: undecodable.toLocaleString("en-US") + (undecodable === 1 ? " character" : " characters") +
+                " could not be decoded as " + decoded.encoding,
+            detail: (undecodable === 1 ? "It is shown as \ufffd and was" : "They are shown as \ufffd and were") +
+                " not analyzed. Everything else in the file was.",
+            lines: lineNumbersOf(text, "�", 10)
+        });
+    }
+
+    var nul = countChar(text, "\u0000");
+    if (nul > 0) {
+        notices.push({
+            level: "warning",
+            title: "The file contains " + nul.toLocaleString("en-US") + " NUL " + (nul === 1 ? "character" : "characters"),
+            detail: "Parts of the file may be binary. NUL characters cannot hold readable content; the text around them was analyzed.",
+            lines: lineNumbersOf(text, "\u0000", 10)
+        });
+    }
+
+    return notices;
+}
+
+// ---------- Scan jobs ----------
+// One scan request: {text} for typed/pasted input or {bytes} (an ArrayBuffer)
+// for a file. Used by the worker, or directly on the page when no worker is
+// available.
+async function runScanJob(job, ctl) {
+    var outcome = { findings: [], incomplete: null, notices: [], encoding: null, binary: false, empty: false };
+    var text;
+
+    if (job.bytes) {
+        var bytes = new Uint8Array(job.bytes);
+        var decoded;
+        try {
+            decoded = decodeFileBytes(bytes);
+        } catch (e) {
+            outcome.decodeError = String((e && e.message) || e);
+            return outcome;
+        }
+        if (!decoded) {
+            outcome.binary = true;
+            return outcome;
+        }
+        text = normalizeNewlines(decoded.text);
+        outcome.encoding = decoded.encoding;
+        outcome.notices = decodingNotices(bytes, decoded, text);
+        decoded = null;
+    } else {
+        text = job.text || "";
+    }
+
+    outcome.empty = !text.trim();
+    var r = await scanTextDetailed(text, ctl);
+    outcome.findings = r.findings;
+    outcome.incomplete = r.incomplete;
+    return outcome;
+}
+
+function summarizeFindings(findings) {
+    var verified = 0;
+    var categories = {};
+    RESULT_CATEGORIES.forEach(function (c) { categories[c.id] = 0; });
+    for (var i = 0; i < findings.length; i++) {
+        var f = findings[i];
+        if (f.types.some(function (t) { return t.confidence === "verified"; })) verified++;
+        for (var k = 0; k < RESULT_CATEGORIES.length; k++) {
+            if (f.cat & (1 << k)) categories[RESULT_CATEGORIES[k].id]++;
+        }
+    }
+    return { total: findings.length, verified: verified, categories: categories };
+}
+
+// ---------- Worker entry point ----------
+// Inside the scan worker this script answers messages from the page:
+//   ping   → checks that crypto.subtle works here
+//   scan   → runs a job, posting progress; the findings stay in the worker
+//   cancel → stops the running job (its partial results are kept)
+//   page   → returns a slice of the last job's findings (optionally one category)
+if (typeof WorkerGlobalScope !== "undefined" && self instanceof WorkerGlobalScope) {
+    (function () {
+        var lastFindings = [];
+        var categoryCache = {};
+        var cancelled = false;
+
+        var channel = new MessageChannel();
+        var resume = null;
+        channel.port1.onmessage = function () { var r = resume; resume = null; if (r) r(); };
+        function yieldTask() {
+            return new Promise(function (r) { resume = r; channel.port2.postMessage(0); });
+        }
+
+        self.onmessage = async function (e) {
+            var msg = e.data || {};
+
+            if (msg.type === "cancel") { cancelled = true; return; }
+
+            if (msg.type === "ping") {
+                try {
+                    await crypto.subtle.digest("SHA-256", new Uint8Array([0]));
+                    self.postMessage({ type: "pong" });
+                } catch (err) {
+                    self.postMessage({ type: "unusable", message: String(err) });
+                }
+                return;
+            }
+
+            if (msg.type === "page") {
+                var list = findingsInCategory(lastFindings, msg.category, categoryCache);
+                self.postMessage({ type: "page", request: msg.request, items: list.slice(msg.offset, msg.offset + msg.count) });
+                return;
+            }
+
+            if (msg.type !== "scan") return;
+            cancelled = false;
+            lastFindings = [];
+            categoryCache = {};
+            var last = 0;
+            var ctl = {
+                tick: function (overall, stage) {
+                    var now = Date.now();
+                    if (now - last < 80) return null;
+                    last = now;
+                    self.postMessage({ type: "progress", job: msg.job, overall: overall, stage: stage });
+                    return yieldTask().then(function () { if (cancelled) throw SCAN_STOPPED; });
+                }
+            };
+
+            try {
+                var outcome = await runScanJob(msg, ctl);
+                lastFindings = outcome.findings;
+                outcome.summary = summarizeFindings(outcome.findings);
+                outcome.findings = lastFindings.slice(0, msg.pageSize);
+                self.postMessage({ type: "done", job: msg.job, outcome: outcome });
+            } catch (err) {
+                self.postMessage({ type: "failed", job: msg.job, message: String((err && err.message) || err) });
+            }
+        };
+    })();
+}
+
+</script>
+    <script>
+// script.js — Magic Tool page: input, file loading, progress and results.
+// The scanning itself happens in engine.js above, normally inside a Web Worker.
+
+var input = document.getElementById("input");
+var clearButton = document.getElementById("clear-button");
+var testdataButton = document.getElementById("testdata-button");
+var resultsEl = document.getElementById("results");
+var legendEl = document.getElementById("legend");
+var emptyState = document.getElementById("empty-state");
+var emptyStateText = emptyState.querySelector("p");
+var emptyStateDefaultText = emptyStateText.textContent;
+var resultCount = document.getElementById("result-count");
+var toast = document.getElementById("toast");
+var inputBox = document.getElementById("input-box");
+var fileButton = document.getElementById("file-button");
+var fileInput = document.getElementById("file-input");
+var fileCard = document.getElementById("file-card");
+var fileCardName = document.getElementById("file-card-name");
+var fileCardMeta = document.getElementById("file-card-meta");
+var fileRemoveButton = document.getElementById("file-remove-button");
+var progressEl = document.getElementById("scan-progress");
+var progressLabel = document.getElementById("scan-progress-label");
+var progressPercent = document.getElementById("scan-progress-percent");
+var progressBar = document.getElementById("scan-progress-bar");
+var cancelButton = document.getElementById("scan-cancel-button");
+var noticesEl = document.getElementById("notices");
+var categoryTabs = document.getElementById("category-tabs");
+var pagerTop = document.getElementById("pager-top");
+var pagerBottom = document.getElementById("pager-bottom");
+
+var MAX_FILE_BYTES = 100 * 1024 * 1024;
+var READ_CHUNK_BYTES = 2 * 1024 * 1024;
+var PAGE_SIZE = 500;
+// Typed or pasted text only shows the progress bar if a scan takes this long
+var TEXT_PROGRESS_DELAY_MS = 300;
+
 // ---------- Rendering ----------
+
+function formatCount(n) {
+    return n.toLocaleString("en-US");
+}
 
 function renderCard(finding) {
     var card = document.createElement("div");
@@ -4486,40 +5648,151 @@ function renderLegend() {
     });
 }
 
-function render(findings, text) {
-    resultsEl.innerHTML = "";
+// Notices report input that could not be read or analyzed. They are shown
+// above the results and are never paged away.
+function renderNotices(notices) {
+    noticesEl.innerHTML = "";
+    notices.forEach(function (n) {
+        var card = document.createElement("div");
+        card.className = "notice-card notice-" + n.level;
 
-    if (!text || !text.trim()) {
-        emptyStateText.textContent = emptyStateDefaultText;
-        emptyState.classList.remove("not-found");
-        emptyState.classList.remove("display-none");
-        resultsEl.classList.add("display-none");
-        resultCount.textContent = "";
-        return;
-    }
+        var title = document.createElement("div");
+        title.className = "notice-title";
+        title.textContent = n.title;
+        card.appendChild(title);
 
-    if (findings.length === 0) {
-        emptyStateText.textContent = "No crypto-related content found";
-        emptyState.classList.add("not-found");
-        emptyState.classList.remove("display-none");
-        resultsEl.classList.add("display-none");
-        resultCount.textContent = "0 matches";
-        return;
-    }
+        if (n.detail) {
+            var detail = document.createElement("div");
+            detail.className = "notice-detail";
+            detail.textContent = n.detail;
+            card.appendChild(detail);
+        }
 
-    emptyState.classList.remove("not-found");
-    emptyState.classList.add("display-none");
-    resultsEl.classList.remove("display-none");
+        if (n.lines && n.lines.length) {
+            var lines = document.createElement("div");
+            lines.className = "notice-detail";
+            lines.textContent = (n.lines.length === 1 ? "First occurrence on line " : "First occurrences on lines ") +
+                n.lines.map(formatCount).join(", ");
+            card.appendChild(lines);
+        }
 
-    var verifiedCount = findings.filter(function (f) {
-        return f.types.some(function (t) { return t.confidence === "verified"; });
-    }).length;
-    resultCount.textContent = findings.length + (findings.length === 1 ? " match" : " matches") +
-        (verifiedCount ? " · " + verifiedCount + (verifiedCount === 1 ? " verified" : " verified") : "");
-
-    findings.forEach(function (f) {
-        resultsEl.appendChild(renderCard(f));
+        noticesEl.appendChild(card);
     });
+    noticesEl.classList.toggle("display-none", notices.length === 0);
+}
+
+function renderCards(items) {
+    resultsEl.innerHTML = "";
+    var fragment = document.createDocumentFragment();
+    items.forEach(function (f) { fragment.appendChild(renderCard(f)); });
+    resultsEl.appendChild(fragment);
+    resultsEl.classList.toggle("display-none", items.length === 0);
+}
+
+// Results are shown one page at a time: a browser cannot lay out more than
+// about 16.7 million pixels, so beyond ~110,000 cards the rest would be
+// stacked out of reach.
+function renderPagers() {
+    [pagerTop, pagerBottom].forEach(function (pager) {
+        pager.innerHTML = "";
+        if (view.total <= PAGE_SIZE) {
+            pager.classList.add("display-none");
+            return;
+        }
+        pager.classList.remove("display-none");
+
+        var last = Math.floor((view.total - 1) / PAGE_SIZE) * PAGE_SIZE;
+        function button(label, offset, disabled) {
+            var b = document.createElement("button");
+            b.type = "button";
+            b.className = "pager-button";
+            b.textContent = label;
+            b.disabled = disabled;
+            b.addEventListener("click", function () { goToPage(offset); });
+            pager.appendChild(b);
+        }
+
+        button("« First", 0, view.offset === 0);
+        button("‹ Previous", Math.max(0, view.offset - PAGE_SIZE), view.offset === 0);
+
+        var info = document.createElement("span");
+        info.className = "pager-info";
+        info.textContent = "Showing " + formatCount(view.offset + 1) + "–" +
+            formatCount(Math.min(view.offset + PAGE_SIZE, view.total)) + " of " + formatCount(view.total);
+        pager.appendChild(info);
+
+        button("Next ›", view.offset + PAGE_SIZE, view.offset >= last);
+        button("Last »", last, view.offset >= last);
+    });
+}
+
+// One tab per category that has findings, after "All". With fewer than two
+// categories there is nothing to filter, so the row is hidden.
+function renderTabs() {
+    categoryTabs.innerHTML = "";
+    var present = RESULT_CATEGORIES.filter(function (c) { return view.counts[c.id] > 0; });
+    if (present.length < 2) {
+        categoryTabs.classList.add("display-none");
+        return;
+    }
+    categoryTabs.classList.remove("display-none");
+
+    function tab(id, label, count) {
+        var b = document.createElement("button");
+        b.type = "button";
+        b.className = "category-tab";
+        b.setAttribute("role", "tab");
+        b.setAttribute("aria-selected", String(view.category === id));
+        b.appendChild(document.createTextNode(label));
+        var n = document.createElement("span");
+        n.className = "tab-count";
+        n.textContent = formatCount(count);
+        b.appendChild(n);
+        b.addEventListener("click", function () { selectCategory(id); });
+        categoryTabs.appendChild(b);
+    }
+
+    tab("all", "All", view.allTotal);
+    present.forEach(function (c) { tab(c.id, c.label, view.counts[c.id]); });
+
+    // keep the selected tab in view when the row is wider than the page
+    var selected = categoryTabs.querySelector('[aria-selected="true"]');
+    if (selected) {
+        var row = categoryTabs.getBoundingClientRect();
+        var box = selected.getBoundingClientRect();
+        if (box.right > row.right) categoryTabs.scrollLeft += box.right - row.right + 24;
+        else if (box.left < row.left) categoryTabs.scrollLeft -= row.left - box.left + 24;
+    }
+    updateTabFades();
+}
+
+function updateTabFades() {
+    var max = categoryTabs.scrollWidth - categoryTabs.clientWidth;
+    categoryTabs.classList.toggle("fade-left", categoryTabs.scrollLeft > 1);
+    categoryTabs.classList.toggle("fade-right", categoryTabs.scrollLeft < max - 1);
+}
+
+// The category tab the user picked; kept across rescans while it has findings.
+var selectedCategory = "all";
+
+function selectCategory(id) {
+    selectedCategory = id;
+    view.category = id;
+    view.total = id === "all" ? view.allTotal : view.counts[id];
+    renderTabs();
+    goToPage(0, true);
+}
+
+async function goToPage(offset, keepScroll) {
+    if (!view.source) return;
+    var id = jobSeq;
+    var category = view.category;
+    var items = await view.source.getPage(offset, PAGE_SIZE, category);
+    if (id !== jobSeq || category !== view.category) return;
+    view.offset = offset;
+    renderCards(items);
+    renderPagers();
+    if (!keepScroll) (categoryTabs.classList.contains("display-none") ? pagerTop : categoryTabs).scrollIntoView({ block: "start" });
 }
 
 function showToast(text) {
@@ -4528,6 +5801,539 @@ function showToast(text) {
     setTimeout(function () {
         toast.classList.remove("show");
     }, 2000);
+}
+
+// ---------- Result state ----------
+
+// What the results area currently shows: `total` findings in the selected
+// `category` (allTotal in all), per-category `counts`; `source` fetches pages.
+function emptyView() {
+    return { total: 0, allTotal: 0, offset: 0, category: "all", counts: {}, source: null };
+}
+var view = emptyView();
+
+function resetResults() {
+    view = emptyView();
+    renderNotices([]);
+    renderTabs();
+    renderCards([]);
+    renderPagers();
+    resultCount.textContent = "";
+    emptyState.classList.add("display-none");
+}
+
+function showEmptyInput() {
+    resetResults();
+    emptyStateText.textContent = emptyStateDefaultText;
+    emptyState.classList.remove("not-found");
+    emptyState.classList.remove("display-none");
+}
+
+// Shows the end state of a job: notices first, then the first page of results.
+// `outcome` is null when the input could not be analyzed at all.
+function showOutcome(notices, outcome, source) {
+    resetResults();
+    var all = notices.slice();
+    if (outcome) {
+        all = all.concat(outcome.notices || []);
+        if (outcome.incomplete) all.push(incompleteNotice(outcome.incomplete));
+    }
+    renderNotices(all);
+    if (!outcome) return;
+
+    var counts = outcome.summary.categories;
+    var category = selectedCategory !== "all" && counts[selectedCategory] > 0 ? selectedCategory : "all";
+    view = {
+        total: category === "all" ? outcome.summary.total : counts[category],
+        allTotal: outcome.summary.total,
+        offset: 0,
+        category: category,
+        counts: counts,
+        source: source
+    };
+    renderTabs();
+    if (category === "all") {
+        renderCards(outcome.findings);
+        renderPagers();
+    } else {
+        goToPage(0, true);
+    }
+
+    var partial = outcome.incomplete ? " (partial)" : "";
+    if (view.allTotal === 0) {
+        resultCount.textContent = "0 matches" + partial;
+        if (!outcome.empty) {
+            emptyStateText.textContent = outcome.incomplete
+                ? "No crypto-related content found in the part that was analyzed"
+                : "No crypto-related content found";
+            emptyState.classList.add("not-found");
+            emptyState.classList.remove("display-none");
+        }
+        return;
+    }
+
+    var verified = outcome.summary.verified;
+    resultCount.textContent = formatCount(view.allTotal) + (view.allTotal === 1 ? " match" : " matches") +
+        (verified ? " · " + formatCount(verified) + " verified" : "") + partial;
+}
+
+function incompleteNotice(inc) {
+    function pct(f) { return Math.floor(f * 100); }
+    function labels(stages) { return stages.map(function (s) { return s.label; }).join(", "); }
+
+    var done = SCAN_STAGES.slice(0, inc.stage);
+    var notStarted = SCAN_STAGES.slice(inc.stage + 1);
+    var parts = [];
+    if (inc.reason === "error") parts.push("Error: " + inc.message + ".");
+    parts.push("The results only cover what was analyzed before it stopped.");
+    if (done.length) parts.push("Completed: " + labels(done) + ".");
+    parts.push("Stopped during: " + SCAN_STAGES[inc.stage].label + " (about " + pct(inc.stageFraction) + "% done).");
+    if (notStarted.length) parts.push("Not analyzed: " + labels(notStarted) + ".");
+
+    return {
+        level: inc.reason === "cancelled" ? "warning" : "error",
+        title: inc.reason === "cancelled"
+            ? "Analysis cancelled at " + pct(inc.overall) + "%"
+            : "Analysis stopped by an error at " + pct(inc.overall) + "%",
+        detail: parts.join(" ")
+    };
+}
+
+// ---------- Progress ----------
+
+function showProgress(label, fraction) {
+    progressEl.classList.remove("display-none");
+    progressLabel.textContent = label;
+    var pct = Math.min(100, Math.floor(fraction * 100));
+    progressPercent.textContent = pct + "%";
+    progressBar.style.width = Math.min(100, fraction * 100).toFixed(1) + "%";
+}
+
+function hideProgress() {
+    progressEl.classList.add("display-none");
+}
+
+// ---------- Scan workers ----------
+// The engine runs in a Web Worker built from this page's own engine scripts
+// (a Blob URL, so it works from file:// and in Electron without any extra
+// files). If workers or crypto.subtle inside them are unavailable, the same
+// engine runs on the page instead, pausing regularly so the page stays usable.
+
+var workerUrl = null;
+function getWorkerUrl() {
+    if (workerUrl) return workerUrl;
+    var src = ["self.window = self;"];
+    ["magic-crypto-helpers", "magic-wordlists", "magic-engine"].forEach(function (id) {
+        src.push(document.getElementById(id).textContent);
+    });
+    workerUrl = URL.createObjectURL(new Blob([src.join("\n;\n")], { type: "application/javascript" }));
+    return workerUrl;
+}
+
+var scanWorker = null;       // reused between scans while idle
+var scanWorkerTask = null;   // the task running in it, if any
+var workerCheck = null;
+var pageRequestSeq = 0;
+
+function workersUsable() {
+    if (workerCheck) return workerCheck;
+    workerCheck = new Promise(function (resolve) {
+        if (typeof Worker === "undefined") return resolve(false);
+        var w;
+        try {
+            w = new Worker(getWorkerUrl());
+        } catch (e) {
+            return resolve(false);
+        }
+        var timer = setTimeout(function () { finish(false); }, 5000);
+        function finish(ok) {
+            clearTimeout(timer);
+            w.onmessage = null;
+            w.onerror = null;
+            if (ok && !scanWorker) scanWorker = w;
+            else w.terminate();
+            resolve(ok);
+        }
+        w.onmessage = function (e) { finish(!!(e.data && e.data.type === "pong")); };
+        w.onerror = function () { finish(false); };
+        w.postMessage({ type: "ping" });
+    });
+    return workerCheck;
+}
+
+// A task: promise (the outcome, holding only the first page of findings),
+// cancel() (stop and keep partial results), stop() (abandon),
+// getPage(offset, count, category).
+function workerScan(job, onProgress) {
+    if (scanWorker && scanWorkerTask) {
+        scanWorker.terminate();
+        scanWorker = null;
+    }
+    if (!scanWorker) scanWorker = new Worker(getWorkerUrl());
+
+    var w = scanWorker;
+    var pages = {};
+    var task = {};
+    scanWorkerTask = task;
+
+    task.promise = new Promise(function (resolve, reject) {
+        task.reject = reject;
+        w.onmessage = function (e) {
+            var m = e.data || {};
+            if (m.type === "progress") {
+                onProgress(m.overall, m.stage);
+            } else if (m.type === "done") {
+                if (scanWorkerTask === task) scanWorkerTask = null;
+                resolve(m.outcome);
+            } else if (m.type === "failed") {
+                if (scanWorkerTask === task) scanWorkerTask = null;
+                reject(new Error(m.message));
+            } else if (m.type === "page") {
+                var done = pages[m.request];
+                delete pages[m.request];
+                if (done) done(m.items);
+            }
+        };
+        w.onerror = function (e) {
+            if (e && e.preventDefault) e.preventDefault();
+            if (scanWorkerTask === task) scanWorkerTask = null;
+            if (scanWorker === w) scanWorker = null;
+            w.terminate();
+            reject(new Error((e && e.message) || "the scan worker stopped unexpectedly"));
+        };
+    });
+    // a task that is abandoned before anyone awaits it must not log an
+    // unhandled rejection
+    task.promise.catch(function () {});
+
+    w.postMessage({ type: "scan", text: job.text, bytes: job.bytes, pageSize: PAGE_SIZE },
+        job.bytes ? [job.bytes] : []);
+
+    task.cancel = function () { w.postMessage({ type: "cancel" }); };
+    task.stop = function () {
+        if (scanWorkerTask !== task) return;
+        scanWorkerTask = null;
+        if (scanWorker === w) scanWorker = null;
+        w.terminate();
+        task.reject(new Error("superseded"));
+    };
+    task.getPage = function (offset, count, category) {
+        return new Promise(function (resolve) {
+            var request = ++pageRequestSeq;
+            pages[request] = resolve;
+            w.postMessage({ type: "page", request: request, offset: offset, count: count, category: category });
+        });
+    };
+    return task;
+}
+
+function yieldToPage() {
+    return new Promise(function (resolve) {
+        var channel = new MessageChannel();
+        channel.port1.onmessage = function () { resolve(); };
+        channel.port2.postMessage(0);
+    });
+}
+
+function pageScan(job, onProgress) {
+    var task = { cancelled: false };
+    var findings = [];
+    var last = Date.now();
+    var ctl = {
+        tick: function (overall, stage) {
+            var now = Date.now();
+            if (now - last < 50) return null;
+            last = now;
+            onProgress(overall, stage);
+            return yieldToPage().then(function () { if (task.cancelled) throw SCAN_STOPPED; });
+        }
+    };
+
+    task.promise = runScanJob(job, ctl).then(function (outcome) {
+        findings = outcome.findings;
+        outcome.summary = summarizeFindings(findings);
+        outcome.findings = findings.slice(0, PAGE_SIZE);
+        return outcome;
+    });
+    task.cancel = function () { task.cancelled = true; };
+    task.stop = task.cancel;
+    var categoryCache = {};
+    task.getPage = function (offset, count, category) {
+        return Promise.resolve(findingsInCategory(findings, category, categoryCache).slice(offset, offset + count));
+    };
+    return task;
+}
+
+async function startScan(job, onProgress) {
+    return (await workersUsable()) ? workerScan(job, onProgress) : pageScan(job, onProgress);
+}
+
+// ---------- Jobs ----------
+// Each load or scan is a job; starting a new one stops the previous one and
+// makes its late results ignored.
+
+var mode = "text";   // "text": the textarea is the input; "file": a file is attached
+var jobSeq = 0;
+var running = null;  // { cancel(), stop() } for the reading/scanning step in progress
+var scanTimer = null;
+
+function beginJob() {
+    clearTimeout(scanTimer);
+    jobSeq++;
+    if (running) {
+        running.stop();
+        running = null;
+    }
+    hideProgress();
+    cancelButton.disabled = false;
+    cancelButton.textContent = "Cancel";
+    return jobSeq;
+}
+
+// Scans `job` and shows the outcome, with `notices` gathered so far.
+async function analyze(id, job, notices, label, progressDelay) {
+    var showAfter = Date.now() + progressDelay;
+    var stopped = false;
+    var task = null;
+    running = {
+        cancel: function () { if (task) task.cancel(); },
+        stop: function () { stopped = true; if (task) task.stop(); }
+    };
+
+    function onProgress(overall, stage) {
+        if (id !== jobSeq || Date.now() < showAfter) return;
+        showProgress(label + " · " + SCAN_STAGES[stage].label, overall);
+    }
+
+    if (!progressDelay) showProgress(label, 0);
+    else setTimeout(function () {
+        if (id === jobSeq && running && progressEl.classList.contains("display-none")) showProgress(label, 0);
+    }, progressDelay);
+
+    task = await startScan(job, onProgress);
+    if (stopped || id !== jobSeq) {
+        task.stop();
+        return null;
+    }
+
+    var outcome;
+    try {
+        outcome = await task.promise;
+    } catch (e) {
+        if (id !== jobSeq) return null;
+        running = null;
+        hideProgress();
+        notices.push({ level: "error", title: "The analysis failed", detail: (e && e.message) || String(e) });
+        showOutcome(notices, null, null);
+        return null;
+    }
+    if (id !== jobSeq) return null;
+
+    running = null;
+    hideProgress();
+    showOutcome(notices, outcome, task);
+    return outcome;
+}
+
+function scheduleScan() {
+    clearTimeout(scanTimer);
+    scanTimer = setTimeout(runTextScan, 250);
+}
+
+async function runTextScan() {
+    var id = beginJob();
+    var text = input.value;
+    if (!text.trim()) {
+        showEmptyInput();
+        return;
+    }
+    await analyze(id, { text: text }, [], "Analyzing", TEXT_PROGRESS_DELAY_MS);
+}
+
+// ---------- Input modes ----------
+
+function showTextMode() {
+    mode = "text";
+    fileCard.classList.add("display-none");
+    input.classList.remove("display-none");
+}
+
+function showFileCard(file) {
+    mode = "file";
+    input.value = "";
+    input.classList.add("display-none");
+    fileCard.classList.remove("display-none");
+    fileCardName.textContent = file.name || "(unnamed file)";
+    fileCardName.title = file.name || "";
+    setFileStatus(file, "");
+    updateClearButton();
+}
+
+// Clear is highlighted only while there is something to clear
+function updateClearButton() {
+    clearButton.classList.toggle("has-input", mode === "file" || input.value.length > 0);
+}
+
+function setFileStatus(file, status, isError) {
+    fileCardMeta.textContent = formatFileSize(file.size) + (status ? " · " + status : "");
+    fileCardMeta.classList.toggle("error", !!isError);
+}
+
+function clearInput() {
+    beginJob();
+    selectedCategory = "all";
+    showTextMode();
+    input.value = "";
+    updateClearButton();
+    showEmptyInput();
+}
+
+// ---------- File reading ----------
+// Files are read locally with the File API - no content leaves the computer.
+// A file is shown as a card instead of being put into the text box: large
+// text makes the box slow and partly unscrollable, and editing it would start
+// a new scan of the whole file on every keystroke.
+
+function formatFileSize(bytes) {
+    if (bytes < 1024) return bytes + " B";
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + " KB";
+    return (bytes / (1024 * 1024)).toFixed(1) + " MB";
+}
+
+function formatExactSize(bytes) {
+    return formatFileSize(bytes) + " (" + formatCount(bytes) + " bytes)";
+}
+
+var READ_CANCELLED = { cancelled: true };
+
+// Reads the file in chunks so the progress bar can follow along.
+async function readFileWithProgress(file, reader, onProgress) {
+    var bytes = new Uint8Array(file.size);
+    var offset = 0;
+    while (offset < file.size) {
+        if (reader.cancelled) throw READ_CANCELLED;
+        var chunk = new Uint8Array(await file.slice(offset, offset + READ_CHUNK_BYTES).arrayBuffer());
+        if (reader.cancelled) throw READ_CANCELLED;
+        if (chunk.length === 0 || offset + chunk.length > file.size) {
+            throw new Error("the file changed while it was being read");
+        }
+        bytes.set(chunk, offset);
+        offset += chunk.length;
+        onProgress(offset / file.size);
+    }
+    return bytes;
+}
+
+function describeReadError(e) {
+    var message = (e && e.message) || String(e);
+    if (e && (e.name === "NotFoundError" || e.name === "NotReadableError")) {
+        message += " (the file may have been moved, changed or be a folder, or reading it is not permitted)";
+    }
+    return message;
+}
+
+async function loadFile(file, ignoredFiles) {
+    if (!file) return;
+    var id = beginJob();
+    showFileCard(file);
+    resetResults();
+
+    var notices = [];
+    if (ignoredFiles && ignoredFiles.length) {
+        notices.push({
+            level: "warning",
+            title: ignoredFiles.length + (ignoredFiles.length === 1 ? " other file was" : " other files were") + " not read",
+            detail: "Only one file can be analyzed at a time. Not read: " +
+                ignoredFiles.map(function (f) { return f.name; }).join(", ") + "."
+        });
+    }
+
+    function fail(status, notice) {
+        if (id !== jobSeq) return;
+        running = null;
+        hideProgress();
+        setFileStatus(file, status, true);
+        notices.push(notice);
+        showOutcome(notices, null, null);
+    }
+
+    if (file.size > MAX_FILE_BYTES) {
+        return fail("too large", {
+            level: "error",
+            title: file.name + " is too large to analyze",
+            detail: "The file is " + formatExactSize(file.size) + "; the limit is " + formatExactSize(MAX_FILE_BYTES) + ". It was not read."
+        });
+    }
+
+    if (file.size === 0) {
+        return fail("empty", { level: "error", title: file.name + " is empty", detail: "There is nothing to analyze." });
+    }
+
+    var reader = { cancelled: false };
+    running = {
+        cancel: function () { reader.cancelled = true; },
+        stop: function () { reader.cancelled = true; }
+    };
+    showProgress("Step 1 of 2 · Reading file", 0);
+
+    var bytes;
+    try {
+        var head = new Uint8Array(await file.slice(0, SNIFF_BYTES).arrayBuffer());
+        if (id !== jobSeq) return;
+        if (looksBinary(head)) {
+            return fail("binary", {
+                level: "error",
+                title: file.name + " looks like a binary file",
+                detail: "Its first 4 KB contain NUL bytes and it is not UTF-16 text, so it cannot be analyzed as text. Nothing was read beyond that."
+            });
+        }
+        bytes = await readFileWithProgress(file, reader, function (fraction) {
+            if (id === jobSeq) showProgress("Step 1 of 2 · Reading file", fraction);
+        });
+    } catch (e) {
+        if (id !== jobSeq) return;
+        if (e === READ_CANCELLED) {
+            return fail("cancelled", {
+                level: "warning",
+                title: "Loading cancelled",
+                detail: "The file was not completely read, so nothing in it was analyzed."
+            });
+        }
+        return fail("could not be read", {
+            level: "error",
+            title: file.name + " could not be read",
+            detail: describeReadError(e)
+        });
+    }
+    if (id !== jobSeq) return;
+
+    var outcome = await analyze(id, { bytes: bytes.buffer }, notices, "Step 2 of 2 · Analyzing", 0);
+    bytes = null;
+    if (id !== jobSeq) return;
+    if (!outcome) {
+        setFileStatus(file, "analysis failed", true);
+        return;
+    }
+
+    if (outcome.binary || outcome.decodeError) {
+        // looksBinary() on the first 4 KB normally catches this before reading
+        return fail(outcome.binary ? "binary" : "could not be decoded", {
+            level: "error",
+            title: file.name + (outcome.binary ? " looks like a binary file" : " could not be decoded as text"),
+            detail: outcome.decodeError || "It cannot be analyzed as text."
+        });
+    }
+
+    var status = outcome.encoding;
+    if (outcome.incomplete) status += " · " + (outcome.incomplete.reason === "cancelled" ? "partly analyzed" : "analysis failed");
+    setFileStatus(file, status, !!outcome.incomplete);
+    if (outcome.empty) {
+        renderNotices(notices.concat(outcome.notices, [{
+            level: "error",
+            title: file.name + " contains no text",
+            detail: "It only contains whitespace, so there is nothing to analyze."
+        }]));
+    }
 }
 
 // ---------- Test data ----------
@@ -4567,162 +6373,35 @@ var TEST_DATA = [
     "1EzGmAEnsDHqFhU9A7mXzS2n7kJ8b1oomm"
 ].join("\n");
 
-// ---------- File reading ----------
-// Files are read locally with the File API - no content leaves the computer. The text lands
-// in the input box so it can be edited and scanned like normal input.
-// The file extension determines nothing: the content is sniffed, so files without an extension
-// (e.g. Geth keystores, "UTC--2024-...") work too.
-
-var MAX_FILE_BYTES = 5 * 1024 * 1024;
-var SNIFF_BYTES = 4096;
-
-function formatFileSize(bytes) {
-    if (bytes < 1024) return bytes + " B";
-    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + " KB";
-    return (bytes / (1024 * 1024)).toFixed(1) + " MB";
-}
-
-function setFileName(text, isError) {
-    fileNameEl.textContent = text;
-    fileNameEl.classList.toggle("error", !!isError);
-    fileNameEl.title = text;
-    var toolbarLeft = fileNameEl.parentNode;
-    if (toolbarLeft) toolbarLeft.classList.toggle("has-file", !!text);
-}
-
-function hasNulByte(sample) {
-    for (var i = 0; i < sample.length; i++) {
-        if (sample[i] === 0) return true;
-    }
-    return false;
-}
-
-// BOM-less UTF-16 is recognized by every other byte being NUL in normal text.
-// offset 1 = little endian ("a\0b\0"), offset 0 = big endian ("\0a\0b").
-function looksLikeUtf16(sample, offset) {
-    var nuls = 0;
-    var total = 0;
-
-    for (var i = offset; i < sample.length; i += 2) {
-        total++;
-        if (sample[i] === 0) nuls++;
-    }
-
-    return total > 8 && nuls / total > 0.6;
-}
-
-// Many replacement characters after UTF-8 decoding usually mean Latin-1/Windows-1252
-function decodeUtf8(bytes) {
-    var text = new TextDecoder("utf-8").decode(bytes);
-    var broken = (text.match(/\ufffd/g) || []).length;
-
-    if (broken > 0 && broken / Math.max(text.length, 1) > 0.002) {
-        return { text: new TextDecoder("windows-1252").decode(bytes), encoding: "Windows-1252" };
-    }
-
-    return { text: text, encoding: "UTF-8" };
-}
-
-// Returns {text, encoding} for text files, null for binary files
-function decodeFileBytes(buffer) {
-    var bytes = new Uint8Array(buffer);
-
-    if (bytes.length >= 2 && bytes[0] === 0xff && bytes[1] === 0xfe) {
-        return { text: new TextDecoder("utf-16le").decode(bytes.subarray(2)), encoding: "UTF-16LE" };
-    }
-
-    if (bytes.length >= 2 && bytes[0] === 0xfe && bytes[1] === 0xff) {
-        return { text: new TextDecoder("utf-16be").decode(bytes.subarray(2)), encoding: "UTF-16BE" };
-    }
-
-    if (bytes.length >= 3 && bytes[0] === 0xef && bytes[1] === 0xbb && bytes[2] === 0xbf) {
-        return { text: new TextDecoder("utf-8").decode(bytes.subarray(3)), encoding: "UTF-8" };
-    }
-
-    var sample = bytes.subarray(0, SNIFF_BYTES);
-
-    if (hasNulByte(sample)) {
-        if (looksLikeUtf16(sample, 1)) {
-            return { text: new TextDecoder("utf-16le").decode(bytes), encoding: "UTF-16LE" };
-        }
-
-        if (looksLikeUtf16(sample, 0)) {
-            return { text: new TextDecoder("utf-16be").decode(bytes), encoding: "UTF-16BE" };
-        }
-
-        return null;
-    }
-
-    return decodeUtf8(bytes);
-}
-
-async function loadFile(file) {
-    if (!file) return;
-
-    if (file.size > MAX_FILE_BYTES) {
-        setFileName(file.name + " - too large (max " + formatFileSize(MAX_FILE_BYTES) + ")", true);
-        return;
-    }
-
-    var decoded;
-
-    try {
-        decoded = decodeFileBytes(await file.arrayBuffer());
-    }
-
-    catch (e) {
-        setFileName(file.name + " - could not be read", true);
-        return;
-    }
-
-    if (!decoded) {
-        setFileName(file.name + " - binary file, not yet supported", true);
-        return;
-    }
-
-    input.value = decoded.text;
-
-    var label = file.name + " (" + formatFileSize(file.size) + ")";
-    if (decoded.encoding !== "UTF-8") label += " · " + decoded.encoding;
-
-    setFileName(label, false);
-    scheduleScan();
-}
-
 // ---------- Init & event wiring ----------
 
-var scanTimer = null;
-var scanToken = 0;
-
-function scheduleScan() {
-    clearTimeout(scanTimer);
-    scanTimer = setTimeout(runScan, 250);
-}
-
-async function runScan() {
-    var myToken = ++scanToken;
-    var text = input.value;
-    var findings = await scanText(text);
-    if (myToken !== scanToken) return; // a newer scan has already started
-    render(findings, text);
-}
-
-// Manual input replaces the file's content - then the file name is no longer true
 input.addEventListener("input", function () {
-    setFileName("", false);
+    updateClearButton();
     scheduleScan();
 });
 
 clearButton.addEventListener("click", function () {
-    input.value = "";
-    setFileName("", false);
-    render([], "");
+    clearInput();
     input.focus();
 });
 
+fileRemoveButton.addEventListener("click", function () {
+    clearInput();
+    input.focus();
+});
+
+cancelButton.addEventListener("click", function () {
+    if (!running) return;
+    running.cancel();
+    cancelButton.disabled = true;
+    cancelButton.textContent = "Cancelling…";
+});
+
 testdataButton.addEventListener("click", function () {
+    beginJob();
+    showTextMode();
     input.value = TEST_DATA;
-    setFileName("", false);
+    updateClearButton();
     scheduleScan();
     input.focus();
 });
@@ -4732,7 +6411,7 @@ fileButton.addEventListener("click", function () {
 });
 
 fileInput.addEventListener("change", function () {
-    loadFile(fileInput.files[0]);
+    loadFile(fileInput.files[0], []);
     fileInput.value = ""; // allows the same file to be loaded again
 });
 
@@ -4749,15 +6428,39 @@ inputBox.addEventListener("dragleave", function (e) {
 inputBox.addEventListener("drop", function (e) {
     e.preventDefault();
     inputBox.classList.remove("dragover");
-    loadFile(e.dataTransfer.files[0]);
+    var files = Array.prototype.slice.call(e.dataTransfer.files);
+    loadFile(files[0], files.slice(1));
 });
+
+// The capability panel starts collapsed (headings only) and expands on demand
+var capabilitiesPanel = document.getElementById("capabilities");
+var capabilitiesToggle = document.getElementById("capabilities-toggle");
+capabilitiesToggle.addEventListener("click", function () {
+    var collapsed = capabilitiesPanel.classList.toggle("collapsed");
+    capabilitiesToggle.setAttribute("aria-expanded", String(!collapsed));
+    capabilitiesToggle.textContent = collapsed ? "Show all" : "Show less";
+});
+
+// The category row scrolls sideways; a mouse wheel scrolls it too while
+// there is more of the row in that direction (otherwise the page scrolls).
+categoryTabs.addEventListener("scroll", updateTabFades);
+window.addEventListener("resize", updateTabFades);
+categoryTabs.addEventListener("wheel", function (e) {
+    if (Math.abs(e.deltaY) <= Math.abs(e.deltaX)) return;
+    var max = categoryTabs.scrollWidth - categoryTabs.clientWidth;
+    if ((e.deltaY > 0 && categoryTabs.scrollLeft >= max - 1) || (e.deltaY < 0 && categoryTabs.scrollLeft <= 0)) return;
+    categoryTabs.scrollLeft += e.deltaY;
+    e.preventDefault();
+}, { passive: false });
 
 // Prevents the browser from opening the file if it's dropped outside the box
 document.addEventListener("dragover", function (e) { e.preventDefault(); });
 document.addEventListener("drop", function (e) { e.preventDefault(); });
 
 renderLegend();
-render([], "");
+showEmptyInput();
+updateClearButton();
+workersUsable();
 
 // --- Theme sync with CryptoToolbox (postMessage from parent iframe) ---
 window.addEventListener('message', function (event) {

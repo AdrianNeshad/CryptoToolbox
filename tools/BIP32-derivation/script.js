@@ -352,11 +352,27 @@
     // Preset derivation-path buttons: fill the path and derive if a key is
     // already present, otherwise just set the path and focus the key field.
     var presetRow = document.getElementById("preset-row");
+    var presetButtons = presetRow ? Array.prototype.slice.call(presetRow.querySelectorAll(".preset-btn")) : [];
+
+    function normalizedPath(value) {
+        try { return pathLabel(parsePath(value, false).levels); } catch (e) { return null; }
+    }
+
+    // The preset whose path equals the one in the path field is marked as selected
+    function updatePresetState() {
+        var current = normalizedPath(pathInput.value);
+        presetButtons.forEach(function (btn) {
+            var selected = current !== null && normalizedPath(btn.getAttribute("data-path")) === current;
+            btn.setAttribute("aria-pressed", String(selected));
+        });
+    }
+
     if (presetRow) {
         presetRow.addEventListener("click", function (e) {
             var btn = e.target.closest(".preset-btn");
             if (!btn) return;
             pathInput.value = btn.getAttribute("data-path");
+            updatePresetState();
             if (keyInput.value.trim()) {
                 run();
             } else {
@@ -365,6 +381,7 @@
         });
     }
 
+    pathInput.addEventListener("input", updatePresetState);
     pathInput.addEventListener("keydown", function (e) { if (e.key === "Enter") run(); });
     countInput.addEventListener("keydown", function (e) { if (e.key === "Enter") run(); });
 
@@ -372,6 +389,7 @@
         keyInput.value = SAMPLE_XPUB;
         pathInput.value = "m/0/0";
         countInput.value = "5";
+        updatePresetState();
         run();
     });
 
@@ -379,6 +397,7 @@
         keyInput.value = "";
         pathInput.value = "m/0/0";
         countInput.value = "5";
+        updatePresetState();
         keyMeta.classList.add("display-none");
         outputWrap.classList.add("display-none");
         hideError();
@@ -406,5 +425,6 @@
         }
     });
 
+    updatePresetState();
     keyInput.focus();
 })();
