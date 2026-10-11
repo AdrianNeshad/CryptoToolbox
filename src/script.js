@@ -272,7 +272,7 @@ function initExternalLinkConfirm() {
 
     function openModal(link) {
         pendingHref = link.href;
-        const title = link.querySelector('.nav-item-title')?.textContent.trim() || 'the website';
+        const title = link.querySelector('.nav-item-title')?.textContent.trim() || link.dataset.linkTitle || 'the website';
         text.textContent = `Do you want to leave CryptoToolbox and open "${title}" in a new tab?`;
         modal.classList.remove('display-none');
     }
@@ -282,7 +282,8 @@ function initExternalLinkConfirm() {
         pendingHref = null;
     }
 
-    document.querySelectorAll('.nav-item--link').forEach((link) => {
+    // Sidebar link entries and other external links marked with data-external-link (e.g. the footer)
+    document.querySelectorAll('.nav-item--link, a[data-external-link]').forEach((link) => {
         link.addEventListener('click', (event) => {
             event.preventDefault();
             openModal(link);
