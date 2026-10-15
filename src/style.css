@@ -560,11 +560,29 @@ body {
     background: var(--bg);
 }
 
+.tool-host {
+    width: 100%;
+    height: 100%;
+    position: relative;
+}
+
+/* Opened tools are stacked on top of each other; only the active one is visible.
+   visibility (not display: none) keeps hidden tools laid out at full size. */
 .tool-frame {
+    position: absolute;
+    inset: 0;
     width: 100%;
     height: 100%;
     border: none;
     display: block;
+    visibility: hidden;
+    pointer-events: none;
+}
+
+.tool-frame.is-active {
+    visibility: visible;
+    pointer-events: auto;
+    z-index: 1;
 }
 
 .content-placeholder {

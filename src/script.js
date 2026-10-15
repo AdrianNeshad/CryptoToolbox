@@ -18,19 +18,51 @@ window.addEventListener('online', updateNetStatus);
 window.addEventListener('offline', updateNetStatus);
 updateNetStatus();
 
+// Each tool keeps its own iframe once it has been opened. Switching tools only
+// hides/shows them, so whatever was typed in a tool survives until the window
+// is closed or reloaded — nothing is stored.
+const toolFrames = new Map();
+
+function currentTheme() {
+    return document.documentElement.getAttribute('data-theme') || 'dark';
+}
+
+function postTheme(frame, theme) {
+    if (!frame.contentWindow) return;
+    try {
+        frame.contentWindow.postMessage({ source: 'cryptotoolbox', type: 'theme', theme: theme }, '*');
+    } catch (e) {
+        /* the tool could not be reached (e.g. still loading) — ignore */
+    }
+}
+
+function createToolFrame(host, item) {
+    const frame = document.createElement('iframe');
+    const title = item.querySelector('.nav-item-title');
+    const src = item.dataset.src;
+    const separator = src.indexOf('?') === -1 ? '?' : '&';
+    frame.className = 'tool-frame';
+    frame.title = title ? title.textContent.trim() : 'Tool';
+    frame.src = src + separator + 'theme=' + currentTheme();
+    // Make sure the tool gets the correct theme as soon as it has loaded,
+    // complementing the ?theme= in the src URL.
+    frame.addEventListener('load', () => postTheme(frame, currentTheme()));
+    host.appendChild(frame);
+    toolFrames.set(src, frame);
+    return frame;
+}
+
 function loadTool(item) {
-    const frame = document.getElementById('tool-frame');
+    const host = document.getElementById('tool-host');
     const placeholder = document.getElementById('content-placeholder');
-    if (!frame || !placeholder || !item) return;
+    if (!host || !placeholder || !item) return;
 
     document.querySelectorAll('.nav-item.active').forEach((el) => el.classList.remove('active'));
     item.classList.add('active');
 
-    const theme = document.documentElement.getAttribute('data-theme') || 'dark';
-    const src = item.dataset.src;
-    const separator = src.indexOf('?') === -1 ? '?' : '&';
-    frame.src = src + separator + 'theme=' + theme;
-    frame.style.display = 'block';
+    const frame = toolFrames.get(item.dataset.src) || createToolFrame(host, item);
+    toolFrames.forEach((el) => el.classList.toggle('is-active', el === frame));
+    host.hidden = false;
     placeholder.style.display = 'none';
 }
 
@@ -152,7 +184,6 @@ initSidebarToggle();
 function initThemeToggle() {
     const THEME_KEY = 'theme';
     const toggle = document.getElementById('theme-toggle');
-    const frame = document.getElementById('tool-frame');
     if (!toggle) return;
 
     function getStoredTheme() {
@@ -172,14 +203,9 @@ function initThemeToggle() {
         }
     }
 
+    // Every opened tool stays alive in the background, so all of them get the new theme.
     function broadcastTheme(value) {
-        if (frame && frame.contentWindow) {
-            try {
-                frame.contentWindow.postMessage({ source: 'cryptotoolbox', type: 'theme', theme: value }, '*');
-            } catch (e) {
-                /* the tool could not be reached (e.g. still loading) — ignore */
-            }
-        }
+        toolFrames.forEach((frame) => postTheme(frame, value));
     }
 
     function applyTheme(value) {
@@ -196,12 +222,6 @@ function initThemeToggle() {
         setStoredTheme(theme);
         broadcastTheme(theme);
     });
-
-    // If a tool is reloaded (e.g. via a click in the sidebar) — make sure it gets
-    // the correct theme immediately, complementing the ?theme= in the src URL.
-    if (frame) {
-        frame.addEventListener('load', () => broadcastTheme(theme));
-    }
 }
 
 initThemeToggle();

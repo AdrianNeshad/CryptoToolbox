@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Proton Wallet Mnemonic Decryptor</title>
+    <script>
+        (function () {
+            try {
+                var params = new URLSearchParams(location.search);
+                var fromParent = params.get('theme');
+                var saved = localStorage.getItem('theme');
+                var theme = (fromParent === 'light' || fromParent === 'dark') ? fromParent
+                    : (saved === 'light' || saved === 'dark') ? saved : 'dark';
+                document.documentElement.setAttribute('data-theme', theme);
+                if (fromParent === 'light' || fromParent === 'dark') {
+                    localStorage.setItem('theme', fromParent);
+                }
+            } catch (e) {
+                document.documentElement.setAttribute('data-theme', 'dark');
+            }
+        })();
+    </script>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <div id="container">
+
+        <header class="page-header">
+            <h1>Proton Wallet Mnemonic Decryptor</h1>
+            <p>Decrypt the BIP39 recovery phrase stored by the Proton Wallet app from the values in your
+                device keychain. Everything is decrypted locally in this window &mdash; nothing is uploaded,
+                stored or sent anywhere.</p>
+        </header>
+
+        <div class="panel-row">
+
+            <div class="panel">
+                <div class="panel-head">
+                    <span class="step-num">1</span>
+                    <span class="panel-title">User PGP private key <code>userPrivateKey</code></span>
+                </div>
+                <p class="hint">The armored OpenPGP private key from the keychain account <code>userPrivateKey</code>.
+                    You can paste more than one block if your account has several keys. Pasting it straight from a
+                    keychain or JSON export &mdash; with escaped <code>\n</code> and surrounding quotes &mdash; works too.</p>
+                <textarea id="user-key" class="text-input" spellcheck="false" autocomplete="off"
+                    placeholder="-----BEGIN PGP PRIVATE KEY BLOCK-----&#10;…&#10;-----END PGP PRIVATE KEY BLOCK-----"></textarea>
+            </div>
+
+            <div class="panel">
+                <div class="panel-head">
+                    <span class="step-num">2</span>
+                    <span class="panel-title">Key passphrase <code>userPassphrase</code></span>
+                </div>
+                <p class="hint">The value from the keychain account <code>userPassphrase</code>. This is the
+                    already-derived key secret that unlocks the private key &mdash; paste it exactly, not your
+                    Proton login password.</p>
+                <div class="field-row">
+                    <input type="password" id="passphrase" class="text-input" spellcheck="false"
+                        autocomplete="off" placeholder="userPassphrase">
+                    <button type="button" class="secondary" id="pw-toggle" title="Show / hide">Show</button>
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-head">
+                    <span class="step-num">3</span>
+                    <span class="panel-title">Wallet key <code>proton_wallet_k_provider_key</code></span>
+                </div>
+                <p class="hint">The value from the keychain account <code>proton_wallet_k_provider_key</code>.
+                    Paste the whole JSON array as-is, or a single <code>-----BEGIN PGP MESSAGE-----</code> block.</p>
+                <textarea id="wallet-key" class="text-input" spellcheck="false" autocomplete="off"
+                    placeholder='[{"walletId":"…","userKeyId":"…","walletKey":"-----BEGIN PGP MESSAGE-----…","walletKeySignature":"…"}]'></textarea>
+            </div>
+
+            <div class="panel">
+                <div class="panel-head">
+                    <span class="step-num">4</span>
+                    <span class="panel-title">Encrypted mnemonic <code>proton_wallet_mn_provider_key</code></span>
+                </div>
+                <p class="hint">The value from the keychain account <code>proton_wallet_mn_provider_key</code>.
+                    Paste the whole JSON array as-is, or a single encrypted mnemonic value.</p>
+                <textarea id="mnemonic-key" class="text-input" spellcheck="false" autocomplete="off"
+                    placeholder='[{"walletID":"…","mnemonic":"…"}]'></textarea>
+            </div>
+
+        </div><!-- /panel-row -->
+
+        <div class="action-row">
+            <button id="run-btn">Decrypt mnemonic</button>
+            <span class="spacer"></span>
+            <button type="button" class="clear-btn" id="clear-btn">Clear</button>
+        </div>
+
+        <div class="output-wrap">
+            <div class="results" id="results"></div>
+            <pre class="log-pane display-none" id="log"></pre>
+            <div class="notice" id="notice">
+                The other keychain accounts you may see &mdash; <code>proton_wallet_address_provider_key</code>
+                (email address keys) and <code>proton_wallet_app_k_is_user_eligible</code> (a feature flag)
+                &mdash; are <strong>not</strong> needed to recover the mnemonic.
+            </div>
+        </div>
+
+        <div id="toast" class="toast"></div>
+
+    </div>
+
+    <!-- Vendored OpenPGP.js (self-contained, no network) -->
+    <script src="vendor/openpgp/openpgp.min.js"></script>
+    <!-- Pure-JS AES-256-GCM + Proton decryption logic -->
+    <script src="lib/aesgcm.js"></script>
+    <script src="lib/proton-decrypt.js"></script>
+    <script src="script.js"></script>
+
+</body>
+
+</html>

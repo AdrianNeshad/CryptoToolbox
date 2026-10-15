@@ -2,12 +2,12 @@
 
 Local toolbox for **cryptography and crypto forensics**. Runs fully offline via .exe-app or by downloading the source and opening `Toolbox.html` in your browser.
 
-## Download (v3.7 - latest release)
+## Download (v3.8 - latest release)
 
 <p align="center">
-  <a href="https://github.com/AdrianNeshad/CryptoToolbox/releases/download/v3.7/CryptoToolbox3.7.zip"><img alt="Download source code (v2.8.zip)" height="28" src="https://img.shields.io/badge/Source-CryptoToolbox.zip-0a84ff?style=plastic&logo=data%3Aimage%2Fsvg%2Bxml%3Bbase64%2CPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI%2BPHBhdGggZmlsbD0iI0U4OTcxRSIgZD0iTTMgNi41QzMgNS42NyAzLjY3IDUgNC41IDVIOS4yTDExLjIgN0gxOS41QzIwLjMzIDcgMjEgNy42NyAyMSA4LjVWMTBIM1Y2LjVaIi8%2BPHBhdGggZmlsbD0iI0ZCQkYyNCIgZD0iTTMgOUgyMVYxNy41QzIxIDE4LjMzIDIwLjMzIDE5IDE5LjUgMTlINC41QzMuNjcgMTkgMyAxOC4zMyAzIDE3LjVWOVoiLz48L3N2Zz4%3D"></a>
-  <a href="https://github.com/AdrianNeshad/CryptoToolbox/releases/download/v3.7/CryptoToolbox3.7.exe"><img alt="Download Windows app (CryptoToolbox.exe)" height="28" src="https://img.shields.io/badge/Windows-CryptoToolbox.exe-0a84ff?style=plastic&logo=data%3Aimage%2Fsvg%2Bxml%3Bbase64%2CPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI%2BPHBhdGggZmlsbD0iIzAwQTRFRiIgZD0iTTMgNC41TDExLjIgMy4zNVYxMS4zNUgzVjQuNVoiLz48cGF0aCBmaWxsPSIjMDBBNEVGIiBkPSJNMTIuMyAzLjJMMjEgMlYxMS4zNUgxMi4zVjMuMloiLz48cGF0aCBmaWxsPSIjMDBBNEVGIiBkPSJNMyAxMi41NUgxMS4yVjIwLjY1TDMgMTkuNVYxMi41NVoiLz48cGF0aCBmaWxsPSIjMDBBNEVGIiBkPSJNMTIuMyAxMi41NUgyMVYyMkwxMi4zIDIwLjhWMTIuNTVaIi8%2BPC9zdmc%2B"></a>
-  <a href="https://github.com/AdrianNeshad/CryptoToolbox/releases/download/v3.7/magic.html"><img alt="Download standalone Magic Tool (magic.html)" height="28" src="https://img.shields.io/badge/Standalone-magic.html-0a84ff?style=plastic&logo=data%3Aimage%2Fsvg%2Bxml%3Bbase64%2CPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI%2BPHJlY3QgeD0iMSIgeT0iMSIgd2lkdGg9IjIyIiBoZWlnaHQ9IjIyIiByeD0iNiIgZmlsbD0iIzMwZDE1OCIvPjxnIHRyYW5zZm9ybT0idHJhbnNsYXRlKDUuMzMgNS4zMykgc2NhbGUoMC41NTYpIiBmaWxsPSJub25lIiBzdHJva2U9IiNmZmYiIHN0cm9rZS13aWR0aD0iMi40IiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cGF0aCBkPSJNMTUgMkwxNi42IDcuNEwyMiA5TDE2LjYgMTAuNkwxNSAxNkwxMy40IDEwLjZMOCA5TDEzLjQgNy40TDE1IDJaIi8%2BPHBhdGggZD0iTTYgMTJMNyAxNUwxMCAxNkw3IDE3TDYgMjBMNSAxN0wyIDE2TDUgMTVMNiAxMloiLz48L2c%2BPC9zdmc%2B"></a>
+  <a href="https://github.com/AdrianNeshad/CryptoToolbox/releases/download/v3.8/CryptoToolbox3.8.zip"><img alt="Download source code (v2.8.zip)" height="28" src="https://img.shields.io/badge/Source-CryptoToolbox.zip-0a84ff?style=plastic&logo=data%3Aimage%2Fsvg%2Bxml%3Bbase64%2CPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI%2BPHBhdGggZmlsbD0iI0U4OTcxRSIgZD0iTTMgNi41QzMgNS42NyAzLjY3IDUgNC41IDVIOS4yTDExLjIgN0gxOS41QzIwLjMzIDcgMjEgNy42NyAyMSA4LjVWMTBIM1Y2LjVaIi8%2BPHBhdGggZmlsbD0iI0ZCQkYyNCIgZD0iTTMgOUgyMVYxNy41QzIxIDE4LjMzIDIwLjMzIDE5IDE5LjUgMTlINC41QzMuNjcgMTkgMyAxOC4zMyAzIDE3LjVWOVoiLz48L3N2Zz4%3D"></a>
+  <a href="https://github.com/AdrianNeshad/CryptoToolbox/releases/download/v3.8/CryptoToolbox3.8.exe"><img alt="Download Windows app (CryptoToolbox.exe)" height="28" src="https://img.shields.io/badge/Windows-CryptoToolbox.exe-0a84ff?style=plastic&logo=data%3Aimage%2Fsvg%2Bxml%3Bbase64%2CPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI%2BPHBhdGggZmlsbD0iIzAwQTRFRiIgZD0iTTMgNC41TDExLjIgMy4zNVYxMS4zNUgzVjQuNVoiLz48cGF0aCBmaWxsPSIjMDBBNEVGIiBkPSJNMTIuMyAzLjJMMjEgMlYxMS4zNUgxMi4zVjMuMloiLz48cGF0aCBmaWxsPSIjMDBBNEVGIiBkPSJNMyAxMi41NUgxMS4yVjIwLjY1TDMgMTkuNVYxMi41NVoiLz48cGF0aCBmaWxsPSIjMDBBNEVGIiBkPSJNMTIuMyAxMi41NUgyMVYyMkwxMi4zIDIwLjhWMTIuNTVaIi8%2BPC9zdmc%2B"></a>
+  <a href="https://github.com/AdrianNeshad/CryptoToolbox/releases/download/v3.8/magic.html"><img alt="Download standalone Magic Tool (magic.html)" height="28" src="https://img.shields.io/badge/Standalone-magic.html-0a84ff?style=plastic&logo=data%3Aimage%2Fsvg%2Bxml%3Bbase64%2CPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI%2BPHJlY3QgeD0iMSIgeT0iMSIgd2lkdGg9IjIyIiBoZWlnaHQ9IjIyIiByeD0iNiIgZmlsbD0iIzMwZDE1OCIvPjxnIHRyYW5zZm9ybT0idHJhbnNsYXRlKDUuMzMgNS4zMykgc2NhbGUoMC41NTYpIiBmaWxsPSJub25lIiBzdHJva2U9IiNmZmYiIHN0cm9rZS13aWR0aD0iMi40IiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cGF0aCBkPSJNMTUgMkwxNi42IDcuNEwyMiA5TDE2LjYgMTAuNkwxNSAxNkwxMy40IDEwLjZMOCA5TDEzLjQgNy40TDE1IDJaIi8%2BPHBhdGggZD0iTTYgMTJMNyAxNUwxMCAxNkw3IDE3TDYgMjBMNSAxN0wyIDE2TDUgMTVMNiAxMloiLz48L2c%2BPC9zdmc%2B"></a>
 </p>
 
 ## Tools
@@ -53,7 +53,7 @@ Local toolbox for **cryptography and crypto forensics**. Runs fully offline via 
 | Hahs Calculator | Calculate and compare different hash values of data |
 | iOS Keychain Viewer | View and analyze iOS keychain data from local backups |
 
-### Brute Force
+### Brute Force & Decryption
 
 | Tool | Description |
 |---------|-------------|
@@ -63,6 +63,7 @@ Local toolbox for **cryptography and crypto forensics**. Runs fully offline via 
 | MetaMask Vault Decryptor | Brute-force MetaMask vault (dictionary attack) |
 | Ethereum Keystore Unlock | Brute-force Ethereum keystore (dictionary attack) |
 | DeFiChain Wallet Unlock | Brute-force DeFiChain Light Wallet passcode (6-digit sweep) |
+| Proton Wallet Decryptor | Decrypt Proton Wallets |
 
 ## Add your own tool
 

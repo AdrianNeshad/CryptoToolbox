@@ -32,7 +32,7 @@
                 <div class="sidebar-header-text">
                     <h1>Crypto Toolbox</h1>
                     <div class="version-row">
-                        <p>Version 3.7</p>
+                        <p>Version 3.8</p>
                         <div id="net-status" class="net-status">
                             <span id="net-status-text"></span>
                         </div>
@@ -331,7 +331,7 @@
                     </div>
 
                     <div class="nav-subgroup nav-subgroup--brute">
-                        <div class="nav-subgroup-title">Brute Force</div>
+                        <div class="nav-subgroup-title">Brute Force & Decryption</div>
 
                     <button class="nav-item" data-type="frame" data-src="tools/moneroUnlock/moneroKeys.html">
                         <span class="nav-item-icon nav-item-icon--local">
@@ -426,6 +426,22 @@
                         <span class="nav-item-text">
                             <span class="nav-item-title">DeFiChain Unlock</span>
                             <span class="nav-item-desc">Brute-force DeFiChain wallet</span>
+                        </span>
+                    </button>
+
+                    <button class="nav-item" data-type="frame" data-src="tools/protonWallet/protonWallet.html">
+                        <span class="nav-item-icon nav-item-icon--forensic">
+                            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <rect x="4" y="9" width="16" height="11" rx="2" stroke="currentColor" stroke-width="1.8"
+                                    stroke-linejoin="round" />
+                                <path d="M8 9V6.5a4 4 0 0 1 8 0V9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
+                                    stroke-linejoin="round" />
+                                <path d="M12 13v3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+                            </svg>
+                        </span>
+                        <span class="nav-item-text">
+                            <span class="nav-item-title">Proton Wallet Decryptor</span>
+                            <span class="nav-item-desc">Decrypt Proton Wallet mnemonic from keychain</span>
                         </span>
                     </button>
                     </div>
@@ -613,7 +629,7 @@
                 </div>
             </div>
 
-            <iframe id="tool-frame" class="tool-frame" title="Tool" style="display:none;"></iframe>
+            <div id="tool-host" class="tool-host" hidden></div>
 
         </main>
 
