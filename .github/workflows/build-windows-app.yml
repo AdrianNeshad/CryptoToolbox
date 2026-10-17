@@ -1,8 +1,10 @@
 name: Build and publish the Windows app
 
-# Runs on every push to main (i.e. every time you push to the repo), plus manually
-# via "Run workflow" in the GitHub Actions tab. Changes that only touch .md files
-# don't trigger a new build, since they don't affect the built app.
+# Builds only when the pushed commit's message contains [release] (anywhere in the
+# message, any letter case, e.g. "3.9 SLIP39 tool [release]"), or manually via
+# "Run workflow" in the GitHub Actions tab. Other pushes show up as "skipped" and
+# use no runner. Only the latest commit of a push counts. Changes that only touch
+# .md files never trigger a build, since they don't affect the built app.
 on:
   push:
     branches: [main]
@@ -15,6 +17,7 @@ permissions:
 
 jobs:
   build:
+    if: github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, 'release')
     runs-on: windows-latest
     steps:
       - name: Check out the repo
@@ -55,30 +58,34 @@ jobs:
       - name: Build the local browser .zip bundle
         run: node scripts/build-release-zips.js
 
-      # If the release for this version already exists (e.g. multiple pushes without
-      # a version bump, or a filename that changed since last time) — empty it of old
-      # attached files before we upload the new ones. Otherwise old/renamed files are
-      # left alongside the new ones instead of being replaced.
-      - name: Clean up old files in the release (if it already exists)
+      # Every [release] push publishes a fresh release of THIS commit, whether or not
+      # the version in Toolbox.html changed. The tag and release are still named after
+      # that version (v3.8 …), so if a release or tag with that name already exists it
+      # is deleted here and recreated below: tag on the new commit, only the new files.
+      - name: Remove the existing release and tag for this version (if any)
         env:
           GH_TOKEN: ${{ github.token }}
         shell: bash
         run: |
           TAG="v${{ steps.version.outputs.version }}"
-          if gh release view "$TAG" --repo "${{ github.repository }}" >/dev/null 2>&1; then
-            gh release view "$TAG" --repo "${{ github.repository }}" --json assets --jq '.assets[].name' |
-              while IFS= read -r name; do
-                echo "Removing previous asset: $name"
-                gh release delete-asset "$TAG" "$name" --repo "${{ github.repository }}" --yes
-              done
+          REPO="${{ github.repository }}"
+          if gh release view "$TAG" --repo "$REPO" >/dev/null 2>&1; then
+            echo "Replacing the existing release $TAG."
+            gh release delete "$TAG" --repo "$REPO" --yes --cleanup-tag
           else
-            echo "No existing release for $TAG yet — nothing to clean up."
+            echo "No existing release for $TAG."
+          fi
+          # A tag can also exist without a release
+          if gh api "repos/$REPO/git/ref/tags/$TAG" >/dev/null 2>&1; then
+            echo "Deleting the existing tag $TAG."
+            gh api -X DELETE "repos/$REPO/git/refs/tags/$TAG" || echo "Tag $TAG was already removed."
           fi
 
-      - name: Create/update GitHub Release
+      - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ steps.version.outputs.version }}
+          target_commitish: ${{ github.sha }}
           name: CryptoToolbox ${{ steps.version.outputs.version }}
           body: |
             Automatically built from commit ${{ github.sha }}.

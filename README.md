@@ -26,6 +26,7 @@ Local toolbox for **cryptography and crypto forensics**. Runs fully offline via 
 | BIP38 Key Compression | Compress/decompress Bitcoin keys |
 | QR Code Decoder | Decode QR codes from images |
 | JSON Formatter | Compact JSON → pretty print / minify, also decodes JWT |
+| BIP32 Derivation Preview | Preview Legacy/SegWit/Native addresses from an xpub + path |
 
 ### BIP39 & Seed
 
@@ -35,7 +36,7 @@ Local toolbox for **cryptography and crypto forensics**. Runs fully offline via 
 | BIP39 Tool | Complete BIP39 tool |
 | BIP39 Wordlist | All BIP39 words with search |
 | BIP39 Checksum Finder | Final checksum word (12 & 24 words) |
-| BIP32 Derivation Preview | Preview Legacy/SegWit/Native addresses from an xpub + path |
+| SLIP39 Tool | Complete SLIP-39 (Shamir backup) tool: create, recover, inspect/repair and extend share sets |
 
 ### Other
 

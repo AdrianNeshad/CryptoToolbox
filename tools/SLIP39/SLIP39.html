@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SLIP-39 Shamir Backup</title>
+    <script>
+        (function () {
+            try {
+                var params = new URLSearchParams(location.search);
+                var fromParent = params.get('theme');
+                var saved = localStorage.getItem('theme');
+                var theme = (fromParent === 'light' || fromParent === 'dark') ? fromParent
+                    : (saved === 'light' || saved === 'dark') ? saved : 'dark';
+                document.documentElement.setAttribute('data-theme', theme);
+                if (fromParent === 'light' || fromParent === 'dark') {
+                    localStorage.setItem('theme', fromParent);
+                }
+            } catch (e) {
+                document.documentElement.setAttribute('data-theme', 'dark');
+            }
+        })();
+    </script>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <div id="container">
+
+        <header class="page-header">
+            <h1>SLIP-39 Shamir Backup</h1>
+            <p>Split a wallet seed into Shamir shares (SLIP-0039, as used by Trezor), recover the
+                master secret from shares, inspect and repair damaged shares, and extend or regenerate an existing
+                backup. Everything runs locally in this window &mdash; nothing is uploaded, stored or sent anywhere.</p>
+        </header>
+
+        <nav class="tabs" role="tablist" id="tabs">
+            <button type="button" class="tab" role="tab" data-tab="create" aria-selected="true">Create shares</button>
+            <button type="button" class="tab" role="tab" data-tab="recover" aria-selected="false">Recover secret</button>
+            <button type="button" class="tab" role="tab" data-tab="inspect" aria-selected="false">Inspect &amp; repair</button>
+            <button type="button" class="tab" role="tab" data-tab="reshare" aria-selected="false">Extend &amp; regenerate</button>
+            <button type="button" class="tab" role="tab" data-tab="wordlist" aria-selected="false">Wordlist</button>
+        </nav>
+
+        <!-- =================== CREATE =================== -->
+        <section class="tab-panel" id="tab-create" role="tabpanel">
+
+            <div class="panel">
+                <div class="panel-head">
+                    <span class="step-num">1</span>
+                    <span class="panel-title">Master secret</span>
+                </div>
+                <p class="hint">The value that gets split. For a wallet this is the BIP-32 master seed. Pick a fresh
+                    random secret, enter one as hex, or convert an existing BIP-39 recovery phrase.</p>
+                <div class="pill-row" id="secret-source">
+                    <button type="button" class="pill" data-source="random" aria-pressed="true">Random</button>
+                    <button type="button" class="pill" data-source="hex" aria-pressed="false">Hex</button>
+                    <button type="button" class="pill" data-source="bip39" aria-pressed="false">BIP-39 phrase</button>
+                </div>
+
+                <div class="source-pane" data-pane="random">
+                    <div class="pill-row" id="strength-row">
+                        <span class="pill-label">Strength</span>
+                        <button type="button" class="pill" data-bits="128" aria-pressed="true">128-bit <code>20 words</code></button>
+                        <button type="button" class="pill" data-bits="256" aria-pressed="false">256-bit <code>33 words</code></button>
+                    </div>
+                    <p class="hint hint--tight">A new secret is drawn from the browser's cryptographic random number
+                        generator each time you press <strong>Create shares</strong>.</p>
+                </div>
+
+                <div class="source-pane display-none" data-pane="hex">
+                    <input type="text" id="secret-hex" class="text-input" spellcheck="false" autocomplete="off"
+                        placeholder="e.g. bb54aac4b89dc868ba37d9cc21b2cece">
+                    <p class="hint hint--tight" id="secret-hex-info">16&ndash;64 bytes, an even number of bytes (128,
+                        160, 192 &hellip; 512 bits).</p>
+                </div>
+
+                <div class="source-pane display-none" data-pane="bip39">
+                    <textarea id="bip39-phrase" class="text-area" spellcheck="false" autocomplete="off"
+                        placeholder="abandon abandon abandon … about"></textarea>
+                    <div class="field-row field-row--top">
+                        <label class="field">
+                            <span class="field-label">BIP-39 passphrase (optional)</span>
+                            <input type="password" id="bip39-pass" class="text-input" spellcheck="false" autocomplete="off"
+                                placeholder="the &quot;25th word&quot;, if any">
+                        </label>
+                    </div>
+                    <p class="hint hint--tight" id="bip39-info">The phrase and passphrase are turned into the 512-bit
+                        BIP-39 seed, which becomes the SLIP-39 master secret &mdash; so each share will be
+                        <strong>59 words</strong>. Restoring the shares on a SLIP-39 wallet opens the same accounts as
+                        the BIP-39 phrase did (the BIP-39 passphrase is already baked in).</p>
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-head">
+                    <span class="step-num">2</span>
+                    <span class="panel-title">Sharing scheme</span>
+                </div>
+                <p class="hint">A share set has 1&ndash;16 groups; each group has 1&ndash;16 member shares and its own
+                    threshold. Recovery needs the group threshold&rsquo;s number of groups, each with enough of its own
+                    shares.</p>
+                <div class="scheme-editor" id="create-scheme"></div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-head">
+                    <span class="step-num">3</span>
+                    <span class="panel-title">Passphrase &amp; options</span>
+                </div>
+                <p class="hint">An optional SLIP-39 passphrase encrypts the master secret before it is split. There is no
+                    way to check a passphrase: every passphrase opens <em>a</em> wallet, so a typo silently gives an
+                    empty one. Printable ASCII only.</p>
+                <div class="field-row">
+                    <label class="field">
+                        <span class="field-label">SLIP-39 passphrase (optional)</span>
+                        <div class="input-with-btn">
+                            <input type="password" id="create-pass" class="text-input" spellcheck="false" autocomplete="off"
+                                placeholder="leave empty for none">
+                            <button type="button" class="secondary pw-toggle" data-target="create-pass">Show</button>
+                        </div>
+                    </label>
+                </div>
+                <details class="advanced">
+                    <summary>Advanced</summary>
+                    <div class="field-row">
+                        <label class="field">
+                            <span class="field-label">Iteration exponent</span>
+                            <select id="create-exp" class="text-input"></select>
+                        </label>
+                        <label class="field">
+                            <span class="field-label">Identifier</span>
+                            <input type="text" id="create-id" class="text-input" spellcheck="false" autocomplete="off"
+                                placeholder="random (0 – 32767)">
+                        </label>
+                    </div>
+                    <label class="check">
+                        <input type="checkbox" id="create-ext" checked>
+                        <span><strong>Extendable backup</strong> (recommended). The identifier is not mixed into the
+                            encryption, so you can later create additional, independent share sets for the same
+                            wallet without the passphrase. Turn off only to mimic shares made before this flag
+                            existed.</span>
+                    </label>
+                </details>
+            </div>
+
+            <div class="action-row">
+                <button type="button" id="create-btn">Create shares</button>
+                <span class="status-line" id="create-status"></span>
+                <span class="spacer"></span>
+                <button type="button" class="clear-btn" id="create-clear">Clear</button>
+            </div>
+
+            <div class="result-panel display-none" id="create-error">
+                <div class="result-title">Could not create shares</div>
+                <div class="result-body"></div>
+            </div>
+
+            <div class="output display-none" id="create-output"></div>
+        </section>
+
+        <!-- =================== RECOVER =================== -->
+        <section class="tab-panel display-none" id="tab-recover" role="tabpanel">
+
+            <div class="panel">
+                <div class="panel-head">
+                    <span class="step-num">1</span>
+                    <span class="panel-title">Shares</span>
+                </div>
+                <p class="hint">Paste your shares, one per line (a share wrapped over several lines works if blank lines
+                    separate the shares). Order doesn't matter, extra shares are fine, and the first four letters of
+                    each word are enough. Lines starting with <code>#</code> are ignored.</p>
+                <textarea id="recover-input" class="text-area text-area--tall" spellcheck="false" autocomplete="off"
+                    placeholder="duckling enlarge academic academic agency result length solution fridge kidney …"></textarea>
+                <div class="share-status" id="recover-status"></div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-head">
+                    <span class="step-num">2</span>
+                    <span class="panel-title">Passphrase</span>
+                </div>
+                <p class="hint">Leave empty if the backup has no passphrase. A wrong passphrase is not detected &mdash;
+                    it just gives a different (empty) wallet, so compare the addresses below with the ones you expect.</p>
+                <div class="input-with-btn">
+                    <input type="password" id="recover-pass" class="text-input" spellcheck="false" autocomplete="off"
+                        placeholder="SLIP-39 passphrase">
+                    <button type="button" class="secondary pw-toggle" data-target="recover-pass">Show</button>
+                </div>
+            </div>
+
+            <div class="action-row">
+                <button type="button" id="recover-btn">Recover master secret</button>
+                <button type="button" class="secondary" id="recover-sample">Load test vector</button>
+                <span class="status-line" id="recover-progress"></span>
+                <span class="spacer"></span>
+                <button type="button" class="clear-btn" id="recover-clear">Clear</button>
+            </div>
+
+            <div class="result-panel display-none" id="recover-error">
+                <div class="result-title">Could not recover</div>
+                <div class="result-body"></div>
+            </div>
+
+            <div class="output display-none" id="recover-output"></div>
+        </section>
+
+        <!-- =================== INSPECT =================== -->
+        <section class="tab-panel display-none" id="tab-inspect" role="tabpanel">
+
+            <div class="panel">
+                <div class="panel-head">
+                    <span class="step-num">1</span>
+                    <span class="panel-title">One share</span>
+                </div>
+                <p class="hint">Paste a single share to decode every field and check it. Write <code>?</code> for a
+                    word you can't read &mdash; the checksum can restore up to three of them. A misspelt or unknown
+                    word is treated the same way.</p>
+                <textarea id="inspect-input" class="text-area" spellcheck="false" autocomplete="off"
+                    placeholder="shadow pistol academic always adequate wildlife fancy gross oasis cylinder mustang ? rescue view …"></textarea>
+            </div>
+
+            <div class="output display-none" id="inspect-output"></div>
+        </section>
+
+        <!-- =================== RESHARE =================== -->
+        <section class="tab-panel display-none" id="tab-reshare" role="tabpanel">
+
+            <div class="panel">
+                <div class="panel-head">
+                    <span class="step-num">1</span>
+                    <span class="panel-title">Existing shares</span>
+                </div>
+                <p class="hint">Paste the shares you have, one per line. What you can do depends on how many you have:
+                    a group&rsquo;s threshold of shares is enough to regenerate any share of that group; a full
+                    recovery set is enough to create a whole new share set.</p>
+                <textarea id="reshare-input" class="text-area text-area--tall" spellcheck="false" autocomplete="off"
+                    placeholder="one share per line"></textarea>
+                <div class="share-status" id="reshare-status"></div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-head">
+                    <span class="step-num">2</span>
+                    <span class="panel-title">What to do</span>
+                </div>
+                <div class="pill-row" id="reshare-mode">
+                    <button type="button" class="pill" data-mode="newset" aria-pressed="true">New share set</button>
+                    <button type="button" class="pill" data-mode="member" aria-pressed="false">Regenerate a lost share</button>
+                    <button type="button" class="pill" data-mode="group" aria-pressed="false">Rebuild a lost group</button>
+                </div>
+
+                <div class="mode-pane" data-pane="newset">
+                    <p class="hint">Creates an additional, independent share set for the same wallet &mdash; for example
+                        to move from a single share to 2-of-3, or to replace a set whose shares may be compromised (the
+                        old shares keep working, so destroy them). The new set gets a new identifier, so its shares
+                        can't be mixed up with the old ones.</p>
+                    <div class="scheme-editor" id="reshare-scheme"></div>
+                    <div class="notice notice--info display-none" id="reshare-enc-info"></div>
+                    <div class="reshare-enc display-none" id="reshare-enc">
+                        <label class="check" id="reshare-reenc-wrap">
+                            <input type="checkbox" id="reshare-reenc">
+                            <span><strong>Change passphrase or iteration exponent.</strong> Needs the current passphrase.
+                                Without this, the new shares keep the encryption as-is and unlock exactly the same
+                                wallets as the old ones, for every passphrase.</span>
+                        </label>
+                        <div class="display-none" id="reshare-pass-fields">
+                            <div class="field-row field-row--top">
+                                <label class="field">
+                                    <span class="field-label">Current passphrase</span>
+                                    <input type="password" id="reshare-oldpass" class="text-input" spellcheck="false" autocomplete="off"
+                                        placeholder="empty if none">
+                                </label>
+                                <label class="field">
+                                    <span class="field-label">New passphrase</span>
+                                    <input type="password" id="reshare-newpass" class="text-input" spellcheck="false" autocomplete="off"
+                                        placeholder="same as current" disabled>
+                                </label>
+                                <label class="field field--narrow">
+                                    <span class="field-label">Iteration exp.</span>
+                                    <select id="reshare-exp" class="text-input"></select>
+                                </label>
+                                <button type="button" class="secondary pw-toggle pw-toggle--multi"
+                                    data-target="reshare-oldpass reshare-newpass">Show</button>
+                            </div>
+                            <label class="check">
+                                <input type="checkbox" id="reshare-same" checked>
+                                <span><strong>Keep the same passphrase.</strong> Untick to set a different one for the new set
+                                    (leave the new field empty for no passphrase).</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mode-pane display-none" data-pane="member">
+                    <p class="hint">Rebuilds the share with a given member index from the threshold number of shares of
+                        the same group. If that index was part of the original set, the result is
+                        <strong>word-for-word identical</strong> to the lost share. (Shares don't record how many members
+                        a group had, so indices beyond the original count give valid new shares.)</p>
+                    <div class="field-row">
+                        <label class="field">
+                            <span class="field-label">Group</span>
+                            <select id="member-group" class="text-input"></select>
+                        </label>
+                        <label class="field">
+                            <span class="field-label">Member share #</span>
+                            <select id="member-index" class="text-input"></select>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="mode-pane display-none" data-pane="group">
+                    <p class="hint">Rebuilds a whole group from a full recovery set (the group threshold&rsquo;s number
+                        of complete groups). A <strong>1-of-1</strong> group is reproduced exactly. For a group with a
+                        higher threshold the original polynomial can&rsquo;t be known, so a fresh member set is
+                        created &mdash; it works with the other groups, but <em>not</em> together with surviving shares of
+                        the old group.</p>
+                    <div class="field-row">
+                        <label class="field">
+                            <span class="field-label">Group</span>
+                            <select id="group-index" class="text-input"></select>
+                        </label>
+                        <label class="field field--narrow">
+                            <span class="field-label">Threshold</span>
+                            <input type="number" id="group-t" class="text-input" min="1" max="16" value="1">
+                        </label>
+                        <label class="field field--narrow">
+                            <span class="field-label">Shares</span>
+                            <input type="number" id="group-n" class="text-input" min="1" max="16" value="1">
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="action-row">
+                <button type="button" id="reshare-btn">Create new share set</button>
+                <span class="status-line" id="reshare-progress"></span>
+                <span class="spacer"></span>
+                <button type="button" class="clear-btn" id="reshare-clear">Clear</button>
+            </div>
+
+            <div class="result-panel display-none" id="reshare-error">
+                <div class="result-title">Could not complete</div>
+                <div class="result-body"></div>
+            </div>
+
+            <div class="output display-none" id="reshare-output"></div>
+        </section>
+
+        <!-- =================== WORDLIST =================== -->
+        <section class="tab-panel display-none" id="tab-wordlist" role="tabpanel">
+            <div class="panel">
+                <div class="panel-head">
+                    <span class="panel-title">SLIP-39 wordlist</span>
+                    <span class="panel-meta" id="wordlist-count">1024 words</span>
+                </div>
+                <p class="hint">1024 English words (10 bits each). Every word is identified by its first four letters
+                    (shown in bold), which is all a Trezor asks you to type. This is <strong>not</strong> the BIP-39
+                    list &mdash; the two share only some words.</p>
+                <input type="text" id="wordlist-search" class="text-input" spellcheck="false" autocomplete="off"
+                    placeholder="Search words, or an index 0 – 1023">
+                <div class="word-index" id="wordlist-grid"></div>
+            </div>
+        </section>
+
+        <div id="toast" class="toast"></div>
+
+    </div>
+
+    <!-- BIP-39 English wordlist (shared with the BIP39 Checksum Finder) -->
+    <script src="../BIP39-checksum/bip39_english.js"></script>
+    <!-- Vendored bitcoinjs-lib 3.3.0 + bech32/taproot helpers (shared with the BIP38 tool, pure JS, no network) -->
+    <script src="../BIP38-keycompression/bitcoinjs-3.3.0.js"></script>
+    <script src="../BIP38-keycompression/segwit-addr.js"></script>
+    <script src="../BIP38-keycompression/taproot.js"></script>
+    <!-- SLIP-39 implementation -->
+    <script src="lib/wordlist.js"></script>
+    <script src="lib/slip39.js"></script>
+    <script src="lib/bip39.js"></script>
+    <script src="script.js"></script>
+
+</body>
+
+</html>
