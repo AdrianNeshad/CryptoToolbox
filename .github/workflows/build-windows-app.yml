@@ -1,7 +1,7 @@
 name: Build and publish the Windows app
 
 # Builds only when the pushed commit's message contains [release] (anywhere in the
-# message, any letter case, e.g. "3.9 SLIP39 tool [release]"), or manually via
+# message, any letter case, e.g. "3.9 SLIP39 tool release"), or manually via
 # "Run workflow" in the GitHub Actions tab. Other pushes show up as "skipped" and
 # use no runner. Only the latest commit of a push counts. Changes that only touch
 # .md files never trigger a build, since they don't affect the built app.

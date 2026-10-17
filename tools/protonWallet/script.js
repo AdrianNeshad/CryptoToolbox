@@ -7,7 +7,6 @@
   var mnemonicEl = document.getElementById('mnemonic-key');
   var runBtn = document.getElementById('run-btn');
   var clearBtn = document.getElementById('clear-btn');
-  var pwToggle = document.getElementById('pw-toggle');
   var resultsEl = document.getElementById('results');
   var logEl = document.getElementById('log');
   var toastEl = document.getElementById('toast');
@@ -32,12 +31,6 @@
     logEl.textContent += (logEl.textContent ? '\n' : '') + line;
     logEl.scrollTop = logEl.scrollHeight;
   }
-
-  pwToggle.addEventListener('click', function () {
-    var show = passphraseEl.type === 'password';
-    passphraseEl.type = show ? 'text' : 'password';
-    pwToggle.textContent = show ? 'Hide' : 'Show';
-  });
 
   function renderResults(results) {
     resultsEl.innerHTML = '';
@@ -128,8 +121,6 @@
     mnemonicEl.value = '';
     resultsEl.innerHTML = '';
     resetLog();
-    passphraseEl.type = 'password';
-    pwToggle.textContent = 'Show';
   });
 
   // Live theme switching from the Toolbox shell

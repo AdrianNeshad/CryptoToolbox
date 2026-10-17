@@ -208,7 +208,6 @@
         .w-note a:hover {
             text-decoration: underline;
         }
-
         /* Green-highlighted badge at the bottom of the Note cell */
         .tool-badge {
             display: inline-block;
@@ -315,6 +314,10 @@
             font-size: 12.5px;
             color: var(--accent);
             background: none;
+        }
+
+        .card li code {
+            overflow-wrap: anywhere;
         }
 
         .card .tagset {
@@ -504,6 +507,14 @@
                         <td class="w-note">jellyfish-wallet-encrypted blob; protected by a 6-digit passcode (000000–999999). Plaintext is BIP39 entropy (N=16384) or a BIP32 root key (N=512). <a href="https://github.com/AdrianNeshad/defichainUnlock" target="_blank" rel="noopener">github.com/AdrianNeshad/defichainUnlock ↗</a><br><span class="tool-badge">✓ Decryptable with Crypto Toolbox</span></td>
                     </tr>
                     <tr>
+                        <td class="w-name">Proton Wallet</td>
+                        <td class="w-plat">Mobile</td>
+                        <td class="w-fmt">Keychain entries</td>
+                        <td><span class="chip chip-gcm">AES-256-GCM</span></td>
+                        <td class="w-kdf">OpenPGP / Keychain</td>
+                        <td class="w-note">Mnemonic encrypted with a PGP-wrapped wallet key; needs four keychain values.<br><span class="tool-badge">✓ Decryptable with Crypto Toolbox</span></td>
+                    </tr>
+                    <tr>
                         <td class="w-name">Trust Wallet</td>
                         <td class="w-plat">Mobile</td>
                         <td class="w-fmt">Encrypted DB</td>
@@ -574,6 +585,15 @@
                     <h3>DeFiChain</h3>
                     <ul>
                         <li>hex blob: <code>3-byte header</code> + <code>4-byte checksum</code> + 2× <code>[IV‖ciphertext]</code></li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h3>Proton Wallet (keychain)</h3>
+                    <ul>
+                        <li><code>userPrivateKey</code></li>
+                        <li><code>userPassphrase</code></li>
+                        <li><code>proton_wallet_k_provider_key</code></li>
+                        <li><code>proton_wallet_mn_provider_key</code></li>
                     </ul>
                 </div>
                 <div class="card">

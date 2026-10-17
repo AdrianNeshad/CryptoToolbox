@@ -151,7 +151,7 @@
                             </svg>
                         </span>
                         <span class="nav-item-text">
-                            <span class="nav-item-title">BIP38 Key Compression</span>
+                            <span class="nav-item-title">BIP-38 Key Compression</span>
                             <span class="nav-item-desc">Compress/decompress Bitcoin keys</span>
                         </span>
                     </button>
@@ -168,7 +168,7 @@
                             </svg>
                         </span>
                         <span class="nav-item-text">
-                            <span class="nav-item-title">BIP32 Derivation</span>
+                            <span class="nav-item-title">BIP-32 Derivation</span>
                             <span class="nav-item-desc">xpub + path &rarr; addresses</span>
                         </span>
                     </button>
@@ -176,7 +176,7 @@
                     </div>
 
                     <div class="nav-subgroup">
-                        <div class="nav-subgroup-title">BIP39 &amp; Seed</div>
+                        <div class="nav-subgroup-title">BIP-39 &amp; Seed</div>
 
                     <button class="nav-item" data-type="frame" data-src="tools/BIP39/bip39-standalone.html">
                         <span class="nav-item-icon nav-item-icon--local">
@@ -187,8 +187,8 @@
                             </svg>
                         </span>
                         <span class="nav-item-text">
-                            <span class="nav-item-title">BIP39 Tool</span>
-                            <span class="nav-item-desc">Complete BIP39 tool</span>
+                            <span class="nav-item-title">BIP-39 Tool</span>
+                            <span class="nav-item-desc">Complete BIP-39 tool</span>
                         </span>
                     </button>
 
@@ -203,7 +203,7 @@
                         </span>
                         <span class="nav-item-text">
                             <span class="nav-item-title">Entropy to Mnemonic</span>
-                            <span class="nav-item-desc">Convert entropy bytes to a BIP39 phrase</span>
+                            <span class="nav-item-desc">Convert entropy bytes to a BIP-39 phrase</span>
                         </span>
                     </button>
 
@@ -214,8 +214,8 @@
                             </svg>
                         </span>
                         <span class="nav-item-text">
-                            <span class="nav-item-title">BIP39 Wordlist</span>
-                            <span class="nav-item-desc">All BIP39 words with search</span>
+                            <span class="nav-item-title">BIP-39 Wordlist</span>
+                            <span class="nav-item-desc">All BIP-39 words with search</span>
                         </span>
                     </button>
 
@@ -228,7 +228,7 @@
                             </svg>
                         </span>
                         <span class="nav-item-text">
-                            <span class="nav-item-title">BIP39 Checksum Finder</span>
+                            <span class="nav-item-title">BIP-39 Checksum Finder</span>
                             <span class="nav-item-desc">Final checksum word (12 &amp; 24 words)</span>
                         </span>
                     </button>
@@ -242,7 +242,7 @@
                             </svg>
                         </span>
                         <span class="nav-item-text">
-                            <span class="nav-item-title">SLIP39 Tool</span>
+                            <span class="nav-item-title">SLIP-39 Tool</span>
                             <span class="nav-item-desc">Shamir backup: split, recover, repair</span>
                         </span>
                     </button>
@@ -455,7 +455,7 @@
                         </span>
                         <span class="nav-item-text">
                             <span class="nav-item-title">Proton Wallet Decryptor</span>
-                            <span class="nav-item-desc">Decrypt Proton Wallet mnemonic from keychain</span>
+                            <span class="nav-item-desc">Decrypt Proton Wallet mnemonic</span>
                         </span>
                     </button>
                     </div>
@@ -464,6 +464,22 @@
 
                 <div class="nav-group">
                     <div class="nav-group-title">Documentation</div>
+
+                    <button class="nav-item" data-type="frame" data-src="documentation/derivation-paths.html">
+                        <span class="nav-item-icon nav-item-icon--doc">
+                            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <circle cx="6" cy="5.5" r="2.2" stroke="currentColor" stroke-width="1.8" />
+                                <circle cx="6" cy="18.5" r="2.2" stroke="currentColor" stroke-width="1.8" />
+                                <circle cx="18" cy="8.5" r="2.2" stroke="currentColor" stroke-width="1.8" />
+                                <path d="M6 7.7v8.6M18 10.7v.8a4.5 4.5 0 0 1-4.5 4.5H8.2" stroke="currentColor" stroke-width="1.8"
+                                    stroke-linecap="round" stroke-linejoin="round" />
+                            </svg>
+                        </span>
+                        <span class="nav-item-text">
+                            <span class="nav-item-title">Derivation paths</span>
+                            <span class="nav-item-desc">HD paths, coin types and prefixes</span>
+                        </span>
+                    </button>
                     
                     <button class="nav-item" data-type="frame" data-src="documentation/wallets.html">
                         <span class="nav-item-icon nav-item-icon--doc">
@@ -625,19 +641,18 @@
                         <span>Good to know</span>
                     </div>
                     <ul class="good-to-know-list">
-                        <li>All content runs locally in your browser; no network requests are made.</li>
+                        <li>Every tool runs locally in your browser; no network requests are made.</li>
                         <li>All tools are available as open source on GitHub.</li>
                         <li>
-                            Don't forget to clear your clipboard history after copying sensitive data, e.g. mnemonics/seed phrases or
-                            private keys.
-                            (Open clipboard history:
+                            Always clear your clipboard after copying sensitive data.
+                            <span class="good-to-know-sub">(Open clipboard history:
                             <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"
                                 style="width: 20px; height: 20px; vertical-align: -4px; margin: 0 2px;" aria-label="Windows">
                                 <path d="M3 4.5L11.2 3.35V11.35H3V4.5Z" fill="currentColor" />
                                 <path d="M12.3 3.2L21 2V11.35H12.3V3.2Z" fill="currentColor" />
                                 <path d="M3 12.55H11.2V20.65L3 19.5V12.55Z" fill="currentColor" />
                                 <path d="M12.3 12.55H21V22L12.3 20.8V12.55Z" fill="currentColor" />
-                            </svg>Win + V)
+                            </svg>Win + V)</span>
                         </li>
                     </ul>
                 </div>

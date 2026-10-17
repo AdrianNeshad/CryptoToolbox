@@ -610,10 +610,12 @@ body {
     font-size: 17px;
 }
 
+/* Sized to its longest line, so each point stays on one line; it only wraps
+   when the window is too narrow to fit it. */
 .good-to-know {
     margin-top: 56px;
-    width: 100%;
-    max-width: 560px;
+    width: max-content;
+    max-width: 100%;
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: 14px;
@@ -652,6 +654,10 @@ body {
     font-size: 16px;
     line-height: 1.6;
     color: var(--text-muted);
+}
+
+.good-to-know-sub {
+    display: block;
 }
 
 .good-to-know-list li::before {

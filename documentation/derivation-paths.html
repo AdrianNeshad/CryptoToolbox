@@ -1,0 +1,1716 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Derivation Paths</title>
+    <script>
+        (function () {
+            try {
+                var params = new URLSearchParams(location.search);
+                var fromParent = params.get('theme');
+                var saved = localStorage.getItem('theme');
+                var theme = (fromParent === 'light' || fromParent === 'dark') ? fromParent
+                    : (saved === 'light' || saved === 'dark') ? saved : 'dark';
+                document.documentElement.setAttribute('data-theme', theme);
+                if (fromParent === 'light' || fromParent === 'dark') {
+                    localStorage.setItem('theme', fromParent);
+                }
+            } catch (e) {
+                document.documentElement.setAttribute('data-theme', 'dark');
+            }
+        })();
+    </script>
+    <style>
+        :root {
+            --bg: #1e1e23;
+            --surface: #28282d;
+            --surface-hover: #323238;
+            --border: #3a3a40;
+            --border-hover: #4a4a52;
+            --text: #e8e8ed;
+            --text-muted: #98989f;
+            --accent: #0a84ff;
+            --accent-soft: rgba(10, 132, 255, 0.16);
+            --success: #30d158;
+            --success-soft: rgba(48, 209, 88, 0.15);
+            --warning: #ff9f0a;
+            --warning-soft: rgba(255, 159, 10, 0.15);
+            --error: #ff453a;
+            --code-bg: #161619;
+        }
+
+        [data-theme="light"] {
+            --bg: #efeff2;
+            --surface: #fafafb;
+            --surface-hover: #ededf0;
+            --border: #dadade;
+            --border-hover: #c2c2c8;
+            --text: #1d1d1f;
+            --text-muted: #66666c;
+            --accent: #007aff;
+            --accent-soft: rgba(0, 122, 255, 0.12);
+            --success: #248a3d;
+            --success-soft: rgba(36, 138, 61, 0.14);
+            --warning: #c46a00;
+            --warning-soft: rgba(255, 149, 0, 0.15);
+            --error: #ff3b30;
+            --code-bg: #f2f2f5;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            line-height: 1.5;
+            font-size: 16px;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Helvetica, Arial, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            transition: background-color 0.2s ease, color 0.2s ease;
+        }
+
+        main {
+            padding: 48px 20px 80px;
+            max-width: 1180px;
+            margin: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 32px;
+        }
+
+        .page-header {
+            text-align: center;
+        }
+
+        .page-header h1 {
+            font-size: 26px;
+            font-weight: 650;
+            letter-spacing: -0.02em;
+            margin: 0;
+        }
+
+        .page-header p {
+            margin: 8px auto 0;
+            max-width: 720px;
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+
+        code,
+        .mono {
+            font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+            font-size: 12.5px;
+        }
+
+        p code,
+        li code,
+        .note code {
+            background: var(--code-bg);
+            border: 1px solid var(--border);
+            border-radius: 5px;
+            padding: 0 5px;
+        }
+
+        a {
+            color: var(--accent);
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        /* ---------- toolbar ---------- */
+        .toolbar {
+            position: sticky;
+            top: 0;
+            z-index: 5;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 10px 14px;
+            padding: 12px 14px;
+            margin: 0 -14px;
+            background: var(--bg);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .search {
+            position: relative;
+            flex: 1 1 280px;
+            min-width: 0;
+        }
+
+        .search svg {
+            position: absolute;
+            left: 11px;
+            top: 50%;
+            width: 16px;
+            height: 16px;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            pointer-events: none;
+        }
+
+        .search input {
+            width: 100%;
+            font: inherit;
+            font-size: 14px;
+            color: var(--text);
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 9px;
+            padding: 9px 12px 9px 34px;
+            outline: none;
+            transition: border-color 0.15s ease;
+        }
+
+        .search input:focus {
+            border-color: var(--accent);
+        }
+
+        .search input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .chip-btn {
+            font: inherit;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-muted);
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 999px;
+            padding: 5px 11px;
+            cursor: pointer;
+            transition: border-color 0.15s ease, color 0.15s ease, background 0.15s ease;
+        }
+
+        .chip-btn:hover {
+            border-color: var(--border-hover);
+            color: var(--text);
+        }
+
+        .chip-btn[aria-pressed="true"] {
+            background: var(--accent-soft);
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .count {
+            font-size: 12.5px;
+            color: var(--text-muted);
+            white-space: nowrap;
+        }
+
+        .empty {
+            display: none;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 14px;
+            padding: 24px 0;
+        }
+
+        /* ---------- sections ---------- */
+        section[hidden] {
+            display: none;
+        }
+
+        h2 {
+            font-size: 18px;
+            font-weight: 650;
+            letter-spacing: -0.01em;
+            margin: 0 0 4px;
+        }
+
+        .section-lede {
+            color: var(--text-muted);
+            font-size: 13.5px;
+            margin: 0 0 14px;
+            max-width: 900px;
+        }
+
+        .after-note {
+            color: var(--text-muted);
+            font-size: 13px;
+            margin: 10px 0 0;
+            max-width: 980px;
+        }
+
+        /* ---------- badges ---------- */
+        .badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 650;
+            line-height: 1.5;
+            white-space: nowrap;
+            border: 1px solid transparent;
+        }
+
+        .v-pub {
+            background: var(--success-soft);
+            color: var(--success);
+        }
+
+        .v-pipe {
+            background: var(--accent-soft);
+            color: var(--accent);
+        }
+
+        .v-der {
+            color: var(--accent);
+            border-color: var(--accent);
+        }
+
+        .v-src {
+            background: var(--surface-hover);
+            color: var(--text-muted);
+            border-color: var(--border);
+        }
+
+        .v-unv {
+            background: var(--warning-soft);
+            color: var(--warning);
+        }
+
+        .tag-unv {
+            display: inline-block;
+            margin-left: 4px;
+            padding: 0 6px;
+            border-radius: 5px;
+            font-size: 10.5px;
+            font-weight: 650;
+            background: var(--warning-soft);
+            color: var(--warning);
+            vertical-align: 1px;
+        }
+
+        /* ---------- anatomy cards ---------- */
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+            gap: 10px;
+        }
+
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 14px 16px;
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .card h3 {
+            font-size: 13px;
+            font-weight: 650;
+            margin: 0 0 6px;
+            color: var(--text);
+        }
+
+        .card h3 code {
+            color: var(--accent);
+            font-size: 13px;
+        }
+
+        .card p {
+            margin: 0;
+        }
+
+        .path-hero {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 16px 18px;
+            margin-bottom: 10px;
+            font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+            font-size: 15px;
+            text-align: center;
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+
+        .path-hero span {
+            color: var(--accent);
+        }
+
+        .path-hero i {
+            font-style: normal;
+            color: var(--text-muted);
+        }
+
+        /* ---------- tables ---------- */
+        .table-wrap {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead th {
+            background: var(--surface-hover);
+            text-align: left;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            padding: 10px 12px;
+            border-bottom: 1px solid var(--border);
+            white-space: nowrap;
+        }
+
+        /* One 20px line grid for every cell so the first lines of all
+           columns share a baseline, whatever their font size. */
+        tbody td {
+            padding: 10px 12px;
+            border-bottom: 1px solid var(--border);
+            font-size: 13px;
+            line-height: 20px;
+            vertical-align: top;
+            color: var(--text-muted);
+        }
+
+        tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        tbody tr:hover td {
+            background: var(--surface-hover);
+        }
+
+        tbody tr.is-hidden {
+            display: none;
+        }
+
+        td.name {
+            color: var(--text);
+            font-weight: 650;
+            min-width: 110px;
+        }
+
+        td.name .sym {
+            display: block;
+            font-weight: 500;
+            font-size: 11.5px;
+            line-height: 16px;
+            color: var(--text-muted);
+            white-space: normal;
+            max-width: 150px;
+        }
+
+        td.num,
+        td.path,
+        td.mono {
+            font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+            font-size: 12.5px;
+        }
+
+        td.path {
+            white-space: nowrap;
+        }
+
+        td.path,
+        td.num {
+            color: var(--accent);
+        }
+
+        td.wrap {
+            white-space: normal;
+        }
+
+        td.vec code,
+        .vec code {
+            display: block;
+            max-width: 250px;
+            word-break: break-all;
+            color: var(--text);
+        }
+
+        div.vec {
+            margin-bottom: 6px;
+        }
+
+        div.vec:last-child {
+            margin-bottom: 0;
+        }
+
+        .vec .vp {
+            display: block;
+            font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        td.ver .src {
+            display: block;
+            margin-top: 4px;
+            font-size: 11.5px;
+            line-height: 16px;
+        }
+
+        /* Exactly one grid line tall (18px + 2px border) so the badge text
+           sits on the same baseline as the first line of the other cells. */
+        td.ver .badge {
+            display: block;
+            width: fit-content;
+            padding: 0 8px;
+            line-height: 18px;
+        }
+
+        td.ver .badge+.badge {
+            margin-top: 4px;
+        }
+
+        ul.paths {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        ul.paths li {
+            line-height: 20px;
+        }
+
+        ul.paths code {
+            color: var(--accent);
+            background: none;
+            border: none;
+            padding: 0;
+            white-space: nowrap;
+            margin-right: 6px;
+        }
+
+        .cell-note {
+            margin: 8px 0 0;
+            font-size: 12px;
+            line-height: 18px;
+        }
+
+        #tbl-chains {
+            min-width: 1000px;
+        }
+
+        #tbl-chains td.paths-cell {
+            min-width: 340px;
+        }
+
+        #tbl-chains td.vec {
+            min-width: 210px;
+        }
+
+        #tbl-chains td.ver {
+            min-width: 150px;
+            max-width: 190px;
+        }
+
+        #tbl-btc,
+        #tbl-xkey,
+        #tbl-addr,
+        #tbl-electrum,
+        #tbl-other {
+            min-width: 860px;
+        }
+
+        #tbl-btc td.ver,
+        #tbl-xkey td.ver,
+        #tbl-electrum td.ver {
+            min-width: 150px;
+            max-width: 210px;
+        }
+
+        /* ---------- sources ---------- */
+        .method {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 16px 18px;
+            font-size: 13.5px;
+            color: var(--text-muted);
+        }
+
+        .method p {
+            margin: 0 0 10px;
+        }
+
+        .method p:last-child {
+            margin-bottom: 0;
+        }
+
+        .method strong {
+            color: var(--text);
+        }
+
+        .sources {
+            columns: 2 360px;
+            column-gap: 28px;
+            margin: 0;
+            padding: 0 0 0 18px;
+            font-size: 12.5px;
+            color: var(--text-muted);
+        }
+
+        .sources li {
+            break-inside: avoid;
+            margin-bottom: 6px;
+        }
+
+        .sources a {
+            font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+            font-size: 11.5px;
+            word-break: break-all;
+        }
+
+        @media (max-width: 640px) {
+            main {
+                padding: 28px 16px 60px;
+            }
+
+            .toolbar {
+                margin: 0 -16px;
+                padding: 10px 16px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <main>
+        <header class="page-header">
+            <h1>Derivation Paths</h1>
+            <p>HD derivation paths, SLIP-44 coin types, extended-key and address prefixes for common chains, and which
+                wallets use which variant. Every row says how it was checked; the test vectors use the standard
+                <code>abandon abandon … about</code> mnemonic with no passphrase.</p>
+        </header>
+
+        <div class="toolbar" role="search">
+            <label class="search">
+                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <circle cx="11" cy="11" r="6.5" stroke="currentColor" stroke-width="1.8" />
+                    <path d="M16 16l4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+                </svg>
+                <input id="q" type="search" autocomplete="off" spellcheck="false"
+                    placeholder="Filter by chain, path, wallet or prefix…" title="Press / to focus, Esc to clear" aria-label="Filter rows">
+            </label>
+            <div class="chips" id="status-chips" aria-label="Filter by verification">
+                <button class="chip-btn" type="button" data-status="" aria-pressed="true">All</button>
+                <button class="chip-btn" type="button" data-status="pub" aria-pressed="false" title="Derived locally; matches a published vector for the abandon … about mnemonic">Published vector</button>
+                <button class="chip-btn" type="button" data-status="pipe" aria-pressed="false" title="Derived locally; the same code reproduces published vectors for this chain (other mnemonic)">Pipeline-checked</button>
+                <button class="chip-btn" type="button" data-status="der" aria-pressed="false" title="Derived locally with code validated on other chains; no chain-specific published vector">Derived</button>
+                <button class="chip-btn" type="button" data-status="src" aria-pressed="false" title="Path / coin type checked against the spec or the wallet's own source or docs; no address derived">Source-checked</button>
+                <button class="chip-btn" type="button" data-status="unv" aria-pressed="false" title="Could not be confirmed; listed for completeness">Unverified</button>
+            </div>
+            <span class="count" id="count" aria-live="polite"></span>
+        </div>
+
+        <p class="empty" id="empty">No rows match the filter.</p>
+
+        <!-- ================= Path anatomy ================= -->
+        <section id="sec-anatomy" class="static">
+            <h2>Path anatomy</h2>
+            <p class="section-lede">BIP-32 defines the tree, BIP-43 the purpose field and BIP-44 the five levels below.
+                In this page <code>x</code> stands for the account number and <code>i</code> for the address index.</p>
+            <div class="path-hero"><i>m</i> / <span>purpose'</span> / <span>coin_type'</span> / <span>account'</span> /
+                <span>change</span> / <span>address_index</span></div>
+            <div class="cards">
+                <div class="card">
+                    <h3><code>m</code></h3>
+                    <p>Master key: HMAC-SHA512 of the 64-byte BIP-39 seed with key <code>"Bitcoin seed"</code>
+                        (secp256k1) or <code>"ed25519 seed"</code> (SLIP-10 ed25519).</p>
+                </div>
+                <div class="card">
+                    <h3><code>purpose'</code></h3>
+                    <p>Which standard / script type: 44 legacy, 49 nested SegWit, 84 native SegWit, 86 Taproot, 45 and 48
+                        multisig, 1852 Cardano. Always hardened.</p>
+                </div>
+                <div class="card">
+                    <h3><code>coin_type'</code></h3>
+                    <p>Chain, from the SLIP-0044 registry (0 Bitcoin, 60 Ether, 501 Solana…). <code>1'</code> is
+                        testnet for all coins. Always hardened.</p>
+                </div>
+                <div class="card">
+                    <h3><code>account'</code></h3>
+                    <p>Separate accounts (“portfolios”) under one seed, numbered from 0. Hardened, so an account xpub
+                        cannot reach other accounts.</p>
+                </div>
+                <div class="card">
+                    <h3><code>change</code></h3>
+                    <p><code>0</code> external chain (receive addresses), <code>1</code> internal chain (change).
+                        Non-hardened in BIP-44, so an account xpub can derive all addresses. Cardano adds 2 = staking key.</p>
+                </div>
+                <div class="card">
+                    <h3><code>address_index</code></h3>
+                    <p>Sequential address number from 0. Wallets stop scanning after a gap of unused addresses (BIP-44
+                        gap limit: 20).</p>
+                </div>
+                <div class="card">
+                    <h3>Hardened notation</h3>
+                    <p><code>'</code> (or <code>h</code>) means index + 2<sup>31</sup>: <code>44'</code> =
+                        <code>0x8000002C</code>. Hardened children need the parent private key; non-hardened ones can be
+                        derived from the parent public key.</p>
+                </div>
+                <div class="card">
+                    <h3>ed25519 chains</h3>
+                    <p>SLIP-10 ed25519 supports hardened derivation only, which is why Solana, Stellar, NEAR, Sui,
+                        Aptos and Tezos paths are hardened at every level. Paths with non-hardened ed25519 levels are
+                        wallet-specific schemes.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= Bitcoin standards ================= -->
+        <section id="sec-btc">
+            <h2>Bitcoin derivation standards</h2>
+            <p class="section-lede">Account-level path, script, prefixes and the first receive address
+                (<code>…/0/0</code>) for the abandon … about mnemonic.</p>
+            <div class="table-wrap">
+                <table id="tbl-btc">
+                    <thead>
+                        <tr>
+                            <th>Standard</th>
+                            <th>Account path</th>
+                            <th>Script</th>
+                            <th>Address</th>
+                            <th>Ext. key</th>
+                            <th>First receive address</th>
+                            <th>Verified</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="row" data-status="pub" data-k="bitcoin btc legacy p2pkh bip44 bip-44 mainnet">
+                            <td class="name">BIP44 Legacy</td>
+                            <td class="path">m/44'/0'/x'</td>
+                            <td class="mono">P2PKH</td>
+                            <td class="mono">1…</td>
+                            <td class="mono">xpub</td>
+                            <td class="vec"><code>1LqBGSKuX5yYUonjxT5qGfpUsXKYYWeabA</code></td>
+                            <td class="ver"><span class="badge v-pub">Published vector</span><span class="src">SLIP-0132 vectors: address, account xpub and xprv</span></td>
+                        </tr>
+                        <tr class="row" data-status="pub" data-k="bitcoin btc nested segwit p2sh-p2wpkh bip49 bip-49 compatibility">
+                            <td class="name">BIP49 Nested SegWit</td>
+                            <td class="path">m/49'/0'/x'</td>
+                            <td class="mono">P2SH-P2WPKH</td>
+                            <td class="mono">3…</td>
+                            <td class="mono">ypub</td>
+                            <td class="vec"><code>37VucYSaXLCAsxYyAPfbSi9eh4iEcbShgf</code></td>
+                            <td class="ver"><span class="badge v-pub">Published vector</span><span class="src">SLIP-0132 vectors: address and account ypub</span></td>
+                        </tr>
+                        <tr class="row" data-status="pub" data-k="bitcoin btc native segwit p2wpkh bech32 bip84 bip-84 bc1q">
+                            <td class="name">BIP84 Native SegWit</td>
+                            <td class="path">m/84'/0'/x'</td>
+                            <td class="mono">P2WPKH</td>
+                            <td class="mono">bc1q… (42)</td>
+                            <td class="mono">zpub</td>
+                            <td class="vec"><code>bc1qcr8te4kr609gcawutmrza0j4xv80jy8z306fyu</code></td>
+                            <td class="ver"><span class="badge v-pub">Published vector</span><span class="src">BIP-0084: root zprv, account zpub, 0/0, 0/1 and 1/0</span></td>
+                        </tr>
+                        <tr class="row" data-status="pub" data-k="bitcoin btc taproot p2tr bech32m bip86 bip-86 bc1p schnorr">
+                            <td class="name">BIP86 Taproot</td>
+                            <td class="path">m/86'/0'/x'</td>
+                            <td class="mono">P2TR (key path)</td>
+                            <td class="mono">bc1p… (62)</td>
+                            <td class="mono">xpub</td>
+                            <td class="vec"><code>bc1p5cyxnuxmeuwuvkwfem96lqzszd02n6xdcjrs20cac6yqjjwudpxqkedrcr</code></td>
+                            <td class="ver"><span class="badge v-pub">Published vector</span><span class="src">BIP-0086: account xpub, 0/0, 0/1 and 1/0</span></td>
+                        </tr>
+                        <tr class="row" data-status="pipe" data-k="bitcoin testnet tbtc legacy p2pkh bip44 tpub coin type 1">
+                            <td class="name">Testnet BIP44</td>
+                            <td class="path">m/44'/1'/x'</td>
+                            <td class="mono">P2PKH</td>
+                            <td class="mono">m… / n…</td>
+                            <td class="mono">tpub</td>
+                            <td class="vec"><code>mkpZhYtJu2r87Js3pDiWJDmPte2NRZ8bJV</code></td>
+                            <td class="ver"><span class="badge v-pipe">Pipeline-checked</span><span class="src">Trezor firmware Testnet m/44'/1'/0'/0/0 vector</span></td>
+                        </tr>
+                        <tr class="row" data-status="pub" data-k="bitcoin testnet tbtc nested segwit p2sh-p2wpkh bip49 upub coin type 1">
+                            <td class="name">Testnet BIP49</td>
+                            <td class="path">m/49'/1'/x'</td>
+                            <td class="mono">P2SH-P2WPKH</td>
+                            <td class="mono">2…</td>
+                            <td class="mono">upub</td>
+                            <td class="vec"><code>2Mww8dCYPUpKHofjgcXcBCEGmniw9CoaiD2</code></td>
+                            <td class="ver"><span class="badge v-pub">Published vector</span><span class="src">BIP-0049 test vector (testnet): address and account upub</span></td>
+                        </tr>
+                        <tr class="row" data-status="pipe" data-k="bitcoin testnet tbtc native segwit p2wpkh bip84 vpub tb1q coin type 1">
+                            <td class="name">Testnet BIP84</td>
+                            <td class="path">m/84'/1'/x'</td>
+                            <td class="mono">P2WPKH</td>
+                            <td class="mono">tb1q…</td>
+                            <td class="mono">vpub</td>
+                            <td class="vec"><code>tb1q6rz28mcfaxtmd6v789l9rrlrusdprr9pqcpvkl</code></td>
+                            <td class="ver"><span class="badge v-pipe">Pipeline-checked</span><span class="src">Trezor firmware Testnet m/84'/1'/0'/0/0 vector</span></td>
+                        </tr>
+                        <tr class="row" data-status="pipe" data-k="bitcoin testnet tbtc taproot p2tr bip86 tb1p coin type 1">
+                            <td class="name">Testnet BIP86</td>
+                            <td class="path">m/86'/1'/x'</td>
+                            <td class="mono">P2TR</td>
+                            <td class="mono">tb1p…</td>
+                            <td class="mono">tpub</td>
+                            <td class="vec"><code>tb1p8wpt9v4frpf3tkn0srd97pksgsxc5hs52lafxwru9kgeephvs7rqlqt9zj</code></td>
+                            <td class="ver"><span class="badge v-pipe">Pipeline-checked</span><span class="src">Trezor firmware Testnet m/86'/1'/0'/0/0 vector</span></td>
+                        </tr>
+                        <tr class="row" data-status="src" data-k="bitcoin multisig bip45 bip-45 p2sh cosigner">
+                            <td class="name">BIP45 Multisig</td>
+                            <td class="path wrap">m/45'/<wbr>cosigner/<wbr>change/<wbr>i</td>
+                            <td class="mono">P2SH multisig</td>
+                            <td class="mono">3…</td>
+                            <td class="mono">xpub</td>
+                            <td class="wrap">No coin-type or account level. <code>cosigner</code> is the position of the own purpose-level public key among the lexicographically sorted keys of all cosigners.</td>
+                            <td class="ver"><span class="badge v-src">Source-checked</span><span class="src">BIP-0045</span></td>
+                        </tr>
+                        <tr class="row" data-status="src" data-k="bitcoin multisig bip48 bip-48 nested p2sh-p2wsh script type 1 ypub">
+                            <td class="name">BIP48 Nested multisig</td>
+                            <td class="path">m/48'/0'/x'/1'</td>
+                            <td class="mono">P2SH-P2WSH</td>
+                            <td class="mono">3…</td>
+                            <td class="mono">Ypub</td>
+                            <td class="wrap">Full path <code>m/48'/coin'/x'/script_type'/change/i</code>; <code>1'</code> = nested SegWit. Testnet coin type <code>1'</code> (Upub).</td>
+                            <td class="ver"><span class="badge v-src">Source-checked</span><span class="src">BIP-0048; Ypub/Upub from SLIP-0132 and Trezor coin definitions</span></td>
+                        </tr>
+                        <tr class="row" data-status="src" data-k="bitcoin multisig bip48 bip-48 native p2wsh script type 2 zpub">
+                            <td class="name">BIP48 Native multisig</td>
+                            <td class="path">m/48'/0'/x'/2'</td>
+                            <td class="mono">P2WSH</td>
+                            <td class="mono">bc1q… (62)</td>
+                            <td class="mono">Zpub</td>
+                            <td class="wrap"><code>2'</code> = native SegWit; BIP-48's recommended default. Testnet <code>m/48'/1'/x'/2'</code> (Vpub).</td>
+                            <td class="ver"><span class="badge v-src">Source-checked</span><span class="src">BIP-0048; Zpub/Vpub from SLIP-0132 and Trezor coin definitions</span></td>
+                        </tr>
+                        <tr class="row" data-status="src" data-k="bitcoin multisig bip87 bip-87 descriptors">
+                            <td class="name">BIP87 Multisig</td>
+                            <td class="path">m/87'/0'/x'</td>
+                            <td class="mono">any (descriptor)</td>
+                            <td class="mono">—</td>
+                            <td class="mono">xpub</td>
+                            <td class="wrap">One path for all multisig script types; the output descriptor (<code>multi</code> / <code>sortedmulti</code>) says which script is used.</td>
+                            <td class="ver"><span class="badge v-src">Source-checked</span><span class="src">BIP-0087</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <p class="after-note">The BIP-84 / BIP-86 vectors above also matched for the second receive address
+                (<code>…/0/1</code>) and the first change address (<code>…/1/0</code>). Electrum's native seed scheme is
+                covered in its own section below.</p>
+        </section>
+
+        <!-- ================= Extended keys ================= -->
+        <section id="sec-xkey">
+            <h2>Extended-key prefixes (SLIP-0132)</h2>
+            <p class="section-lede">The 4-byte version at the start of a serialized BIP-32 key decides the Base58 prefix.
+                It signals the script type only — the coin type and full path are not encoded in the key.</p>
+            <div class="table-wrap">
+                <table id="tbl-xkey">
+                    <thead>
+                        <tr>
+                            <th>Public / private</th>
+                            <th>Version bytes</th>
+                            <th>Network</th>
+                            <th>Script</th>
+                            <th>Path</th>
+                            <th>Verified</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="row" data-status="pub" data-k="xpub xprv bitcoin p2pkh p2sh legacy taproot">
+                            <td class="mono">xpub / xprv</td>
+                            <td class="mono">0x0488b21e / 0x0488ade4</td>
+                            <td>Bitcoin</td>
+                            <td>P2PKH or P2SH (also used by BIP-86 Taproot)</td>
+                            <td class="path">m/44'/0'</td>
+                            <td class="ver"><span class="badge v-pub">Published vector</span><span class="src">SLIP-0132 table and vectors; re-encoded locally</span></td>
+                        </tr>
+                        <tr class="row" data-status="pub" data-k="ypub yprv bitcoin nested segwit p2sh-p2wpkh">
+                            <td class="mono">ypub / yprv</td>
+                            <td class="mono">0x049d7cb2 / 0x049d7878</td>
+                            <td>Bitcoin</td>
+                            <td>P2WPKH in P2SH</td>
+                            <td class="path">m/49'/0'</td>
+                            <td class="ver"><span class="badge v-pub">Published vector</span><span class="src">SLIP-0132 table and vectors; re-encoded locally</span></td>
+                        </tr>
+                        <tr class="row" data-status="pub" data-k="zpub zprv bitcoin native segwit p2wpkh">
+                            <td class="mono">zpub / zprv</td>
+                            <td class="mono">0x04b24746 / 0x04b2430c</td>
+                            <td>Bitcoin</td>
+                            <td>P2WPKH</td>
+                            <td class="path">m/84'/0'</td>
+                            <td class="ver"><span class="badge v-pub">Published vector</span><span class="src">SLIP-0132 / BIP-0084 vectors; re-encoded locally</span></td>
+                        </tr>
+                        <tr class="row" data-status="src" data-k="ypub capital yprv bitcoin multisig p2sh-p2wsh nested bip48">
+                            <td class="mono">Ypub / Yprv</td>
+                            <td class="mono">0x0295b43f / 0x0295b005</td>
+                            <td>Bitcoin</td>
+                            <td>Multisig P2WSH in P2SH</td>
+                            <td class="path">—</td>
+                            <td class="ver"><span class="badge v-src">Source-checked</span><span class="src">SLIP-0132 table; prefix re-encoded locally</span></td>
+                        </tr>
+                        <tr class="row" data-status="src" data-k="zpub capital zprv bitcoin multisig p2wsh native bip48">
+                            <td class="mono">Zpub / Zprv</td>
+                            <td class="mono">0x02aa7ed3 / 0x02aa7a99</td>
+                            <td>Bitcoin</td>
+                            <td>Multisig P2WSH</td>
+                            <td class="path">—</td>
+                            <td class="ver"><span class="badge v-src">Source-checked</span><span class="src">SLIP-0132 table; prefix re-encoded locally</span></td>
+                        </tr>
+                        <tr class="row" data-status="src" data-k="tpub tprv testnet p2pkh p2sh">
+                            <td class="mono">tpub / tprv</td>
+                            <td class="mono">0x043587cf / 0x04358394</td>
+                            <td>Testnet</td>
+                            <td>P2PKH or P2SH</td>
+                            <td class="path">m/44'/1'</td>
+                            <td class="ver"><span class="badge v-src">Source-checked</span><span class="src">SLIP-0132 table; prefix re-encoded locally</span></td>
+                        </tr>
+                        <tr class="row" data-status="pub" data-k="upub uprv testnet nested segwit p2sh-p2wpkh">
+                            <td class="mono">upub / uprv</td>
+                            <td class="mono">0x044a5262 / 0x044a4e28</td>
+                            <td>Testnet</td>
+                            <td>P2WPKH in P2SH</td>
+                            <td class="path">m/49'/1'</td>
+                            <td class="ver"><span class="badge v-pub">Published vector</span><span class="src">BIP-0049 account upub; SLIP-0132 table</span></td>
+                        </tr>
+                        <tr class="row" data-status="src" data-k="vpub vprv testnet native segwit p2wpkh">
+                            <td class="mono">vpub / vprv</td>
+                            <td class="mono">0x045f1cf6 / 0x045f18bc</td>
+                            <td>Testnet</td>
+                            <td>P2WPKH</td>
+                            <td class="path">m/84'/1'</td>
+                            <td class="ver"><span class="badge v-src">Source-checked</span><span class="src">SLIP-0132 table; prefix re-encoded locally</span></td>
+                        </tr>
+                        <tr class="row" data-status="src" data-k="upub capital uprv testnet multisig p2sh-p2wsh">
+                            <td class="mono">Upub / Uprv</td>
+                            <td class="mono">0x024289ef / 0x024285b5</td>
+                            <td>Testnet</td>
+                            <td>Multisig P2WSH in P2SH</td>
+                            <td class="path">—</td>
+                            <td class="ver"><span class="badge v-src">Source-checked</span><span class="src">SLIP-0132 table; prefix re-encoded locally</span></td>
+                        </tr>
+                        <tr class="row" data-status="src" data-k="vpub capital vprv testnet multisig p2wsh">
+                            <td class="mono">Vpub / Vprv</td>
+                            <td class="mono">0x02575483 / 0x02575048</td>
+                            <td>Testnet</td>
+                            <td>Multisig P2WSH</td>
+                            <td class="path">—</td>
+                            <td class="ver"><span class="badge v-src">Source-checked</span><span class="src">SLIP-0132 table; prefix re-encoded locally</span></td>
+                        </tr>
+                        <tr class="row" data-status="src" data-k="ltub ltpv litecoin ltc legacy p2pkh">
+                            <td class="mono">Ltub / Ltpv</td>
+                            <td class="mono">0x019da462 / 0x019d9cfe</td>
+                            <td>Litecoin</td>
+                            <td>P2PKH or P2SH</td>
+                            <td class="path">m/44'/2'</td>
+                            <td class="ver"><span class="badge v-src">Source-checked</span><span class="src">SLIP-0132 table; prefix re-encoded locally</span></td>
+                        </tr>
+                        <tr class="row" data-status="src" data-k="mtub mtpv litecoin ltc nested segwit p2sh-p2wpkh">
+                            <td class="mono">Mtub / Mtpv</td>
+                            <td class="mono">0x01b26ef6 / 0x01b26792</td>
+                            <td>Litecoin</td>
+                            <td>P2WPKH in P2SH</td>
+                            <td class="path">m/49'/2'</td>
+                            <td class="ver"><span class="badge v-src">Source-checked</span><span class="src">SLIP-0132 table; prefix re-encoded locally</span></td>
+                        </tr>
+                        <tr class="row" data-status="src" data-k="ttub ttpv litecoin testnet">
+                            <td class="mono">ttub / ttpv</td>
+                            <td class="mono">0x0436f6e1 / 0x0436ef7d</td>
+                            <td>Litecoin testnet</td>
+                            <td>P2PKH or P2SH</td>
+                            <td class="path">m/44'/1'</td>
+                            <td class="ver"><span class="badge v-src">Source-checked</span><span class="src">SLIP-0132 table; prefix re-encoded locally</span></td>
+                        </tr>
+                        <tr class="row" data-status="src" data-k="zpub litecoin ltc native segwit p2wpkh ltc1 trezor trust">
+                            <td class="mono">zpub</td>
+                            <td class="mono">0x04b24746</td>
+                            <td>Litecoin</td>
+                            <td>P2WPKH (not in SLIP-0132 for Litecoin)</td>
+                            <td class="path">m/84'/2'</td>
+                            <td class="ver"><span class="badge v-src">Source-checked</span><span class="src">Trezor coin definition (litecoin.json) and Trust Wallet Core registry</span></td>
+                        </tr>
+                        <tr class="row" data-status="src" data-k="dgub dogecoin doge">
+                            <td class="mono">dgub</td>
+                            <td class="mono">0x02facafd</td>
+                            <td>Dogecoin</td>
+                            <td>P2PKH (not in SLIP-0132)</td>
+                            <td class="path">m/44'/3'</td>
+                            <td class="ver"><span class="badge v-src">Source-checked</span><span class="src">Trezor coin definition (dogecoin.json), Trust Wallet Core registry; prefix re-encoded locally</span></td>
+                        </tr>
+                        <tr class="row" data-status="src" data-k="drkp dash">
+                            <td class="mono">drkp</td>
+                            <td class="mono">0x02fe52cc</td>
+                            <td>Dash</td>
+                            <td>P2PKH (not in SLIP-0132)</td>
+                            <td class="path">m/44'/5'</td>
+                            <td class="ver"><span class="badge v-src">Source-checked</span><span class="src">Trezor coin definition (dash.json); Trust Wallet Core uses plain xpub</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <p class="after-note">Taproot (BIP-86) has no SLIP-0132 prefix; the BIP-86 vectors use plain
+                <code>xpub</code>. Because the prefix is only a label, a <code>zpub</code> and an <code>xpub</code> of the
+                same account hold the same key and chain code — only the 4 version bytes differ.</p>
+        </section>
+
+        <!-- ================= Address formats ================= -->
+        <section id="sec-addr">
+            <h2>Address formats</h2>
+            <p class="section-lede">Version bytes / human-readable parts and the leading characters they produce. Base58
+                leading characters were checked by encoding the lowest and highest 20-byte payload for each version byte.</p>
+            <div class="table-wrap">
+                <table id="tbl-addr">
+                    <thead>
+                        <tr>
+                            <th>Chain</th>
+                            <th>Type</th>
+                            <th>Encoding</th>
+                            <th>Version / HRP</th>
+                            <th>Starts with</th>
+                            <th>Verified</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="row" data-status="pub" data-k="bitcoin btc legacy p2pkh base58">
+                            <td class="name">Bitcoin</td><td>P2PKH</td><td>Base58Check</td><td class="mono">0x00</td><td class="mono">1</td>
+                            <td class="ver"><span class="badge v-pub">Published vector</span></td>
+                        </tr>
+                        <tr class="row" data-status="pub" data-k="bitcoin btc p2sh nested base58">
+                            <td class="name">Bitcoin</td><td>P2SH</td><td>Base58Check</td><td class="mono">0x05</td><td class="mono">3</td>
+                            <td class="ver"><span class="badge v-pub">Published vector</span></td>
+                        </tr>
+                        <tr class="row" data-status="pub" data-k="bitcoin btc p2wpkh bech32 bc1q native segwit">
+                            <td class="name">Bitcoin</td><td>P2WPKH (v0, 20-byte)</td><td>Bech32 (BIP-173)</td><td class="mono">bc</td><td class="mono">bc1q… (42 chars)</td>
+                            <td class="ver"><span class="badge v-pub">Published vector</span></td>
+                        </tr>
+                        <tr class="row" data-status="src" data-k="bitcoin btc p2wsh bech32 bc1q multisig">
+                            <td class="name">Bitcoin</td><td>P2WSH (v0, 32-byte)</td><td>Bech32 (BIP-173)</td><td class="mono">bc</td><td class="mono">bc1q… (62 chars)</td>
+                            <td class="ver"><span class="badge v-src">Source-checked</span></td>
+                        </tr>
+                        <tr class="row" data-status="pub" data-k="bitcoin btc p2tr taproot bech32m bc1p">
+                            <td class="name">Bitcoin</td><td>P2TR (v1, 32-byte)</td><td>Bech32m (BIP-350)</td><td class="mono">bc</td><td class="mono">bc1p… (62 chars)</td>
+                            <td class="ver"><span class="badge v-pub">Published vector</span></td>
+                        </tr>
+                        <tr class="row" data-status="pub pipe" data-k="bitcoin testnet tbtc p2pkh p2sh tb1q tb1p">
+                            <td class="name">Testnet</td><td>P2PKH / P2SH / P2WPKH / P2TR</td><td>Base58Check / Bech32(m)</td><td class="mono">0x6f / 0xc4 / tb</td><td class="mono">m, n / 2 / tb1q / tb1p</td>
+                            <td class="ver"><span class="badge v-pub">Published vector</span><span class="badge v-pipe">Pipeline-checked</span><span class="src">BIP-0049 (2…); Trezor vectors for m/n, tb1q, tb1p</span></td>
+                        </tr>
+                        <tr class="row" data-status="pipe" data-k="litecoin ltc l m ltc1 base58 bech32">
+                            <td class="name">Litecoin</td><td>P2PKH / P2SH / P2WPKH</td><td>Base58Check / Bech32</td><td class="mono">0x30 / 0x32 / ltc</td><td class="mono">L / M / ltc1q</td>
+                            <td class="ver"><span class="badge v-pipe">Pipeline-checked</span><span class="src">Trezor vector (L…); version bytes and HRP from Trezor litecoin.json</span></td>
+                        </tr>
+                        <tr class="row" data-status="src" data-k="dogecoin doge d base58">
+                            <td class="name">Dogecoin</td><td>P2PKH / P2SH</td><td>Base58Check</td><td class="mono">0x1e / 0x16</td><td class="mono">D / 9 or A</td>
+                            <td class="ver"><span class="badge v-src">Source-checked</span><span class="src">Trezor dogecoin.json</span></td>
+                        </tr>
+                        <tr class="row" data-status="src" data-k="dash x 7 base58">
+                            <td class="name">Dash</td><td>P2PKH / P2SH</td><td>Base58Check</td><td class="mono">0x4c / 0x10</td><td class="mono">X / 7</td>
+                            <td class="ver"><span class="badge v-src">Source-checked</span><span class="src">Trezor dash.json</span></td>
+                        </tr>
+                        <tr class="row" data-status="src" data-k="zcash zec transparent t1 t3 base58">
+                            <td class="name">Zcash</td><td>Transparent P2PKH / P2SH</td><td>Base58Check (2-byte version)</td><td class="mono">0x1cb8 / 0x1cbd</td><td class="mono">t1 / t3 (35 chars)</td>
+                            <td class="ver"><span class="badge v-src">Source-checked</span><span class="src">Trezor zcash.json</span></td>
+                        </tr>
+                        <tr class="row" data-status="pipe" data-k="bitcoin cash bch cashaddr bitcoincash q p legacy">
+                            <td class="name">Bitcoin Cash</td><td>P2PKH / P2SH</td><td>CashAddr (legacy Base58 = Bitcoin's)</td><td class="mono">bitcoincash</td><td class="mono">bitcoincash:q… / bitcoincash:p…</td>
+                            <td class="ver"><span class="badge v-pipe">Pipeline-checked</span><span class="src">CashAddr spec example and Trezor BCH vector</span></td>
+                        </tr>
+                        <tr class="row" data-status="pipe" data-k="ethereum eth evm 0x keccak eip-55 checksum polygon bsc avalanche c-chain">
+                            <td class="name">Ethereum / EVM</td><td>Account</td><td>Hex, EIP-55 mixed-case checksum</td><td class="mono">last 20 B of Keccak-256(pubkey)</td><td class="mono">0x + 40 hex</td>
+                            <td class="ver"><span class="badge v-pipe">Pipeline-checked</span><span class="src">Trezor ETH/ETC vectors (checksummed)</span></td>
+                        </tr>
+                        <tr class="row" data-status="pipe" data-k="tron trx t base58 keccak">
+                            <td class="name">Tron</td><td>Account</td><td>Base58Check of 0x41 ‖ ETH-style 20 bytes</td><td class="mono">0x41</td><td class="mono">T (34 chars)</td>
+                            <td class="ver"><span class="badge v-pipe">Pipeline-checked</span><span class="src">Trezor TRX vectors</span></td>
+                        </tr>
+                        <tr class="row" data-status="pipe" data-k="xrp ripple r base58">
+                            <td class="name">XRP</td><td>Classic address</td><td>Base58Check, Ripple alphabet, HASH160(pubkey)</td><td class="mono">0x00</td><td class="mono">r</td>
+                            <td class="ver"><span class="badge v-pipe">Pipeline-checked</span><span class="src">Trezor XRP vectors</span></td>
+                        </tr>
+                        <tr class="row" data-status="pub" data-k="stellar xlm g s strkey base32">
+                            <td class="name">Stellar</td><td>Public / secret key</td><td>StrKey (Base32 + CRC16)</td><td class="mono">6≪3 / 18≪3</td><td class="mono">G… / S… (56 chars)</td>
+                            <td class="ver"><span class="badge v-pub">Published vector</span><span class="src">SEP-0005 test 5</span></td>
+                        </tr>
+                        <tr class="row" data-status="pipe" data-k="solana sol base58 ed25519">
+                            <td class="name">Solana</td><td>Account</td><td>Base58 of the 32-byte ed25519 public key</td><td class="mono">—</td><td class="mono">32–44 chars</td>
+                            <td class="ver"><span class="badge v-pipe">Pipeline-checked</span><span class="src">Trezor SOL vectors</span></td>
+                        </tr>
+                        <tr class="row" data-status="pipe" data-k="cosmos atom bech32 cosmos1">
+                            <td class="name">Cosmos Hub</td><td>Account</td><td>Bech32 of RIPEMD-160(SHA-256(pubkey))</td><td class="mono">cosmos</td><td class="mono">cosmos1… (45 chars)</td>
+                            <td class="ver"><span class="badge v-pipe">Pipeline-checked</span><span class="src">cosmjs test vector</span></td>
+                        </tr>
+                        <tr class="row" data-status="pipe" data-k="tezos xtz tz1 tz2 blake2b">
+                            <td class="name">Tezos</td><td>ed25519 / secp256k1</td><td>Base58Check of BLAKE2b-160(pubkey)</td><td class="mono">06 a1 9f (tz1)</td><td class="mono">tz1… / tz2…</td>
+                            <td class="ver"><span class="badge v-pipe">Pipeline-checked</span><span class="src">tz1: Trezor XTZ vectors; tz2 = secp256k1 per Ledger Live mode tag</span></td>
+                        </tr>
+                        <tr class="row" data-status="src" data-k="cardano ada addr stake bech32 byron ae2 ddz">
+                            <td class="name">Cardano</td><td>Shelley / stake / Byron</td><td>Bech32 (Shelley), Base58 (Byron)</td><td class="mono">addr, addr_test, stake, stake_test</td><td class="mono">addr1… / stake1… / Ae2… / Ddz…</td>
+                            <td class="ver"><span class="badge v-src">Source-checked</span><span class="src">CIP-0005 (HRPs), CIP-0003 (Byron prefixes)</span></td>
+                        </tr>
+                        <tr class="row" data-status="src unv" data-k="polkadot dot kusama ksm ss58 substrate">
+                            <td class="name">Polkadot / Kusama</td><td>Account</td><td>SS58</td><td class="mono">prefix 0 / 2 (42 = generic Substrate)</td><td class="mono">Polkadot: 1…</td>
+                            <td class="ver"><span class="badge v-src">Source-checked</span><span class="src">ss58-registry; leading “1” for prefix 0 <span class="tag-unv">unverified</span></span></td>
+                        </tr>
+                        <tr class="row" data-status="src" data-k="monero xmr 4 8 subaddress">
+                            <td class="name">Monero</td><td>Standard address</td><td>—</td><td class="mono">—</td><td class="mono">4… or 8… (95 chars)</td>
+                            <td class="ver"><span class="badge v-src">Source-checked</span><span class="src">Moneropedia “address”</span></td>
+                        </tr>
+                        <tr class="row" data-status="src" data-k="ton eq uq bounceable non-bounceable raw base64">
+                            <td class="name">TON</td><td>User-friendly / raw</td><td>Base64(url), 36 bytes → 48 chars / workchain:hex</td><td class="mono">—</td><td class="mono">EQ… / UQ… (mainnet), 0:&lt;64 hex&gt;</td>
+                            <td class="ver"><span class="badge v-src">Source-checked</span><span class="src">TON docs, address formats</span></td>
+                        </tr>
+                        <tr class="row" data-status="src" data-k="algorand algo base32">
+                            <td class="name">Algorand</td><td>Account</td><td>Base32 of pubkey ‖ 4-byte checksum</td><td class="mono">—</td><td class="mono">58 chars</td>
+                            <td class="ver"><span class="badge v-src">Source-checked</span><span class="src">algosdk address.ts</span></td>
+                        </tr>
+                        <tr class="row" data-status="src unv" data-k="near implicit account ed25519 hex">
+                            <td class="name">NEAR</td><td>Public key / implicit account</td><td>ed25519:&lt;base58&gt; / hex</td><td class="mono">—</td><td class="mono">ed25519:… / 64 hex</td>
+                            <td class="ver"><span class="badge v-src">Source-checked</span><span class="src">Key format from near-seed-phrase; implicit-account hex form <span class="tag-unv">unverified</span></span></td>
+                        </tr>
+                        <tr class="row" data-status="unv" data-k="sui aptos apt 0x">
+                            <td class="name">Sui / Aptos</td><td>Account</td><td>Hex</td><td class="mono">—</td><td class="mono">0x + 64 hex</td>
+                            <td class="ver"><span class="badge v-unv">Unverified</span><span class="src">Address hashing not checked here</span></td>
+                        </tr>
+                        <tr class="row" data-status="unv" data-k="avalanche avax x-chain p-chain x-avax p-avax">
+                            <td class="name">Avalanche X/P</td><td>Account</td><td>Bech32</td><td class="mono">avax</td><td class="mono">X-avax1… / P-avax1…</td>
+                            <td class="ver"><span class="badge v-unv">Unverified</span><span class="src">C-Chain uses the Ethereum format</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- ================= Chains ================= -->
+        <section id="sec-chains">
+            <h2>Chains, coin types and wallet paths</h2>
+            <p class="section-lede">SLIP-44 numbers were checked against the registry. “Trust Wallet Core” means the
+                default in Trust Wallet's open-source <code>registry.json</code>; Ledger Live and Trezor Suite paths come
+                from their source code, Exodus and Phantom from their own support articles.</p>
+            <div class="table-wrap">
+                <table id="tbl-chains">
+                    <thead>
+                        <tr>
+                            <th>Chain</th>
+                            <th>SLIP-44</th>
+                            <th>Key scheme</th>
+                            <th>Paths and wallets</th>
+                            <th>abandon … about vector</th>
+                            <th>Verified</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="row" data-status="pub" data-k="bitcoin btc segwit taproot legacy trezor ledger trust exodus phantom">
+                            <td class="name">Bitcoin<span class="sym">BTC</span></td>
+                            <td class="num">0'</td>
+                            <td>secp256k1, BIP-32</td>
+                            <td class="paths-cell">
+                                <ul class="paths">
+                                    <li><code>m/84'/0'/x'/0/i</code>Trezor Suite (default), Trust Wallet Core, Exodus (SegWit), Phantom, Ledger Live</li>
+                                    <li><code>m/86'/0'/x'/0/i</code>Trezor Suite, Ledger Live, Exodus (Taproot), Phantom, Trust Wallet Core (taproot)</li>
+                                    <li><code>m/49'/0'/x'/0/i</code>Trezor Suite, Ledger Live</li>
+                                    <li><code>m/44'/0'/x'/0/i</code>Trezor Suite, Ledger Live, Exodus (Legacy), Trust Wallet Core (legacy)</li>
+                                </ul>
+                                <p class="cell-note">Phantom keeps the account fixed and steps the index: <code>m/84'/0'/0'/0/i</code>. Electrum native seeds use <code>m/</code> or <code>m/0'</code> (see below).</p>
+                            </td>
+                            <td class="vec">
+                                <div class="vec"><span class="vp">See “Bitcoin derivation standards” above (BIP44 / 49 / 84 / 86 and testnet).</span></div>
+                            </td>
+                            <td class="ver"><span class="badge v-pub">Published vector</span><span class="src">BIP-0084/0086, SLIP-0132</span></td>
+                        </tr>
+                        <tr class="row" data-status="pipe" data-k="litecoin ltc ltub mtub ltc1 trezor trust exodus">
+                            <td class="name">Litecoin<span class="sym">LTC</span></td>
+                            <td class="num">2'</td>
+                            <td>secp256k1, BIP-32</td>
+                            <td class="paths-cell">
+                                <ul class="paths">
+                                    <li><code>m/84'/2'/x'/0/i</code>Trezor Suite (default), Trust Wallet Core — ltc1q…, zpub</li>
+                                    <li><code>m/49'/2'/x'/0/i</code>Trezor Suite — M…, Mtub</li>
+                                    <li><code>m/44'/2'/x'/0/i</code>Trezor Suite, Exodus, Trust Wallet Core (legacy) — L…, Ltub</li>
+                                </ul>
+                            </td>
+                            <td class="vec">
+                                <div class="vec"><span class="vp">m/44'/2'/0'/0/0</span><code>LUWPbpM43E2p7ZSh8cyTBEkvpHmr3cB8Ez</code></div>
+                                <div class="vec"><span class="vp">m/49'/2'/0'/0/0</span><code>M7wtsL7wSHDBJVMWWhtQfTMSYYkyooAAXM</code></div>
+                                <div class="vec"><span class="vp">m/84'/2'/0'/0/0</span><code>ltc1qjmxnz78nmc8nq77wuxh25n2es7rzm5c2rkk4wh</code></div>
+                            </td>
+                            <td class="ver"><span class="badge v-pipe">Pipeline-checked</span><span class="src">Trezor LTC m/44'/2' vector; version bytes from Trezor litecoin.json</span></td>
+                        </tr>
+                        <tr class="row" data-status="der" data-k="dogecoin doge dgub trezor trust exodus">
+                            <td class="name">Dogecoin<span class="sym">DOGE</span></td>
+                            <td class="num">3'</td>
+                            <td>secp256k1, BIP-32</td>
+                            <td class="paths-cell">
+                                <ul class="paths">
+                                    <li><code>m/44'/3'/x'/0/i</code>Trezor Suite, Trust Wallet Core, Exodus — D…, dgub</li>
+                                </ul>
+                            </td>
+                            <td class="vec"><div class="vec"><span class="vp">m/44'/3'/0'/0/0</span><code>DBus3bamQjgJULBJtYXpEzDWQRwF5iwxgC</code></div></td>
+                            <td class="ver"><span class="badge v-der">Derived</span><span class="src">Version byte 0x1e from Trezor dogecoin.json</span></td>
+                        </tr>
+                        <tr class="row" data-status="der" data-k="dash drkp trust exodus trezor">
+                            <td class="name">Dash<span class="sym">DASH</span></td>
+                            <td class="num">5'</td>
+                            <td>secp256k1, BIP-32</td>
+                            <td class="paths-cell">
+                                <ul class="paths">
+                                    <li><code>m/44'/5'/x'/0/i</code>Trust Wallet Core, Exodus — X…; Trezor firmware coin definition (slip44 5)</li>
+                                </ul>
+                            </td>
+                            <td class="vec"><div class="vec"><span class="vp">m/44'/5'/0'/0/0</span><code>XoJA8qE3N2Y3jMLEtZ3vcN42qseZ8LvFf5</code></div></td>
+                            <td class="ver"><span class="badge v-der">Derived</span><span class="src">Version byte 0x4c from Trezor dash.json</span></td>
+                        </tr>
+                        <tr class="row" data-status="der src" data-k="zcash zec transparent t1 sapling orchard zip-32 shielded trezor trust exodus">
+                            <td class="name">Zcash<span class="sym">ZEC</span></td>
+                            <td class="num">133'</td>
+                            <td>secp256k1 (transparent); ZIP-32 (shielded)</td>
+                            <td class="paths-cell">
+                                <ul class="paths">
+                                    <li><code>m/44'/133'/x'/0/i</code>Trezor Suite, Trust Wallet Core — transparent t1…</li>
+                                    <li><code>m/44'/133'/0'/0'/0'</code>Exodus (hardened change and index)</li>
+                                    <li><code>m_Sapling/32'/133'/x'</code>ZIP-32 shielded Sapling account (Orchard: <code>m_Orchard/32'/133'/x'</code>) — a separate key tree, not BIP-32 secp256k1</li>
+                                </ul>
+                            </td>
+                            <td class="vec"><div class="vec"><span class="vp">m/44'/133'/0'/0/0</span><code>t1XVXWCvpMgBvUaed4XDqWtgQgJSu1Ghz7F</code></div></td>
+                            <td class="ver"><span class="badge v-der">Derived</span><span class="badge v-src">Source-checked</span><span class="src">Version 0x1cb8 from Trezor zcash.json; ZIP-0032</span></td>
+                        </tr>
+                        <tr class="row" data-status="pipe" data-k="bitcoin cash bch cashaddr unsplit fork 145 0 trezor ledger trust exodus">
+                            <td class="name">Bitcoin Cash<span class="sym">BCH</span></td>
+                            <td class="num">145'</td>
+                            <td>secp256k1, BIP-32</td>
+                            <td class="paths-cell">
+                                <ul class="paths">
+                                    <li><code>m/44'/145'/x'/0/i</code>Trezor Suite, Ledger Live, Trust Wallet Core, Exodus</li>
+                                    <li><code>m/44'/0'/x'/0/i</code>Legacy: coins held in a Bitcoin wallet from before the fork. Ledger Live scans it as its “unsplit” mode (fork's parent coin type)</li>
+                                </ul>
+                            </td>
+                            <td class="vec">
+                                <div class="vec"><span class="vp">m/44'/145'/0'/0/0</span><code>bitcoincash:qqyx49mu0kkn9ftfj6hje6g2wfer34yfnq5tahq3q6</code></div>
+                                <div class="vec"><span class="vp">same key, legacy format</span><code>1mW6fDEMjKrDHvLvoEsaeLxSCzZBf3Bfg</code></div>
+                                <div class="vec"><span class="vp">m/44'/0'/0'/0/0 (pre-fork)</span><code>bitcoincash:qrvcdmgpk73zyfd8pmdl9wnuld36zh9n4gms8s0u59</code></div>
+                            </td>
+                            <td class="ver"><span class="badge v-pipe">Pipeline-checked</span><span class="src">Trezor BCH vector; CashAddr spec example</span></td>
+                        </tr>
+                        <tr class="row" data-status="src" data-k="bitcoin sv bsv exodus">
+                            <td class="name">Bitcoin SV<span class="sym">BSV</span></td>
+                            <td class="num">236'</td>
+                            <td>secp256k1, BIP-32</td>
+                            <td class="paths-cell"><ul class="paths"><li><code>m/44'/236'/0'/0/0</code>Exodus</li></ul></td>
+                            <td class="vec">—</td>
+                            <td class="ver"><span class="badge v-src">Source-checked</span></td>
+                        </tr>
+                        <tr class="row" data-status="pipe unv" data-k="ethereum eth evm polygon pol matic bnb bsc smart chain arbitrum base optimism avalanche c-chain metamask ledger live legacy mew trezor trust exodus phantom">
+                            <td class="name">Ethereum &amp; EVM<span class="sym">ETH, Polygon, BNB Smart Chain, Arbitrum, Base, Optimism, Avalanche C-Chain</span></td>
+                            <td class="num">60'</td>
+                            <td>secp256k1, BIP-32, Keccak-256</td>
+                            <td class="paths-cell">
+                                <ul class="paths">
+                                    <li><code>m/44'/60'/0'/0/i</code>MetaMask, Trezor Suite (default), Trust Wallet Core, Exodus, Phantom, Ledger Live (“MetaMask” mode)</li>
+                                    <li><code>m/44'/60'/x'/0/0</code>Ledger Live (default), Trezor Suite (“Ledger” account type)</li>
+                                    <li><code>m/44'/60'/0'/x</code>Ledger Live “legacy” mode, Trezor Suite “legacy” type (old Ledger Chrome-app layout; MEW/MyCrypto “Ledger” option <span class="tag-unv">unverified</span>)</li>
+                                    <li><code>m/44'/60'/1'/0/i</code>Phantom “bip44” grouping and Phantom's Ledger Live mode</li>
+                                    <li><code>m/44'/60'/2'/0/i</code>Phantom “deprecated” grouping</li>
+                                </ul>
+                                <p class="cell-note">Polygon (SLIP-44 966) and BNB Smart Chain are still derived with coin type 60 by Trust Wallet Core and Trezor Suite.</p>
+                            </td>
+                            <td class="vec">
+                                <div class="vec"><span class="vp">m/44'/60'/0'/0/0</span><code>0x9858EfFD232B4033E47d90003D41EC34EcaEda94</code></div>
+                                <div class="vec"><span class="vp">m/44'/60'/0'/0/1</span><code>0x6Fac4D18c912343BF86fa7049364Dd4E424Ab9C0</code></div>
+                                <div class="vec"><span class="vp">m/44'/60'/1'/0/0</span><code>0x78839F6054d7ed13918bAe0473BA31b1Ca9D7265</code></div>
+                                <div class="vec"><span class="vp">m/44'/60'/0'/0 (legacy, account 0)</span><code>0xB8Fd42000d00202DCbCF5e18d6640d656345FD6A</code></div>
+                            </td>
+                            <td class="ver"><span class="badge v-pipe">Pipeline-checked</span><span class="src">Trezor ETH vectors incl. the legacy m/44'/60'/0'/0 path</span></td>
+                        </tr>
+                        <tr class="row" data-status="pipe" data-k="ethereum classic etc ledger trezor trust exodus 160720">
+                            <td class="name">Ethereum Classic<span class="sym">ETC</span></td>
+                            <td class="num">61'</td>
+                            <td>secp256k1, BIP-32, Keccak-256</td>
+                            <td class="paths-cell">
+                                <ul class="paths">
+                                    <li><code>m/44'/61'/0'/0/i</code>Trezor (device-test vector), Trust Wallet Core, Exodus; Ledger Live default <code>m/44'/61'/x'/0/0</code></li>
+                                    <li><code>m/44'/60'/0'/x</code>, <code>m/44'/60'/0'/0/x</code>, <code>m/44'/60'/160720'/0'/x</code>Also scanned by Ledger Live for ETC</li>
+                                </ul>
+                            </td>
+                            <td class="vec"><div class="vec"><span class="vp">m/44'/61'/0'/0/0</span><code>0xFA22515E43658ce56A7682B801e9B5456f511420</code></div></td>
+                            <td class="ver"><span class="badge v-pipe">Pipeline-checked</span><span class="src">Trezor ETC vector</span></td>
+                        </tr>
+                        <tr class="row" data-status="pipe src" data-k="avalanche avax c-chain x-chain p-chain 9000 core">
+                            <td class="name">Avalanche<span class="sym">AVAX</span></td>
+                            <td class="num">9000'<br>60' (C)</td>
+                            <td>secp256k1, BIP-32</td>
+                            <td class="paths-cell">
+                                <ul class="paths">
+                                    <li><code>m/44'/60'/0'/0/i</code>C-Chain — Avalanche SDK default, Exodus, Trust Wallet Core</li>
+                                    <li><code>m/44'/9000'/0'/0/i</code>X-Chain and P-Chain — Avalanche SDK default</li>
+                                </ul>
+                            </td>
+                            <td class="vec"><div class="vec"><span class="vp">C-Chain m/44'/60'/0'/0/0</span><code>0x9858EfFD232B4033E47d90003D41EC34EcaEda94</code></div></td>
+                            <td class="ver"><span class="badge v-pipe">Pipeline-checked</span><span class="badge v-src">Source-checked</span><span class="src">C-Chain = ETH pipeline; X/P path from Avalanche SDK docs</span></td>
+                        </tr>
+                        <tr class="row" data-status="pipe" data-k="tron trx trezor ledger trust exodus">
+                            <td class="name">Tron<span class="sym">TRX</span></td>
+                            <td class="num">195'</td>
+                            <td>secp256k1, BIP-32, Keccak-256</td>
+                            <td class="paths-cell">
+                                <ul class="paths">
+                                    <li><code>m/44'/195'/0'/0/i</code>Trezor Suite (default), Trust Wallet Core</li>
+                                    <li><code>m/44'/195'/x'/0/0</code>Ledger Live (default), Trezor Suite (“Ledger” account type)</li>
+                                    <li><code>m/44'/195'/0'/0'/0'</code>Exodus</li>
+                                </ul>
+                            </td>
+                            <td class="vec"><div class="vec"><span class="vp">m/44'/195'/0'/0/0</span><code>TUEZSdKsoDHQMeZwihtdoBiN46zxhGWYdH</code></div></td>
+                            <td class="ver"><span class="badge v-pipe">Pipeline-checked</span><span class="src">Trezor TRX vectors (m/44'/195'/0'/0/0, m/44'/195'/1'/0/0)</span></td>
+                        </tr>
+                        <tr class="row" data-status="pipe" data-k="xrp ripple xrpl trezor ledger trust exodus family seed">
+                            <td class="name">XRP<span class="sym">XRP</span></td>
+                            <td class="num">144'</td>
+                            <td>secp256k1, BIP-32</td>
+                            <td class="paths-cell">
+                                <ul class="paths">
+                                    <li><code>m/44'/144'/x'/0/0</code>Trezor Suite, Ledger Live (default); Trust Wallet Core <code>m/44'/144'/0'/0/0</code></li>
+                                    <li><code>m/44'/144'/0'/0'/0'</code>Exodus</li>
+                                </ul>
+                                <p class="cell-note">The XRPL's own key scheme derives keys from a 16-byte seed with ledger-specific steps, not BIP-32/BIP-39; keys made that way are not on these paths.</p>
+                            </td>
+                            <td class="vec"><div class="vec"><span class="vp">m/44'/144'/0'/0/0</span><code>rHsMGQEkVNJmpGWs8XUBoTBiAAbwxZN5v3</code></div></td>
+                            <td class="ver"><span class="badge v-pipe">Pipeline-checked</span><span class="src">Trezor XRP vectors; xrpl.org “Cryptographic keys”</span></td>
+                        </tr>
+                        <tr class="row" data-status="pub" data-k="stellar xlm sep-0005 sep5 ed25519 trezor ledger trust exodus">
+                            <td class="name">Stellar<span class="sym">XLM</span></td>
+                            <td class="num">148'</td>
+                            <td>ed25519, SLIP-10</td>
+                            <td class="paths-cell">
+                                <ul class="paths">
+                                    <li><code>m/44'/148'/x'</code>SEP-0005; Trezor Suite, Ledger Live, Trust Wallet Core</li>
+                                    <li><code>m/44'/148'/0'/0/0</code>Exodus (marked non-standard by Exodus)</li>
+                                </ul>
+                            </td>
+                            <td class="vec">
+                                <div class="vec"><span class="vp">m/44'/148'/0'</span><code>GB3JDWCQJCWMJ3IILWIGDTQJJC5567PGVEVXSCVPEQOTDN64VJBDQBYX</code></div>
+                                <div class="vec"><span class="vp">m/44'/148'/1'</span><code>GDVSYYTUAJ3ACHTPQNSTQBDQ4LDHQCMNY4FCEQH5TJUMSSLWQSTG42MV</code></div>
+                            </td>
+                            <td class="ver"><span class="badge v-pub">Published vector</span><span class="src">SEP-0005 test 5 is this mnemonic: seed, m/44'/148' key, accounts 0'–9'</span></td>
+                        </tr>
+                        <tr class="row" data-status="pipe src unv" data-k="solana sol phantom ledger live trust exodus metamask okx xdefi math wallet sollet solana-keygen cli bip44change deprecated ed25519">
+                            <td class="name">Solana<span class="sym">SOL</span></td>
+                            <td class="num">501'</td>
+                            <td>ed25519, SLIP-10</td>
+                            <td class="paths-cell">
+                                <ul class="paths">
+                                    <li><code>m/44'/501'/x'/0'</code>Phantom (“bip44Change”, default), Trezor Suite (default), Exodus Mobile restore (Phantom, MetaMask, OKX, XDEFI)</li>
+                                    <li><code>m/44'/501'/x'</code>Ledger Live (default), Trust Wallet Core (default), Phantom (“bip44”), Trezor Suite (“Ledger” type)</li>
+                                    <li><code>m/44'/501'</code>Solana CLI <code>prompt://</code> default, Ledger Live, Trezor Suite (“root”), Phantom (first Ledger address)</li>
+                                    <li><code>m/501'/x'/0/0</code>Phantom “deprecated” (older Phantom / third-party wallets; often attributed to Sollet <span class="tag-unv">unverified</span>)</li>
+                                    <li><code>m/44'/501'/0'/0/0</code>Exodus (marked non-standard)</li>
+                                    <li><code>m/44'/501'/0'/0</code>Math Wallet (per Exodus)</li>
+                                    <li><code>no path</code><code>solana-keygen</code> without <code>--derivation-path</code>: secret key = first 32 bytes of the BIP-39 seed</li>
+                                </ul>
+                            </td>
+                            <td class="vec">
+                                <div class="vec"><span class="vp">m/44'/501'/0'/0'</span><code>HAgk14JpMQLgt6rVgv7cBQFJWFto5Dqxi472uT3DKpqk</code></div>
+                                <div class="vec"><span class="vp">m/44'/501'/1'/0'</span><code>Hh8QwFUA6MtVu1qAoq12ucvFHNwCcVTV7hpWjeY1Hztb</code></div>
+                                <div class="vec"><span class="vp">m/44'/501'/0'</span><code>GjJyeC1r2RgkuoCWMyPYkCWSGSGLcz266EaAkLA27AhL</code></div>
+                                <div class="vec"><span class="vp">m/44'/501'</span><code>D2PPQSYFe83nDzk96FqGumVU8JA7J8vj2Rhjc2oXzEi5</code></div>
+                                <div class="vec"><span class="vp">seed[0:32], no path</span><code>EHqmfkN89RJ7Y33CXM6uCzhVeuywHoJXZZLszBHHZy7o</code></div>
+                            </td>
+                            <td class="ver"><span class="badge v-pipe">Pipeline-checked</span><span class="src">Trezor SOL vectors for m/44'/501', m/44'/501'/0', m/44'/501'/0'/0'; no-path rule from Agave keygen source</span></td>
+                        </tr>
+                        <tr class="row" data-status="src" data-k="cardano ada cip-1852 1852 icarus byron yoroi daedalus trezor ledger bitbox exodus shelley staking">
+                            <td class="name">Cardano<span class="sym">ADA</span></td>
+                            <td class="num">1815'</td>
+                            <td>BIP32-Ed25519 (not SLIP-10)</td>
+                            <td class="paths-cell">
+                                <ul class="paths">
+                                    <li><code>m/1852'/1815'/x'/role/i</code>CIP-1852 Shelley: role 0 external, 1 change, 2 staking key, 3 DRep, 4/5 committee cold/hot; Trezor Suite, Ledger Live, Trust Wallet Core</li>
+                                    <li><code>m/44'/1815'/x'/0/i</code>Byron-era wallets (CIP-1852 rationale)</li>
+                                    <li><code>m/44'/1815'/0'/0/0</code>Exodus (marked non-standard)</li>
+                                </ul>
+                                <p class="cell-note">The master key from the mnemonic differs per wallet (CIP-0003): Icarus (Yoroi, Daedalus), Icarus-Trezor (Trezor; deviates for 24-word phrases), Ledger/BitBox02, and the deprecated Byron scheme (Daedalus, Ddz… addresses). Same path, different keys — Trezor Suite exposes these as separate account types.</p>
+                            </td>
+                            <td class="vec">—</td>
+                            <td class="ver"><span class="badge v-src">Source-checked</span><span class="src">CIP-1852, CIP-0003, CIP-0011; Trezor Suite / Ledger Live source</span></td>
+                        </tr>
+                        <tr class="row" data-status="pipe" data-k="cosmos atom cosmos-sdk fundraiser ledger trust exodus bech32">
+                            <td class="name">Cosmos Hub<span class="sym">ATOM</span></td>
+                            <td class="num">118'</td>
+                            <td>secp256k1, BIP-32</td>
+                            <td class="paths-cell">
+                                <ul class="paths">
+                                    <li><code>m/44'/118'/0'/0/i</code>Cosmos SDK <code>FullFundraiserPath</code> (m/44'/118'/0'/0/0), Trust Wallet Core, Exodus</li>
+                                    <li><code>m/44'/118'/x'/0/0</code>Ledger Live (BIP-44 default)</li>
+                                </ul>
+                                <p class="cell-note">Other Cosmos-SDK chains can set their own coin type (<code>config.SetCoinType</code>) and bech32 prefix.</p>
+                            </td>
+                            <td class="vec"><div class="vec"><span class="vp">m/44'/118'/0'/0/0</span><code>cosmos19rl4cm2hmr8afy4kldpxz3fka4jguq0auqdal4</code></div></td>
+                            <td class="ver"><span class="badge v-pipe">Pipeline-checked</span><span class="src">cosmjs Secp256k1HdWallet test vector</span></td>
+                        </tr>
+                        <tr class="row" data-status="src" data-k="polkadot dot kusama ksm substrate sr25519 polkadot.js suri junction ledger trust exodus not bip32">
+                            <td class="name">Polkadot / Kusama<span class="sym">DOT / KSM</span></td>
+                            <td class="num">354'<br>434'</td>
+                            <td>sr25519 (native) — not BIP-32</td>
+                            <td class="paths-cell">
+                                <ul class="paths">
+                                    <li><code>//hard/soft</code>Polkadot.js: no BIP-32. Mini-secret = PBKDF2-HMAC-SHA512(BIP-39 <em>entropy</em>, "mnemonic"+password, 2048)[0:32] → sr25519 key; optional Substrate junctions in the SURI <code>&lt;phrase&gt;/soft//hard///password</code></li>
+                                    <li><code>m/44'/354'/x'/0'/i'</code>Ledger (Polkadot generic app; Ledger Live) — BIP32-Ed25519, hardened only, on the BIP-39 seed</li>
+                                    <li><code>m/44'/434'/x'/0'/i'</code>Legacy Ledger Kusama app; Zondax asks Kusama/parachain users to migrate to the 354' path</li>
+                                    <li><code>m/44'/354'/0'/0'/0'</code>Trust Wallet Core (curve “ed25519”), Exodus; Kusama <code>m/44'/434'/0'/0'/0'</code> in Trust Wallet Core</li>
+                                </ul>
+                                <p class="cell-note">The same mnemonic gives different addresses in Polkadot.js (sr25519) and on BIP-44-style paths; Trust Wallet Core's ed25519 curve and Ledger's BIP32-Ed25519 are also different algorithms.</p>
+                            </td>
+                            <td class="vec">—</td>
+                            <td class="ver"><span class="badge v-src">Source-checked</span><span class="src">polkadot-js util-crypto (toMiniSecret, hdLedger, extractSuri, knownLedger); Zondax ledger-polkadot</span></td>
+                        </tr>
+                        <tr class="row" data-status="src" data-k="monero xmr 25 words spend key view key keccak trezor not bip32 16 words">
+                            <td class="name">Monero<span class="sym">XMR</span></td>
+                            <td class="num">128'</td>
+                            <td>ed25519 (CryptoNote) — not BIP-32</td>
+                            <td class="paths-cell">
+                                <ul class="paths">
+                                    <li><code>25 words</code>Official wallet: the words encode the 256-bit private spend key (last word = checksum); private view key = Keccak-256 of the spend key. No path</li>
+                                    <li><code>16 words</code>Newer 16-word phrases also embed the wallet restore height</li>
+                                    <li><code>m/44'/128'/x'</code>Trezor derives the Monero account from the BIP-39 seed at this path</li>
+                                </ul>
+                            </td>
+                            <td class="vec">—</td>
+                            <td class="ver"><span class="badge v-src">Source-checked</span><span class="src">Moneropedia “mnemonic seed”; Trezor Monero device tests</span></td>
+                        </tr>
+                        <tr class="row" data-status="src" data-k="ton toncoin tonkeeper ledger trust exodus not bip39 ton default seed">
+                            <td class="name">TON<span class="sym">TON</span></td>
+                            <td class="num">607'</td>
+                            <td>ed25519</td>
+                            <td class="paths-cell">
+                                <ul class="paths">
+                                    <li><code>TON mnemonic</code>24 words, not BIP-39: entropy = HMAC-SHA512(key = words, msg = password); seed = PBKDF2-HMAC-SHA512(entropy, "TON default seed", 100000); first 32 bytes = ed25519 key. No path</li>
+                                    <li><code>m/44'/607'/0'/0'/x'/0'</code>Ledger Live</li>
+                                    <li><code>m/44'/607'/0'</code>Trust Wallet Core</li>
+                                    <li><code>m/44'/607'/0'/0/0</code>Exodus</li>
+                                </ul>
+                            </td>
+                            <td class="vec">—</td>
+                            <td class="ver"><span class="badge v-src">Source-checked</span><span class="src">ton-crypto mnemonic.ts; Ledger Live; Trust Wallet Core; Exodus</span></td>
+                        </tr>
+                        <tr class="row" data-status="pipe" data-k="tezos xtz tz1 tz2 galleon tezbox ledger trezor trust exodus ed25519">
+                            <td class="name">Tezos<span class="sym">XTZ</span></td>
+                            <td class="num">1729'</td>
+                            <td>ed25519, SLIP-10</td>
+                            <td class="paths-cell">
+                                <ul class="paths">
+                                    <li><code>m/44'/1729'/x'/0'</code>Ledger Live (default “tezbox” mode), Trust Wallet Core</li>
+                                    <li><code>m/44'/1729'/x'</code>Trezor; Ledger Live also uses it for tz2 (secp256k1)</li>
+                                    <li><code>m/44'/1729'/x'/0'/0'</code>Ledger Live “galleon” mode; <code>m/44'/1729'/0'/0'/x'</code> and <code>m/44'/1729'/0'/x'</code> are its legacy Galleon / TezBox modes</li>
+                                    <li><code>m/44'/1729'/0'/0/0</code>Exodus (marked non-standard)</li>
+                                </ul>
+                            </td>
+                            <td class="vec">
+                                <div class="vec"><span class="vp">m/44'/1729'/0'/0'</span><code>tz1VQA4RP4fLjEEMW2FR4pE9kAg5abb5h5GL</code></div>
+                                <div class="vec"><span class="vp">m/44'/1729'/0'</span><code>tz1WoVmT5Kc3NRCmXrWtW7ZKnp1XtykfyZV3</code></div>
+                            </td>
+                            <td class="ver"><span class="badge v-pipe">Pipeline-checked</span><span class="src">Trezor XTZ vectors; BLAKE2b checked against OpenSSL</span></td>
+                        </tr>
+                        <tr class="row" data-status="src" data-k="algorand algo 25 words ledger trust exodus not bip39">
+                            <td class="name">Algorand<span class="sym">ALGO</span></td>
+                            <td class="num">283'</td>
+                            <td>ed25519</td>
+                            <td class="paths-cell">
+                                <ul class="paths">
+                                    <li><code>25 words</code>Algorand SDK mnemonic: 24 words carry the 32-byte key directly (11 bits per word), word 25 is a checksum. Not BIP-39, no path</li>
+                                    <li><code>m/44'/283'/x'/0/0</code>Ledger Algorand app</li>
+                                    <li><code>m/44'/283'/0'/0'/0'</code>Trust Wallet Core</li>
+                                    <li><code>m/44'/283'/0'/0/0</code>Exodus (marked non-standard)</li>
+                                </ul>
+                            </td>
+                            <td class="vec">—</td>
+                            <td class="ver"><span class="badge v-src">Source-checked</span><span class="src">algosdk mnemonic.ts; Ledger app-algorand APDUSPEC; Trust Wallet Core; Exodus</span></td>
+                        </tr>
+                        <tr class="row" data-status="der src" data-k="near near-seed-phrase ledger trust ed25519">
+                            <td class="name">NEAR<span class="sym">NEAR</span></td>
+                            <td class="num">397'</td>
+                            <td>ed25519, SLIP-10</td>
+                            <td class="paths-cell">
+                                <ul class="paths">
+                                    <li><code>m/44'/397'/0'</code>near-seed-phrase default, Trust Wallet Core</li>
+                                    <li><code>m/44'/397'/0'/0'/x'</code>Ledger Live</li>
+                                </ul>
+                            </td>
+                            <td class="vec"><div class="vec"><span class="vp">m/44'/397'/0' public key</span><code>ed25519:6j4b6zUaty6fD1awqcGCCU9JYGCWYUgdJhQrzfZhqE25</code></div></td>
+                            <td class="ver"><span class="badge v-der">Derived</span><span class="src">SLIP-10 code validated on SOL/XLM/XTZ</span></td>
+                        </tr>
+                        <tr class="row" data-status="src unv" data-k="sui ed25519 secp256k1 secp256r1 54 74 ledger trust exodus">
+                            <td class="name">Sui<span class="sym">SUI</span></td>
+                            <td class="num">784'</td>
+                            <td>ed25519 / secp256k1 / secp256r1</td>
+                            <td class="paths-cell">
+                                <ul class="paths">
+                                    <li><code>m/44'/784'/x'/0'/0'</code>Ed25519, all levels hardened — Sui wallet spec, Ledger Live, Trust Wallet Core, Exodus</li>
+                                    <li><code>m/54'/784'/x'/0/0</code>Secp256k1, first three levels hardened — Sui wallet spec</li>
+                                    <li><code>m/74'/784'/x'/0/0</code>Secp256r1 <span class="tag-unv">unverified</span></li>
+                                </ul>
+                            </td>
+                            <td class="vec">—</td>
+                            <td class="ver"><span class="badge v-src">Source-checked</span><span class="src">Sui “Wallet cryptography specifications”; Ledger Live; Trust Wallet Core</span></td>
+                        </tr>
+                        <tr class="row" data-status="src" data-k="aptos apt ledger trust ed25519">
+                            <td class="name">Aptos<span class="sym">APT</span></td>
+                            <td class="num">637'</td>
+                            <td>ed25519, SLIP-10</td>
+                            <td class="paths-cell">
+                                <ul class="paths">
+                                    <li><code>m/44'/637'/x'/0'/0'</code>Ledger Live; Trust Wallet Core <code>m/44'/637'/0'/0'/0'</code></li>
+                                </ul>
+                            </td>
+                            <td class="vec">—</td>
+                            <td class="ver"><span class="badge v-src">Source-checked</span><span class="src">Ledger Live derivation.ts; Trust Wallet Core</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- ================= Electrum ================= -->
+        <section id="sec-electrum">
+            <h2>Electrum seeds</h2>
+            <p class="section-lede">Electrum 2.0+ does not generate BIP-39 phrases. The words are hashed directly; the
+                seed type is the hex prefix of <code>HMAC-SHA512(key = "Seed version", msg = phrase)</code>, and the
+                BIP-32 root comes from <code>PBKDF2-HMAC-SHA512(phrase, "electrum" + passphrase, 2048)</code> — note the
+                salt is <code>electrum</code>, not BIP-39's <code>mnemonic</code>.</p>
+            <div class="table-wrap">
+                <table id="tbl-electrum">
+                    <thead>
+                        <tr>
+                            <th>Seed type</th>
+                            <th>Version prefix</th>
+                            <th>Key path</th>
+                            <th>Script</th>
+                            <th>Ext. key</th>
+                            <th>Test vector (Electrum's own tests)</th>
+                            <th>Verified</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="row" data-status="pub" data-k="electrum standard seed 01 p2pkh m/">
+                            <td class="name">Standard</td>
+                            <td class="mono">01</td>
+                            <td class="path">m/0/i<br>m/1/i</td>
+                            <td class="mono">P2PKH (P2SH multisig)</td>
+                            <td class="mono">xpub</td>
+                            <td class="vec">
+                                <div class="vec"><span class="vp">cycle rocket west … song · m/0/0</span><code>1NNkttn1YvVGdqBW4PR6zvc3Zx3H5owKRf</code></div>
+                                <div class="vec"><span class="vp">m/1/0 (change)</span><code>1KSezYMhAJMWqFbVFB2JshYg69UpmEXR4D</code></div>
+                            </td>
+                            <td class="ver"><span class="badge v-pub">Published vector</span><span class="src">Electrum test_wallet_vertical.py: root xpub and both addresses</span></td>
+                        </tr>
+                        <tr class="row" data-status="pub" data-k="electrum segwit seed 100 p2wpkh m/0' zpub">
+                            <td class="name">Segwit</td>
+                            <td class="mono">100</td>
+                            <td class="path">m/0'/0/i<br>m/0'/1/i</td>
+                            <td class="mono">P2WPKH</td>
+                            <td class="mono">zpub</td>
+                            <td class="vec">
+                                <div class="vec"><span class="vp">bitter grass shiver … silver · m/0'/0/0</span><code>bc1q3g5tmkmlvxryhh843v4dz026avatc0zzr6h3af</code></div>
+                                <div class="vec"><span class="vp">m/0'/1/0 (change)</span><code>bc1qdy94n2q5qcp0kg7v9yzwe6wvfkhnvyzje7nx2p</code></div>
+                            </td>
+                            <td class="ver"><span class="badge v-pub">Published vector</span><span class="src">Electrum tests: account zpub at m/0' and both addresses</span></td>
+                        </tr>
+                        <tr class="row" data-status="src" data-k="electrum segwit multisig seed 100 p2wsh m/1'">
+                            <td class="name">Segwit, multisig wallet</td>
+                            <td class="mono">100</td>
+                            <td class="path">m/1'/…</td>
+                            <td class="mono">P2WSH</td>
+                            <td class="mono">—</td>
+                            <td class="wrap">A segwit seed used as a multisig cosigner key derives from <code>m/1'</code> instead of <code>m/0'</code>.</td>
+                            <td class="ver"><span class="badge v-src">Source-checked</span><span class="src">Electrum keystore.py from_seed()</span></td>
+                        </tr>
+                        <tr class="row" data-status="src" data-k="electrum 2fa two-factor 101 102">
+                            <td class="name">2FA / 2FA segwit</td>
+                            <td class="mono">101 / 102</td>
+                            <td class="path">—</td>
+                            <td class="mono">multisig</td>
+                            <td class="mono">—</td>
+                            <td class="wrap">Two-factor-authentication wallets (normal and segwit).</td>
+                            <td class="ver"><span class="badge v-src">Source-checked</span><span class="src">Electrum version.py</span></td>
+                        </tr>
+                        <tr class="row" data-status="src" data-k="electrum old seed pre-2.0 1.x">
+                            <td class="name">Old (pre-2.0)</td>
+                            <td class="mono">—</td>
+                            <td class="path">not BIP-32</td>
+                            <td class="mono">P2PKH</td>
+                            <td class="mono">—</td>
+                            <td class="wrap">Pre-2.0 seeds load into Electrum's separate “old” keystore, cannot carry a passphrase and are not BIP-32.</td>
+                            <td class="ver"><span class="badge v-src">Source-checked</span><span class="src">Electrum mnemonic.py / keystore.py</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <p class="after-note">With a BIP-39 phrase Electrum asks for the path; its standard choices are
+                <code>m/44'/0'/0'</code>, <code>m/49'/0'/0'</code> and <code>m/84'/0'/0'</code>, and its recovery scan also
+                tries the non-standard layouts listed below.</p>
+        </section>
+
+        <!-- ================= Other paths ================= -->
+        <section id="sec-other">
+            <h2>Non-standard and wallet-specific paths</h2>
+            <p class="section-lede">Paths worth trying when a restored wallet comes up empty.</p>
+            <div class="table-wrap">
+                <table id="tbl-other">
+                    <thead>
+                        <tr>
+                            <th>Path</th>
+                            <th>Script / chain</th>
+                            <th>Used by</th>
+                            <th>Verified</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="row" data-status="src" data-k="electrum non-standard m/0' legacy compatibility native segwit bip39">
+                            <td class="path">m/0'</td>
+                            <td>P2PKH, P2SH-P2WPKH or P2WPKH</td>
+                            <td class="wrap">“Non-standard” BIP-39 layouts in Electrum's recovery list (also the Electrum-seed segwit layout)</td>
+                            <td class="ver"><span class="badge v-src">Source-checked</span><span class="src">Electrum bip39_wallet_formats.json</span></td>
+                        </tr>
+                        <tr class="row" data-status="src" data-k="electrum non-standard script on bip84 bip49 path">
+                            <td class="path">m/84'/0'/0', m/49'/0'/0'</td>
+                            <td>P2PKH / P2SH-P2WPKH on 84', P2PKH / P2WPKH on 49'</td>
+                            <td class="wrap">Wrong script type on a BIP path, also in Electrum's recovery list</td>
+                            <td class="ver"><span class="badge v-src">Source-checked</span><span class="src">Electrum bip39_wallet_formats.json</span></td>
+                        </tr>
+                        <tr class="row" data-status="src" data-k="copay bitpay native segwit bip44 path">
+                            <td class="path">m/44'/0'/0'</td>
+                            <td>P2WPKH</td>
+                            <td class="wrap">Copay native segwit</td>
+                            <td class="ver"><span class="badge v-src">Source-checked</span><span class="src">Electrum bip39_wallet_formats.json</span></td>
+                        </tr>
+                        <tr class="row" data-status="src" data-k="coolwallet s nested segwit bip44 path">
+                            <td class="path">m/44'/0'/0'</td>
+                            <td>P2SH-P2WPKH</td>
+                            <td class="wrap">CoolWallet S</td>
+                            <td class="ver"><span class="badge v-src">Source-checked</span><span class="src">Electrum bip39_wallet_formats.json</span></td>
+                        </tr>
+                        <tr class="row" data-status="src" data-k="samourai whirlpool bad bank toxic change premix postmix 2147483644 2147483645 2147483646">
+                            <td class="path">m/84'/0'/2147483644'<br>m/84'/0'/2147483645'<br>m/84'/0'/2147483646'</td>
+                            <td>P2WPKH</td>
+                            <td class="wrap">Samourai: Bad Bank (toxic change), Whirlpool Pre-mix, Whirlpool Post-mix</td>
+                            <td class="ver"><span class="badge v-src">Source-checked</span><span class="src">Electrum bip39_wallet_formats.json</span></td>
+                        </tr>
+                        <tr class="row" data-status="src" data-k="samourai ricochet 2147483647">
+                            <td class="path">m/44'/0'/2147483647'<br>m/49'/0'/2147483647'<br>m/84'/0'/2147483647'</td>
+                            <td>P2PKH / P2SH-P2WPKH / P2WPKH</td>
+                            <td class="wrap">Samourai Ricochet</td>
+                            <td class="ver"><span class="badge v-src">Source-checked</span><span class="src">Electrum bip39_wallet_formats.json</span></td>
+                        </tr>
+                        <tr class="row" data-status="src" data-k="trezor suite coinjoin slip-0025 10025">
+                            <td class="path">m/10025'/0'/x'/1'</td>
+                            <td>Bitcoin</td>
+                            <td class="wrap">Trezor Suite coinjoin account (SLIP-0025); testnet <code>m/10025'/1'/x'/1'</code></td>
+                            <td class="ver"><span class="badge v-src">Source-checked</span><span class="src">Trezor Suite bitcoin networkConfig</span></td>
+                        </tr>
+                        <tr class="row" data-status="src" data-k="exodus hardened change index xrp tron zcash">
+                            <td class="path">m/44'/144'/0'/0'/0'<br>m/44'/195'/0'/0'/0'<br>m/44'/133'/0'/0'/0'</td>
+                            <td>XRP, Tron, Zcash</td>
+                            <td class="wrap">Exodus — hardened change and index, unlike Trezor / Trust Wallet for the same coins</td>
+                            <td class="ver"><span class="badge v-src">Source-checked</span><span class="src">Exodus “Derivation paths in Exodus”</span></td>
+                        </tr>
+                        <tr class="row" data-status="src" data-k="exodus non-standard asterisk cardano stellar tezos algorand solana">
+                            <td class="path">m/44'/&lt;coin&gt;'/0'/0/0</td>
+                            <td>ADA 1815', XLM 148', XTZ 1729', ALGO 283', SOL 501'</td>
+                            <td class="wrap">Exodus, which flags these as non-standard: other wallets may not find the funds; import the private key instead</td>
+                            <td class="ver"><span class="badge v-src">Source-checked</span><span class="src">Exodus “Derivation paths in Exodus”</span></td>
+                        </tr>
+                        <tr class="row" data-status="src" data-k="ledger live ethereum classic etc 160720">
+                            <td class="path">m/44'/60'/160720'/0'/x</td>
+                            <td>Ethereum Classic</td>
+                            <td class="wrap">Ledger Live legacy ETC mode</td>
+                            <td class="ver"><span class="badge v-src">Source-checked</span><span class="src">Ledger Live derivation.ts (etcM)</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+    </main>
+    <script>
+        (function () {
+            window.addEventListener('message', function (event) {
+                if (event.source !== window.parent) return;
+                var data = event.data;
+                if (data && data.source === 'cryptotoolbox' && data.type === 'theme' &&
+                    (data.theme === 'light' || data.theme === 'dark')) {
+                    document.documentElement.setAttribute('data-theme', data.theme);
+                    try { localStorage.setItem('theme', data.theme); } catch (e) { /* ignored */ }
+                }
+            });
+
+            var input = document.getElementById('q');
+            var chips = Array.prototype.slice.call(document.querySelectorAll('#status-chips .chip-btn'));
+            var countEl = document.getElementById('count');
+            var emptyEl = document.getElementById('empty');
+            var rows = Array.prototype.slice.call(document.querySelectorAll('tr.row'));
+            var sections = Array.prototype.slice.call(document.querySelectorAll('main > section:not(.static)'));
+            var staticSections = Array.prototype.slice.call(document.querySelectorAll('main > section.static'));
+            var status = '';
+
+            // Search text = visible cell text + extra keywords; normalise the
+            // typographic apostrophe so m/44'/… matches either way.
+            function norm(s) {
+                return s.toLowerCase().replace(/[’′]/g, "'").replace(/\s+/g, ' ');
+            }
+            rows.forEach(function (tr) {
+                tr._text = norm(tr.textContent + ' ' + (tr.getAttribute('data-k') || ''));
+                tr._status = (tr.getAttribute('data-status') || '').split(/\s+/);
+            });
+
+            function apply() {
+                var terms = norm(input.value).trim().split(' ').filter(Boolean);
+                var shown = 0;
+                rows.forEach(function (tr) {
+                    var ok = (!status || tr._status.indexOf(status) !== -1) &&
+                        terms.every(function (t) { return tr._text.indexOf(t) !== -1; });
+                    tr.classList.toggle('is-hidden', !ok);
+                    if (ok) shown++;
+                });
+                sections.forEach(function (sec) {
+                    sec.hidden = !sec.querySelector('tr.row:not(.is-hidden)');
+                });
+                var filtering = terms.length > 0 || status !== '';
+                staticSections.forEach(function (sec) { sec.hidden = filtering; });
+                emptyEl.style.display = shown ? 'none' : 'block';
+                countEl.textContent = filtering ? shown + ' of ' + rows.length + ' rows' : rows.length + ' rows';
+            }
+
+            input.addEventListener('input', apply);
+            chips.forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    status = btn.getAttribute('data-status');
+                    chips.forEach(function (b) { b.setAttribute('aria-pressed', b === btn ? 'true' : 'false'); });
+                    apply();
+                });
+            });
+            document.addEventListener('keydown', function (e) {
+                if (e.key === '/' && document.activeElement !== input &&
+                    !/^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement.tagName)) {
+                    e.preventDefault();
+                    input.focus();
+                } else if (e.key === 'Escape' && document.activeElement === input && input.value) {
+                    input.value = '';
+                    apply();
+                }
+            });
+            apply();
+        })();
+    </script>
+</body>
+
+</html>
