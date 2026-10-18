@@ -13,10 +13,10 @@ Local toolbox for **cryptography and crypto forensics**. Runs fully offline via 
 ## Tools
 
 ### Magic Tool - Paste any text and detect crypto-related strings with checksum verification
-<img width="1512" height="827" alt="Screenshot 2026-09-09 at 18 01 01" src="https://github.com/user-attachments/assets/db6af8cd-9a13-4f26-8f5a-43b61beedd05" />
+<img width="1512" height="948" alt="Screenshot 2026-10-18 at 08 33 29" src="https://github.com/user-attachments/assets/00198171-fc72-416a-a2ad-14bfd7bf429d" />
 
 ### Brute Force Tools
-<img width="1512" height="828" alt="Screenshot 2026-09-09 at 18 01 58" src="https://github.com/user-attachments/assets/e637a39d-0248-46ae-926c-90ad68e7e6af" />
+<img width="1512" height="951" alt="Screenshot 2026-10-18 at 08 36 56" src="https://github.com/user-attachments/assets/6653ef94-7730-4c2a-8a2b-3fb1279cd058" />
 
 ### Conversion & Format
 
