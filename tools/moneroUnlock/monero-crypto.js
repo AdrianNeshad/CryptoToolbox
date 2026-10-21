@@ -431,6 +431,79 @@
         };
     }
 
+    /* ---------- Wallet CACHE file (the file WITHOUT the .keys extension) ----------
+       Cake-family wallets created from a BIP39 (12-word) or polyseed (16-word) seed
+       do NOT store those phrases in the .keys file. The native wallet is restored from
+       a DERIVED 25-word legacy seed, and the original phrase is kept as a wallet
+       "attribute" (m_attributes), which Monero serialises into the CACHE file, not into
+       store_keys(). So the 12-word phrase is only recoverable from the cache file.
+
+       The cache file has the SAME outer container as .keys — [8-byte IV][varint len][ct]
+       (wallet2::cache_file_data { chacha_iv iv; std::string cache_data; }, written with
+       no magic prefix) — but it is encrypted with a DERIVED key:
+         cache_key = cn_fast_hash(keys_chacha_key || HASH_KEY_WALLET_CACHE)
+                   = keccak256( key[0..32] || 0x8d )      (config::HASH_KEY_WALLET_CACHE)
+       Inside the decrypted cache, m_attributes is a string→string map serialised by the
+       cryptonote ::serialization archive, i.e. each entry is
+         [LEB128 varint keylen][key bytes][LEB128 varint vallen][value bytes].
+       We don't parse the whole wallet2 blob — we scan for the known Cake attribute keys,
+       validating that each is preceded by its own length varint, then read the value. */
+    function deriveCacheKey(keysChachaKey) {
+        var dd = new Uint8Array(33);
+        dd.set(keysChachaKey.slice(0, 32), 0);
+        dd[32] = 0x8d;                    // config::HASH_KEY_WALLET_CACHE
+        return keccak256(dd);             // cn_fast_hash == keccak256 (32 bytes)
+    }
+
+    // Find a string attribute by key name inside the decrypted cache bytes.
+    // wordsOnly: require a printable-ASCII value (used for seed phrases).
+    function findCacheAttr(bytes, keyName, wordsOnly) {
+        var kb = strToBytes(keyName), klen = kb.length, N = bytes.length;
+        if (klen === 0 || klen > 0x7f) return null;   // keys we look for are short (single-byte varint)
+        for (var i = 1; i + klen <= N; i++) {
+            if (bytes[i - 1] !== klen) continue;      // the key-length varint must sit right before the key
+            var ok = true;
+            for (var j = 0; j < klen; j++) { if (bytes[i + j] !== kb[j]) { ok = false; break; } }
+            if (!ok) continue;
+            var r = readLEB128(bytes, i + klen);      // value length varint follows the key
+            var vlen = r.value, vp = r.next;
+            if (vlen <= 0 || vlen > 0x4000 || vp + vlen > N) continue;
+            var val = bytes.slice(vp, vp + vlen);
+            var txt = utf8Decode(val);
+            if (wordsOnly && !/^[\x20-\x7e]+$/.test(txt)) continue;
+            return txt;
+        }
+        return null;
+    }
+
+    // Decrypt the cache file with the key derived from the (already-known) .keys chacha
+    // key and pull out the Cake attributes. preferCipher is the cipher that unlocked the
+    // .keys file ('ChaCha20'/'ChaCha8'); we try it first, then the other.
+    function extractCakeFromCache(cacheBytes, keysChachaKey, preferCipher) {
+        if (!cacheBytes || cacheBytes.length < 12) throw new Error('The cache file is too small to be a wallet cache.');
+        var iv = cacheBytes.slice(0, 8);
+        var hdr = readLEB128(cacheBytes, 8);
+        if (hdr.value !== cacheBytes.length - hdr.next)
+            throw new Error('This does not look like a wallet cache file. Use the file WITHOUT the .keys extension (same name as your .keys file).');
+        var ct = cacheBytes.slice(hdr.next, hdr.next + hdr.value);
+        var ck = deriveCacheKey(keysChachaKey);
+        var ciphers = (preferCipher === 'ChaCha8')
+            ? [['ChaCha8', chacha8], ['ChaCha20', chacha20]]
+            : [['ChaCha20', chacha20], ['ChaCha8', chacha8]];
+        for (var c = 0; c < ciphers.length; c++) {
+            var pt = ciphers[c][1](ct, ck, iv);
+            var bip39 = findCacheAttr(pt, 'cakewallet.seed.bip39', true);
+            var polyseed = findCacheAttr(pt, 'cakewallet.seed', true);
+            var passphrase = findCacheAttr(pt, 'cakewallet.passphrase', false);
+            if (bip39 || polyseed || passphrase) {
+                return { cipher: ciphers[c][0], bip39: bip39, polyseed: polyseed, passphrase: passphrase, found: true };
+            }
+        }
+        // Decrypted, but no Cake attributes present (e.g. a Monero GUI/CLI cache, or a
+        // Cake legacy-25 wallet that never stored a 12/16-word phrase).
+        return { cipher: null, bip39: null, polyseed: null, passphrase: null, found: false };
+    }
+
     root.MoneroKeys = {
         keccak256: keccak256,
         makeAddress: makeAddress,
@@ -449,6 +522,9 @@
         utf8ToBytes: utf8ToBytes,
         customDerivePassword: customDerivePassword,
         customDecryptPin: customDecryptPin,
+        deriveCacheKey: deriveCacheKey,
+        findCacheAttr: findCacheAttr,
+        extractCakeFromCache: extractCakeFromCache,
         NET_BYTE: NET_BYTE, NET_NAME: NET_NAME
     };
 })(typeof window !== 'undefined' ? window : this);

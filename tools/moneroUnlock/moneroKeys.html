@@ -79,6 +79,20 @@
             </label>
 
             <div id="custom-panel" class="custom-panel display-none">
+                <div class="custom-pin cache-opt" style="margin:0 0 14px">
+                    <div class="custom-pin-title">12-word / polyseed recovery (optional)</div>
+                    <p class="hint" style="margin:8px 0">Wallet made in <strong>Cake Wallet</strong> with a
+                        12-word (BIP39) or 16-word (polyseed) seed? Those words are <em>not</em> in the <code>.keys</code>
+                        file — only the derived 25-word legacy seed is. To also recover the 12/16-word phrase, add the
+                        <strong>wallet cache file</strong>: the file with the <em>same name but no</em> <code>.keys</code>
+                        extension, next to it.</p>
+                    <div class="file-row">
+                        <button type="button" class="secondary" id="cache-btn">Add cache file…</button>
+                        <span class="file-name" id="cache-name">No file selected</span>
+                    </div>
+                    <input type="file" id="cache-input" accept="*/*" hidden>
+                </div>
+
                 <p class="hint" style="margin:0 0 10px">Custom mode does not use a typed password. Instead the wallet stores
                     a random password, AES-encrypted, in the device keychain. Provide the two secret constants (wallet salt +
                     short key) and that wallet's encrypted password to unlock the file. All values stay on your computer.</p>

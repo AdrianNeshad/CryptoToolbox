@@ -17,6 +17,9 @@
     var keysBtn = $('keys-btn');
     var keysInput = $('keys-input');
     var keysName = $('keys-name');
+    var cacheBtn = $('cache-btn');
+    var cacheInput = $('cache-input');
+    var cacheName = $('cache-name');
     var pwBtn = $('pw-btn');
     var pwInput = $('pw-input');
     var pwName = $('pw-name');
@@ -47,6 +50,7 @@
     var toast = $('toast');
 
     var fileBytes = null;
+    var cacheBytes = null;
     var running = false;
     var stopRequested = false;
     var toastTimer = null;
@@ -223,6 +227,52 @@
         reader.readAsArrayBuffer(file);
     });
 
+    function setCacheName(text, state, title) {
+        cacheName.textContent = text;
+        cacheName.classList.remove('set', 'valid', 'invalid');
+        if (state) cacheName.classList.add(state);
+        if (title) cacheName.title = title; else cacheName.removeAttribute('title');
+    }
+    if (cacheBtn) cacheBtn.addEventListener('click', function () { cacheInput.click(); });
+    if (cacheInput) cacheInput.addEventListener('change', function () {
+        var file = cacheInput.files && cacheInput.files[0];
+        if (!file) return;
+        if (/\.keys$/i.test(file.name)) {
+            setCacheName(file.name + ' — that looks like the .keys file', 'invalid',
+                'The cache file is the one WITHOUT the .keys extension (same name).');
+            cacheBytes = null;
+            return;
+        }
+        var reader = new FileReader();
+        reader.onload = function () {
+            cacheBytes = new Uint8Array(reader.result);
+            var label = file.name + ' (' + cacheBytes.length + ' byte)';
+            try {
+                MK.inspectContainer(cacheBytes);
+                setCacheName(label, 'valid', 'Looks like a wallet cache container');
+            } catch (e) {
+                setCacheName(label, 'invalid', 'Uncertain cache structure: ' + e.message + '. You can still try.');
+            }
+        };
+        reader.onerror = function () { cacheBytes = null; setCacheName('Could not read the file', 'invalid'); };
+        reader.readAsArrayBuffer(file);
+    });
+
+    // Pull the Cake 12/16-word phrases out of the (optional) cache file, using the
+    // keys-chacha key captured during unlock. Never throws into the main flow.
+    function attachCakeCache(res) {
+        if (!cacheBytes || !res || !res._key) return;
+        try {
+            var cake = MK.extractCakeFromCache(cacheBytes, res._key, res.cipher);
+            res.cakeBip39 = cake.bip39;
+            res.cakePolyseed = cake.polyseed;
+            res.cakePassphrase = cake.passphrase;
+            if (!cake.found) res.cacheNote = 'The cache file decrypted, but held no Cake 12/16-word seed (a Monero GUI/CLI or legacy-25 wallet stores none).';
+        } catch (e) {
+            res.cacheError = e.message;
+        }
+    }
+
     pwBtn.addEventListener('click', function () { pwInput.click(); });
     pwInput.addEventListener('change', function () {
         var file = pwInput.files && pwInput.files[0];
@@ -277,16 +327,44 @@
 
         html += field('Primary address', r.address);
 
+        var poly = r.cakePolyseed || r.polyseed;
+        var hasCakePhrase = !!(r.cakeBip39 || r.cakePolyseed);
+
+        // Cake Wallet 12-word (BIP39) — the phrase shown when the wallet was created.
+        // Recovered from the cache file; not present in .keys.
+        if (r.cakeBip39) {
+            html += field('Seed phrase — Cake Wallet (12 words · BIP39)', r.cakeBip39, { seed: true });
+        }
+
+        // Polyseed (16 words) — from the cache file, or from m_polyseed in the .keys file.
+        if (poly) {
+            html += field('Seed phrase — polyseed (16 words)', poly, { seed: true });
+        }
+
+        // 25-word Monero seed. For a Cake 12/16-word wallet this is the derived legacy seed.
         if (r.mnemonic) {
-            html += field('Mnemonic seed (25 words' + (r.seedLanguage ? ', ' + r.seedLanguage : '') + ')', r.mnemonic, { seed: true });
+            var seedLabel = hasCakePhrase
+                ? 'Legacy seed (25 words' + (r.seedLanguage ? ', ' + r.seedLanguage : '') + ')'
+                : 'Mnemonic seed (25 words' + (r.seedLanguage ? ', ' + r.seedLanguage : '') + ')';
+            html += field(seedLabel, r.mnemonic, { seed: true });
         } else if (r.watchOnly) {
             html += '<div class="info-box" style="margin:0 0 12px">This is a <strong>watch-only</strong> wallet — it contains no spend key, so there is no seed phrase to recover.</div>';
         } else {
             html += '<div class="info-box" style="margin:0 0 12px">The wallet is <strong>non-deterministic</strong> — a 25-word phrase would not recreate the same view key, so no seed is shown. Use the keys below to import the wallet.</div>';
         }
 
-        if (r.polyseed) html += field('Polyseed', r.polyseed, { seed: true });
-        if (r.passphrase) html += field('Seed passphrase', r.passphrase);
+        if (hasCakePhrase && r.mnemonic) {
+            html += '<div class="info-box" style="margin:0 0 12px">The <strong>25-word</strong> phrase is the legacy seed Monero derives from the ' +
+                (r.cakeBip39 ? '12-word BIP39' : '16-word polyseed') + ' phrase — both restore the same wallet. Cake Wallet shows the ' +
+                (r.cakeBip39 ? '12' : '16') + '-word phrase on creation and the 25-word one under its “Legacy” view.</div>';
+        }
+
+        var sPass = r.cakePassphrase || r.passphrase;
+        if (sPass) html += field('Seed passphrase / offset', sPass);
+
+        if (r.cacheError) html += '<div class="info-box" style="margin:0 0 12px">Cache file: ' + esc(r.cacheError) + '</div>';
+        else if (r.cacheNote) html += '<div class="info-box" style="margin:0 0 12px">' + esc(r.cacheNote) + '</div>';
+        else if (!cacheBytes && r.deterministic && !r.watchOnly) html += '<div class="info-box" style="margin:0 0 12px">Only a 25-word seed was found. If this wallet was created in <strong>Cake Wallet</strong> with a 12- or 16-word phrase, turn on <strong>Custom</strong> and add the <strong>wallet cache file</strong> (same name, no <code>.keys</code>) to recover that phrase too.</div>';
 
         if (r.spendSecretKey) html += field('Private spend key', r.spendSecretKey);
         html += field('Private view key', r.viewSecretKey);
@@ -323,6 +401,7 @@
         stopBtn.classList.toggle('display-none', !state);
         clearBtn.disabled = state;
         keysBtn.disabled = state;
+        if (cacheBtn) cacheBtn.disabled = state;
         pwBtn.disabled = state;
         pwList.disabled = state;
         kdfInput.disabled = state;
@@ -384,6 +463,7 @@
             }
             var res = MK.extractKeys(outer.obj, key, cnHash, netOverride, WORDS);
             res.cipher = outer.cipher;
+            res._key = key;   // kept so the cache file (if supplied) can be decrypted
             return res;
         }
 
@@ -432,7 +512,10 @@
                 progressStatus.textContent = 'Done — password found on attempt ' + found.index + ' of ' + total + ' (' + fmtTime(secs) + ')';
                 log('\n✓ MATCH on password #' + found.index + ': ' + (found.password === '' ? '(empty password)' : found.password), 'log-hit');
             }
-            if (found.res.mnemonic) log('Seed: ' + found.res.mnemonic, 'log-ok');
+            attachCakeCache(found.res);
+            if (found.res.cakeBip39) log('BIP39 seed (12 words): ' + found.res.cakeBip39, 'log-ok');
+            if (found.res.cakePolyseed) log('Polyseed (16 words): ' + found.res.cakePolyseed, 'log-ok');
+            if (found.res.mnemonic) log((found.res.cakeBip39 || found.res.cakePolyseed ? 'Legacy seed (25 words): ' : 'Seed: ') + found.res.mnemonic, 'log-ok');
             log('Address: ' + found.res.address, 'log-ok');
             renderResult(found.res, found.password, found.index, total);
         } else if (stopRequested) {
@@ -493,6 +576,7 @@
             // 3) extract keys / address / seed / polyseed / passphrase
             var res = MK.extractKeys(outer.obj, key, cnHash, netOverride, WORDS);
             res.cipher = outer.cipher;
+            res._key = key;
             res.custom = true;
             try { res.derivedPassword = new TextDecoder('utf-8', { fatal: false }).decode(pwBytes); }
             catch (e) { res.derivedPassword = String.fromCharCode.apply(null, pwBytes); }
@@ -507,13 +591,17 @@
                 }
             }
 
+            attachCakeCache(res);
+
             progressBar.style.width = '100%';
             var secs = (performance.now() - t0) / 1000;
             progressStatus.textContent = 'Done — wallet unlocked (' + fmtTime(secs) + ')';
             log('\n✓ Wallet unlocked', 'log-hit');
             log('Derived password: ' + res.derivedPassword, 'log-ok');
-            if (res.mnemonic) log('Seed: ' + res.mnemonic, 'log-ok');
-            if (res.polyseed) log('Polyseed: ' + res.polyseed, 'log-ok');
+            if (res.cakeBip39) log('BIP39 seed (12 words): ' + res.cakeBip39, 'log-ok');
+            if (res.cakePolyseed) log('Polyseed (16 words): ' + res.cakePolyseed, 'log-ok');
+            if (res.mnemonic) log((res.cakeBip39 || res.cakePolyseed ? 'Legacy seed (25 words): ' : 'Seed: ') + res.mnemonic, 'log-ok');
+            if (res.polyseed && !res.cakePolyseed) log('Polyseed: ' + res.polyseed, 'log-ok');
             log('Address: ' + res.address, 'log-ok');
             if (res.pin) log('PIN: ' + res.pin, 'log-ok');
             renderResult(res, res.derivedPassword, 1, 1);

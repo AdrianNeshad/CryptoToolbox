@@ -144,6 +144,9 @@ code {
 .file-name.valid { color: var(--success); font-weight: 600; }
 .file-name.invalid { color: var(--error); font-weight: 600; }
 
+.cache-opt { margin-top: 12px; }
+.cache-opt .hint { margin-top: 0; }
+
 .pw-count {
     margin-left: auto;
     font-size: 12px;
