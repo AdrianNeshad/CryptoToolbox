@@ -379,13 +379,34 @@
         var encrypted = Number(obj.encrypted_secret_keys || 0) === 1;
         var polyseed = null, passphrase = null;   // Custom-mode wallet extras (absent in Monero GUI files)
 
+        // Normalise an epee value that should be a byte blob into a Uint8Array, or null when it
+        // is absent or an empty section. Handles the raw blob, the { buffer: <blob> } section
+        // form, and a generic array-like; anything else (e.g. an empty section {}) becomes null.
+        function asBlobBytes(v) {
+            if (!v) return null;
+            if (v instanceof Uint8Array) return v;
+            if (v.buffer instanceof Uint8Array) return v.buffer;
+            if (typeof v.length === 'number' && v.length > 0) {
+                var o = new Uint8Array(v.length);
+                for (var i = 0; i < v.length; i++) o[i] = v[i] & 0xff;
+                return o;
+            }
+            return null;
+        }
+
         if (encrypted) {
             var ivb = (encIv && encIv.length === 8) ? encIv : new Uint8Array(8);
             var dd = new Uint8Array(33); dd.set(key, 0); dd[32] = 0x6b; // config::HASH_KEY_MEMORY = 'k'
             var derived = cnHash(dd);
             // Custom-mode wallets append m_polyseed and m_passphrase to the same continuous
             // ChaCha20 keystream, in field order: [spend 32][view 32][polyseed][passphrase].
-            var encPoly = mk.m_polyseed, encPass = mk.m_passphrase;
+            // These fields can arrive as a raw byte blob, as an epee section { buffer: <blob> },
+            // or — when empty (e.g. a wallet with no seed passphrase) — as an empty section {}.
+            // Normalise to a Uint8Array or null first: an object with an undefined .length would
+            // otherwise make `new Uint8Array(64 + NaN)` a zero-length keystream, so the XOR below
+            // reads undefined, leaves the secret keys as ciphertext, and every key/seed comes out
+            // wrong while the address (from the public keys) still looks correct.
+            var encPoly = asBlobBytes(mk.m_polyseed), encPass = asBlobBytes(mk.m_passphrase);
             var polyLen = encPoly ? encPoly.length : 0, passLen = encPass ? encPass.length : 0;
             var ks = chacha20(new Uint8Array(64 + polyLen + passLen), derived, ivb);
             for (var i = 0; i < 32; i++) { spendSec[i] ^= ks[i]; viewSec[i] ^= ks[32 + i]; }
