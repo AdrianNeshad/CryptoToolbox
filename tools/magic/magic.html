@@ -2,6 +2,7 @@
 <html lang="en">
 
 <head>
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' blob: data:; script-src 'self' 'unsafe-inline' 'unsafe-eval' blob:; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' blob:; worker-src 'self' blob:; child-src 'self' blob:; frame-src 'self' blob: data:; object-src 'self' blob: data:; media-src 'self' blob: data:; base-uri 'self'; form-action 'self'">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Magic Tool</title>
@@ -5166,6 +5167,13 @@ async function scanTextDetailed(text, ctl) {
     var consumed = new Set();
 
     function addFinding(value, label, confidence, alt, chipClass) {
+        // Hide blue (unverified) entropy hits reported for hex values, while keeping
+        // the ones entered in decimal/number-list form (still shown blue) and the
+        // green (verified) JSON-object ones — see the confidence legend above
+        // (verified=green, likely=blue). Only the entropy type is dropped; other
+        // types reported for the same value (e.g. "Possible MD5/SHA-256 hash") are
+        // left untouched.
+        if (confidence === "likely" && /^Entropy \(\d+ bytes, hex\)/.test(label)) return;
         if (!findings.has(value)) findings.set(value, { value: value, types: [] });
         var f = findings.get(value);
         if (!f.types.some(function (t) { return t.label === label; })) {
