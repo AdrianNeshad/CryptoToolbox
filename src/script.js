@@ -66,13 +66,16 @@ function loadTool(item) {
     placeholder.style.display = 'none';
 }
 
-// Some managed browsers (e.g. certain Edge policies on Windows) refuse to show local
-// pages inside an iframe. That can't be read from a web page, so instead a tiny probe
-// page is loaded in a hidden iframe: if its message arrives, embedding works; if not,
-// tools are opened as separate pages (after telling the user) instead of in an iframe.
+// Some managed browsers (e.g. Edge with the IntranetFileLinksEnabled policy on Windows)
+// block every file:// navigation a page starts itself — tool iframes as well as
+// location.href. That can't be read from a web page, so instead a tiny probe page is
+// loaded in a hidden iframe: if its message arrives, embedding works; if not, a popup
+// tells the user how to open the tool themselves (only user-started navigations,
+// such as "Open link in new tab" or pasting into the address bar, get through).
 const FRAME_PROBE_SRC = 'src/frame-probe.html';
-const FRAME_PROBE_TIMEOUT_MS = 5000;   // give up if the probe never answers
-const FRAME_PROBE_GRACE_MS = 1000;     // after the probe's load event, wait this long for its message
+const FRAME_PROBE_TIMEOUT_MS = 2500;   // give up if the probe never answers (a local page loads in well under that)
+const FRAME_PROBE_GRACE_MS = 500;      // after the probe's load event, wait this long for its message
+const FRAME_PROBE_POLL_MS = 100;       // how often to look for Chromium's "about:blank#blocked" marker
 
 let frameSupport = 'pending';          // 'pending' | 'ok' | 'blocked'
 const frameSupportWaiters = [];
@@ -91,6 +94,7 @@ function initFrameProbe() {
         frameSupport = result;
         clearTimeout(timeoutTimer);
         clearTimeout(graceTimer);
+        clearInterval(pollTimer);
         window.removeEventListener('message', onMessage);
         probe.remove();
         frameSupportWaiters.splice(0).forEach((callback) => callback(result));
@@ -111,6 +115,15 @@ function initFrameProbe() {
             graceTimer = setTimeout(() => settle('blocked'), FRAME_PROBE_GRACE_MS);
         }
     });
+    // A blocked navigation leaves the frame on "about:blank#blocked", which (unlike a
+    // loaded tool page) the parent may be able to read — settle right away if so.
+    const pollTimer = setInterval(() => {
+        try {
+            if (String(probe.contentWindow.location.href).indexOf('#blocked') !== -1) settle('blocked');
+        } catch (e) {
+            /* not readable: the probe page itself has loaded — wait for its message */
+        }
+    }, FRAME_PROBE_POLL_MS);
 
     probe.hidden = true;
     probe.title = 'Frame support check';
@@ -120,22 +133,63 @@ function initFrameProbe() {
     document.body.appendChild(probe);
 }
 
-// Popup shown before a tool is opened as a separate page instead of inside CryptoToolbox.
+// Popup shown when tools can't be embedded. Navigating there from script is blocked too,
+// so the popup gives the user a link to open in a new tab (right-click) and the address
+// to paste into the address bar — both are navigations the browser itself starts.
 function initFrameFallback() {
     const modal = document.getElementById('frame-fallback-modal');
     const text = document.getElementById('frame-fallback-modal-text');
-    const cancelButton = document.getElementById('frame-fallback-modal-cancel');
-    const confirmButton = document.getElementById('frame-fallback-modal-confirm');
-    if (!modal || !text || !cancelButton || !confirmButton) return null;
+    const link = document.getElementById('frame-fallback-modal-link');
+    const address = document.getElementById('frame-fallback-modal-address');
+    const status = document.getElementById('frame-fallback-modal-status');
+    const closeButton = document.getElementById('frame-fallback-modal-close');
+    const copyButton = document.getElementById('frame-fallback-modal-copy');
+    if (!modal || !text || !link || !address || !status || !closeButton || !copyButton) return null;
 
-    let pendingUrl = null;
+    function setStatus(message) {
+        status.textContent = message;
+    }
 
     function closeModal() {
         modal.classList.add('display-none');
-        pendingUrl = null;
     }
 
-    cancelButton.addEventListener('click', closeModal);
+    function copyAddress() {
+        const value = address.value;
+        const fallbackCopy = () => {
+            address.focus();
+            address.select();
+            let copied = false;
+            try {
+                copied = document.execCommand('copy');
+            } catch (e) {
+                copied = false;
+            }
+            setStatus(copied
+                ? 'Address copied. Paste it into the address bar of a new tab.'
+                : 'Could not copy automatically. The address is selected: press Ctrl + C.');
+        };
+        if (navigator.clipboard && window.isSecureContext) {
+            navigator.clipboard.writeText(value)
+                .then(() => setStatus('Address copied. Paste it into the address bar of a new tab.'))
+                .catch(fallbackCopy);
+        } else {
+            fallbackCopy();
+        }
+    }
+
+    // A plain left click is a page-started navigation and gets blocked, so point the user
+    // to the context menu instead. Middle/Ctrl-click are left alone in case they work.
+    link.addEventListener('click', (event) => {
+        if (event.button !== 0 || event.ctrlKey || event.metaKey || event.shiftKey) return;
+        event.preventDefault();
+        setStatus('Right-click the link and choose "Open link in new tab".');
+    });
+
+    address.addEventListener('focus', () => address.select());
+
+    closeButton.addEventListener('click', closeModal);
+    copyButton.addEventListener('click', copyAddress);
 
     modal.addEventListener('click', (event) => {
         if (event.target === modal) closeModal();
@@ -145,22 +199,20 @@ function initFrameFallback() {
         if (event.key === 'Escape' && !modal.classList.contains('display-none')) closeModal();
     });
 
-    confirmButton.addEventListener('click', () => {
-        const url = pendingUrl;
-        closeModal();
-        if (url) window.location.href = url;
-    });
-
     return function openFallbackModal(item) {
         const title = item.querySelector('.nav-item-title')?.textContent.trim() || 'this tool';
         const src = item.dataset.src;
         const separator = src.indexOf('?') === -1 ? '?' : '&';
-        pendingUrl = src + separator + 'theme=' + currentTheme();
-        text.textContent = `This computer does not allow tools to be shown inside CryptoToolbox. ` +
-            `"${title}" will open as a separate page instead. ` +
-            `Use the browser's Back button to return to CryptoToolbox.`;
+        const url = new URL(src + separator + 'theme=' + currentTheme(), window.location.href).href;
+        text.textContent = `This computer's browser settings don't allow CryptoToolbox to open tools by itself. ` +
+            `To open "${title}", right-click the link below and choose "Open link in new tab", ` +
+            `or copy the address and paste it into the address bar of a new tab.`;
+        link.href = url;
+        link.textContent = title;
+        address.value = url;
+        setStatus('');
         modal.classList.remove('display-none');
-        confirmButton.focus();
+        copyButton.focus();
     };
 }
 
