@@ -66,12 +66,117 @@ function loadTool(item) {
     placeholder.style.display = 'none';
 }
 
+// Some managed browsers (e.g. certain Edge policies on Windows) refuse to show local
+// pages inside an iframe. That can't be read from a web page, so instead a tiny probe
+// page is loaded in a hidden iframe: if its message arrives, embedding works; if not,
+// tools are opened as separate pages (after telling the user) instead of in an iframe.
+const FRAME_PROBE_SRC = 'src/frame-probe.html';
+const FRAME_PROBE_TIMEOUT_MS = 5000;   // give up if the probe never answers
+const FRAME_PROBE_GRACE_MS = 1000;     // after the probe's load event, wait this long for its message
+
+let frameSupport = 'pending';          // 'pending' | 'ok' | 'blocked'
+const frameSupportWaiters = [];
+
+function whenFrameSupportKnown(callback) {
+    if (frameSupport === 'pending') frameSupportWaiters.push(callback);
+    else callback(frameSupport);
+}
+
+function initFrameProbe() {
+    const probe = document.createElement('iframe');
+    let graceTimer = null;
+
+    function settle(result) {
+        if (frameSupport !== 'pending') return;
+        frameSupport = result;
+        clearTimeout(timeoutTimer);
+        clearTimeout(graceTimer);
+        window.removeEventListener('message', onMessage);
+        probe.remove();
+        frameSupportWaiters.splice(0).forEach((callback) => callback(result));
+    }
+
+    function onMessage(event) {
+        const data = event.data;
+        if (event.source === probe.contentWindow && data &&
+            data.source === 'cryptotoolbox' && data.type === 'frame-probe') {
+            settle('ok');
+        }
+    }
+
+    window.addEventListener('message', onMessage);
+    const timeoutTimer = setTimeout(() => settle('blocked'), FRAME_PROBE_TIMEOUT_MS);
+    probe.addEventListener('load', () => {
+        if (frameSupport === 'pending' && !graceTimer) {
+            graceTimer = setTimeout(() => settle('blocked'), FRAME_PROBE_GRACE_MS);
+        }
+    });
+
+    probe.hidden = true;
+    probe.title = 'Frame support check';
+    probe.setAttribute('aria-hidden', 'true');
+    probe.tabIndex = -1;
+    probe.src = FRAME_PROBE_SRC;
+    document.body.appendChild(probe);
+}
+
+// Popup shown before a tool is opened as a separate page instead of inside CryptoToolbox.
+function initFrameFallback() {
+    const modal = document.getElementById('frame-fallback-modal');
+    const text = document.getElementById('frame-fallback-modal-text');
+    const cancelButton = document.getElementById('frame-fallback-modal-cancel');
+    const confirmButton = document.getElementById('frame-fallback-modal-confirm');
+    if (!modal || !text || !cancelButton || !confirmButton) return null;
+
+    let pendingUrl = null;
+
+    function closeModal() {
+        modal.classList.add('display-none');
+        pendingUrl = null;
+    }
+
+    cancelButton.addEventListener('click', closeModal);
+
+    modal.addEventListener('click', (event) => {
+        if (event.target === modal) closeModal();
+    });
+
+    document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && !modal.classList.contains('display-none')) closeModal();
+    });
+
+    confirmButton.addEventListener('click', () => {
+        const url = pendingUrl;
+        closeModal();
+        if (url) window.location.href = url;
+    });
+
+    return function openFallbackModal(item) {
+        const title = item.querySelector('.nav-item-title')?.textContent.trim() || 'this tool';
+        const src = item.dataset.src;
+        const separator = src.indexOf('?') === -1 ? '?' : '&';
+        pendingUrl = src + separator + 'theme=' + currentTheme();
+        text.textContent = `This computer does not allow tools to be shown inside CryptoToolbox. ` +
+            `"${title}" will open as a separate page instead. ` +
+            `Use the browser's Back button to return to CryptoToolbox.`;
+        modal.classList.remove('display-none');
+        confirmButton.focus();
+    };
+}
+
 function initToolNav() {
+    const openFallbackModal = initFrameFallback();
     document.querySelectorAll('.nav-item[data-type="frame"]').forEach((item) => {
-        item.addEventListener('click', () => loadTool(item));
+        item.addEventListener('click', () => {
+            whenFrameSupportKnown((support) => {
+                if (support === 'blocked' && openFallbackModal) openFallbackModal(item);
+                else loadTool(item);
+            });
+        });
     });
 }
 
+initFrameProbe();
 initToolNav();
 
 function initToolSearch() {
