@@ -11,6 +11,7 @@
     "start": "electron .",
     "sync-version": "node scripts/sync-version.js",
     "build:zips": "node scripts/build-release-zips.js",
+    "build:standalone": "node scripts/build-standalone.js",
     "dist": "npm run sync-version && electron-builder --win && node scripts/finalize-artifacts.js",
     "dist:installer": "npm run sync-version && electron-builder --win nsis && node scripts/finalize-artifacts.js",
     "dist:portable": "npm run sync-version && electron-builder --win portable && node scripts/finalize-artifacts.js",

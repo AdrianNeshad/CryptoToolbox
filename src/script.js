@@ -36,6 +36,59 @@ function postTheme(frame, theme) {
     }
 }
 
+// Standalone build (scripts/build-standalone.js): every tool is baked into this page as a
+// <script type="application/json" data-standalone-src="…"> block and shown via srcdoc
+// (PDFs: a blob: URL), so the page never navigates to file:// (which some managed Edge
+// setups block).
+const STANDALONE = window.CRYPTOTOOLBOX_STANDALONE === true;
+
+function getStandaloneEntry(src) {
+    const blocks = document.querySelectorAll('script[type="application/json"][data-standalone-src]');
+    for (const block of blocks) {
+        if (block.dataset.standaloneSrc !== src) continue;
+        try {
+            return JSON.parse(block.textContent);
+        } catch (e) {
+            return null;
+        }
+    }
+    return null;
+}
+
+// Loads a baked-in tool into the frame. Pages run via srcdoc in a sandbox without
+// allow-same-origin, so they stay isolated from the toolbox and from each other just like
+// separate file:// pages. srcdoc rather than a blob: URL because, on file://, a sandboxed
+// blob: page dies as soon as it changes its own #hash (BalletCrypto's router does) and
+// gets no clipboard API; a srcdoc page has neither problem (tested in headless Chrome).
+function loadStandaloneFrame(frame, src) {
+    const entry = getStandaloneEntry(src);
+    if (!entry) {
+        frame.src = 'about:blank';
+        return;
+    }
+    if (entry.kind === 'pdf') {
+        // The browser's PDF viewer does not run inside a sandboxed frame.
+        const bytes = Uint8Array.from(atob(entry.data), (c) => c.charCodeAt(0));
+        frame.src = URL.createObjectURL(new Blob([bytes], { type: 'application/pdf' }));
+        return;
+    }
+    frame.setAttribute('sandbox',
+        'allow-scripts allow-forms allow-modals allow-downloads allow-popups allow-popups-to-escape-sandbox');
+    frame.setAttribute('allow', 'clipboard-read; clipboard-write');
+    frame.srcdoc = entry.data.split('__CRYPTOTOOLBOX_THEME__').join(currentTheme());
+}
+
+// Sidebar entries that are not baked into the standalone file (CyberChef) are removed.
+function removeMissingStandaloneEntries() {
+    if (!STANDALONE) return;
+    document.querySelectorAll('.nav-item[data-type="frame"]').forEach((item) => {
+        if (getStandaloneEntry(item.dataset.src)) return;
+        const group = item.closest('.nav-subgroup');
+        item.remove();
+        if (group && !group.querySelector('.nav-item')) group.remove();
+    });
+}
+
 function createToolFrame(host, item) {
     const frame = document.createElement('iframe');
     const title = item.querySelector('.nav-item-title');
@@ -43,7 +96,8 @@ function createToolFrame(host, item) {
     const separator = src.indexOf('?') === -1 ? '?' : '&';
     frame.className = 'tool-frame';
     frame.title = title ? title.textContent.trim() : 'Tool';
-    frame.src = src + separator + 'theme=' + currentTheme();
+    if (STANDALONE) loadStandaloneFrame(frame, src);
+    else frame.src = src + separator + 'theme=' + currentTheme();
     // Make sure the tool gets the correct theme as soon as it has loaded,
     // complementing the ?theme= in the src URL.
     frame.addEventListener('load', () => postTheme(frame, currentTheme()));
@@ -86,6 +140,11 @@ function whenFrameSupportKnown(callback) {
 }
 
 function initFrameProbe() {
+    // The standalone file never loads tools from file://, so there is nothing to check.
+    if (STANDALONE) {
+        frameSupport = 'ok';
+        return;
+    }
     const probe = document.createElement('iframe');
     let graceTimer = null;
 
@@ -228,6 +287,7 @@ function initToolNav() {
     });
 }
 
+removeMissingStandaloneEntries();
 initFrameProbe();
 initToolNav();
 

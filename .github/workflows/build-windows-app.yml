@@ -58,6 +58,12 @@ jobs:
       - name: Build the local browser .zip bundle
         run: node scripts/build-release-zips.js
 
+      # Builds the single-file browser version into release/:
+      #   CryptoToolbox-<ver>.html  (everything baked in except CyberChef; for machines that
+      #   block local iframes, e.g. Edge with the IntranetFileLinksEnabled policy)
+      - name: Build the standalone .html
+        run: node scripts/build-standalone.js
+
       # Every [release] push publishes a fresh release of THIS commit, whether or not
       # the version in Toolbox.html changed. The tag and release are still named after
       # that version (v3.8 …), so if a release or tag with that name already exists it
@@ -92,8 +98,10 @@ jobs:
 
             - **CryptoToolbox${{ steps.version.outputs.version }}.zip** — Browser version, unzip and open `Toolbox.html`.
             - **CryptoToolbox${{ steps.version.outputs.version }}.exe** — Windows app, just download and open as usual.
+            - **CryptoToolbox-${{ steps.version.outputs.version }}.html** — Single-file browser version (everything except CyberChef), just open it in the browser.
 
           files: |
             release/CryptoToolbox${{ steps.version.outputs.version }}.zip
             release/CryptoToolbox${{ steps.version.outputs.version }}.exe
+            release/CryptoToolbox-${{ steps.version.outputs.version }}.html
             tools/Magic/magic.html
