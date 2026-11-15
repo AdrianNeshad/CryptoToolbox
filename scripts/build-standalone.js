@@ -18,10 +18,14 @@
 // folders. The version is read from "Version X.Y" in Toolbox.html (the same text shown in
 // the app sidebar), so the file name always follows the app version.
 //
+// Comments are removed from all HTML, CSS and JavaScript that goes into the file (see
+// strip-comments.js); everything else is kept exactly as it is.
+//
 // Run: node scripts/build-standalone.js   (or: npm run build:standalone)
 
 const fs = require('node:fs');
 const path = require('node:path');
+const { stripHtml } = require('./strip-comments');
 
 const ROOT = path.join(__dirname, '..');
 const RELEASE_DIR = path.join(ROOT, 'release');
@@ -148,7 +152,7 @@ function main() {
     let shell = readText(TOOLBOX_HTML);
     const version = readShortVersion(shell);
     const outName = `CryptoToolbox-${version}.html`;
-    const stats = { inlined: 0, missing: [] };
+    const stats = { inlined: 0, missing: [], stripped: { scripts: 0, styles: 0 } };
 
     // 1. The shell's own stylesheet and script.
     shell = shell.replace(/<link\b[^>]*href="src\/style\.css"[^>]*>/i,
@@ -177,7 +181,7 @@ function main() {
         if (/\.pdf$/i.test(file)) {
             entry = { kind: 'pdf', data: fs.readFileSync(file).toString('base64') };
         } else if (/\.html?$/i.test(file)) {
-            entry = { kind: 'html', data: inlineDocument(file, stats) };
+            entry = { kind: 'html', data: stripHtml(inlineDocument(file, stats), rel, stats.stripped) };
         } else {
             throw new Error(`don't know how to bake in ${src}`);
         }
@@ -194,6 +198,9 @@ function main() {
     //    script.js runs (it removes sidebar entries that have no block, e.g. CyberChef).
     const marker = '<script>window.CRYPTOTOOLBOX_STANDALONE = true;</script>';
     if (shell.split(marker).length !== 2) throw new Error('standalone marker not found exactly once');
+    // The shell is stripped first; the data blocks are already stripped.
+    shell = stripHtml(shell, 'Toolbox.html', stats.stripped);
+    if (shell.split(marker).length !== 2) throw new Error('standalone marker lost while stripping comments');
     const out = shell.replace(marker, () => `${blocks.join('\n')}\n${marker}`);
 
     fs.mkdirSync(RELEASE_DIR, { recursive: true });
@@ -201,7 +208,8 @@ function main() {
     fs.writeFileSync(path.join(RELEASE_DIR, outName), out);
 
     const mb = (Buffer.byteLength(out) / (1024 * 1024)).toFixed(1);
-    log(`wrote release/${outName} (${mb} MB, ${included} entries, ${stats.inlined} files inlined)`);
+    log(`wrote release/${outName} (${mb} MB, ${included} entries, ${stats.inlined} files inlined, ` +
+        `comments stripped from ${stats.stripped.scripts} scripts and ${stats.stripped.styles} stylesheets)`);
 }
 
 main();

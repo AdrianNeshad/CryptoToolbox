@@ -116,21 +116,75 @@ const calculateCandidates = async (validWords, config) => {
     return candidates
 }
 
+// A word typed as one of these marks the missing word, at any position.
+const MISSING_MARKERS = ['?', '-', '.', ',']
+const isMissingMarker = word => MISSING_MARKERS.includes(word)
+
+/*
+  Returns true when the full list of word indices (one per word) has a valid
+  BIP-39 checksum.
+*/
+const hasValidChecksum = async (indices, config) => {
+    const bits = indices.map(i => i.toString(2).padStart(11, '0')).join('')
+    const entropy = bits.substring(0, config.entropyBits)
+    const checksum = bits.substring(config.entropyBits)
+
+    const hash = await sha256(entropy)
+    let hashBits = ''
+    for (let char of hash.substring(0, config.checksumHexChars)) {
+        hashBits += hexToBinaryString[char]
+    }
+    return hashBits.substring(config.checksumBitSlice[0], config.checksumBitSlice[1]) === checksum
+}
+
+/*
+  Tries all 2048 words at position `gap` (0-based) and returns those that give
+  a valid checksum, in word list order.
+*/
+const calculateMissingWord = async (words, gap, config) => {
+    const indices = words.map(word => bipWords.indexOf(word))
+    const candidates = []
+    for (let k = 0; k < bipWords.length; k++) {
+        indices[gap] = k
+        if (await hasValidChecksum(indices, config)) candidates.push(bipWords[k])
+    }
+    return candidates
+}
+
+// 1-based position of the missing word: where the marker is, otherwise the last word.
+const missingWordPosition = (inputWords, config) => {
+    const gap = (inputWords || []).findIndex(isMissingMarker)
+    return gap >= 0 ? gap + 1 : config.totalWords
+}
+
 const run = async (inputWords, seedType) => {
     if ((inputWords || []).length === 0) return []
 
     const config = seedConfig[seedType]
     if (!config) return Promise.reject('Invalid seed type')
 
+    const markerCount = inputWords.filter(isMissingMarker).length
     const validWords = []
     const wrongWords = []
     inputWords.forEach(word => {
+        if (isMissingMarker(word)) return
         if (bipWords.includes(word)) validWords.push(word)
         else wrongWords.push(word)
     })
 
     if (wrongWords.length > 0) {
         return Promise.reject(`${wrongWords.join(', ')} are not BIP-39 words. Make sure you only use valid BIP-39 words.`)
+    }
+
+    if (markerCount > 1) {
+        return Promise.reject('Only one word can be missing. Mark it with a single ?, -, . or ,')
+    }
+
+    if (markerCount === 1) {
+        if (validWords.length !== config.inputWords) {
+            return Promise.reject(`Input ${config.inputWords} words plus ?, -, . or , for the missing one. You have input ${validWords.length} valid words.`)
+        }
+        return calculateMissingWord(inputWords, inputWords.findIndex(isMissingMarker), config)
     }
 
     if ((validWords || []).length !== config.inputWords) {
